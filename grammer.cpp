@@ -19,8 +19,8 @@ extern set<string> noReturnValueFunctionSet;
 //＜字符串＞   ::=  "｛十进制编码为32,33,35-126的ASCII字符｝"
 bool strings() {
 	if (symbol == STRCON) {
-		doOutput();
-		outputfile << "<字符串>" << endl;
+		//doOutput();
+		//outputfile << "<字符串>" << endl;
 		getsym();  //预读一个 不管是啥
 		return true;
 	}
@@ -54,7 +54,7 @@ bool procedure() {
 	if (mainFunction()) {
 		//看一下主函数之外剩没剩东西  主函数调用完 会预读一个
 		if (isEOF()) {
-			outputfile << "<程序>" << endl;
+			//outputfile << "<程序>" << endl;
 			return true;
 		}
 		else {
@@ -69,7 +69,7 @@ bool procedure() {
 //＜常量说明＞ ::=  const＜常量定义＞;{ const＜常量定义＞;}
 bool constDeclaration() {
 	if (symbol == CONSTTK) {
-		doOutput();
+		//doOutput();
 		int re = getsym();  //读下一个 然后进入常量定义
 		if (re < 0) {  //没有下一个 出错
 			return false;
@@ -83,7 +83,7 @@ bool constDeclaration() {
 					return false;
 				}
 				if (symbol == SEMICN) {  //分号
-					doOutput();
+					//doOutput();
 					//开始分析{ const＜常量定义＞;}
 					while (true) {
 						re = getsym();
@@ -93,7 +93,7 @@ bool constDeclaration() {
 						if (symbol != CONSTTK) {  //这个是可以没有的
 							break;
 						}
-						doOutput();
+						//doOutput();
 						//当前是const 继续向下看
 						re = getsym();
 						if (re < 0) {  //const 后缺少东西
@@ -109,9 +109,9 @@ bool constDeclaration() {
 						if (symbol != SEMICN) {  //缺少分号
 							return false;
 						}
-						doOutput();
+						//doOutput();
 					}
-					outputfile << "<常量说明>" << endl;
+					//outputfile << "<常量说明>" << endl;
 					return true;
 				}
 				else {
@@ -129,21 +129,21 @@ bool constDeclaration() {
 //                  | char＜标识符＞＝＜字符＞{,＜标识符＞＝＜字符＞}
 bool constDefinition() {
 	if (symbol == INTTK) {
-		doOutput();
+		//doOutput();
 		int re = getsym();  //读下一个 然后进入标识符
 		if (re < 0) {  //没有下一个 出错
 			return false;
 		}
 		else {
 			if (symbol == IDENFR) {  //读到标识符
-				doOutput();
+				//doOutput();
 				re = getsym();  //读下一个 进入=
 				if (re < 0) {
 					return false;
 				}
 				else {
 					if (symbol == ASSIGN) {  //读到=
-						doOutput();
+						//doOutput();
 						re = getsym();  //再读一个 进入整数
 						if (re < 0) {
 							return false;
@@ -158,7 +158,7 @@ bool constDefinition() {
 									if (symbol != COMMA) {  //这个是可以没有的
 										break;
 									}
-									doOutput();
+									//doOutput();
 									//当前是,逗号 继续向下看
 									re = getsym();
 									if (re < 0) {  //, 后缺少东西
@@ -167,7 +167,7 @@ bool constDefinition() {
 									if (symbol != IDENFR) { //,后不是标识符
 										return false;
 									}
-									doOutput();
+									//doOutput();
 									//当前是标识符
 									re = getsym();
 									if (re < 0) {  //标识符后缺少东西
@@ -176,7 +176,7 @@ bool constDefinition() {
 									if (symbol != ASSIGN) { //标识符后不是=
 										return false;
 									}
-									doOutput();
+									//doOutput();
 									//当前是=
 									re = getsym();
 									if (re < 0) {  //=后缺少东西
@@ -186,7 +186,7 @@ bool constDefinition() {
 										return false;
 									}
 								}
-								outputfile << "<常量定义>" << endl;
+								//outputfile << "<常量定义>" << endl;
 								return true;
 							}
 							else {
@@ -205,28 +205,28 @@ bool constDefinition() {
 		}
 	}
 	else if (symbol == CHARTK) {  //char＜标识符＞＝＜字符＞{,＜标识符＞＝＜字符＞}
-		doOutput();
+		//doOutput();
 		int re = getsym();  //读下一个 然后进入标识符
 		if (re < 0) {  //没有下一个 出错
 			return false;
 		}
 		else {
 			if (symbol == IDENFR) {  //读到标识符
-				doOutput();
+				//doOutput();
 				re = getsym();  //读下一个 进入=
 				if (re < 0) {
 					return false;
 				}
 				else {
 					if (symbol == ASSIGN) {  //读到=
-						doOutput();
+						//doOutput();
 						re = getsym();  //再读一个 进入字符
 						if (re < 0) {
 							return false;
 						}
 						else {
 							if (symbol == CHARCON) {  //字符常量
-								doOutput();
+								//doOutput();
 								//开始分析{,＜标识符＞＝＜字符＞}部分
 								while (true) {
 									re = getsym();
@@ -236,7 +236,7 @@ bool constDefinition() {
 									if (symbol != COMMA) {  //这个是可以没有的
 										break;
 									}
-									doOutput();
+									//doOutput();
 									//当前是,逗号 继续向下看
 									re = getsym();
 									if (re < 0) {  //, 后缺少东西
@@ -245,7 +245,7 @@ bool constDefinition() {
 									if (symbol != IDENFR) { //,后不是标识符
 										return false;
 									}
-									doOutput();
+									//doOutput();
 									//当前是标识符
 									re = getsym();
 									if (re < 0) {  //标识符后缺少东西
@@ -254,7 +254,7 @@ bool constDefinition() {
 									if (symbol != ASSIGN) { //标识符后不是=
 										return false;
 									}
-									doOutput();
+									//doOutput();
 									//当前是=
 									re = getsym();
 									if (re < 0) {  //=后缺少东西
@@ -263,9 +263,9 @@ bool constDefinition() {
 									if (symbol != CHARCON) { //=后不是字符
 										return false;
 									}
-									doOutput();
+									//doOutput();
 								}
-								outputfile << "<常量定义>" << endl;
+								//outputfile << "<常量定义>" << endl;
 								return true;
 							}
 							else {
@@ -291,9 +291,9 @@ bool constDefinition() {
 //＜无符号整数＞  ::= ＜非零数字＞｛＜数字＞｝| 0
 bool unsignedInteger() {
 	if (symbol == INTCON) {
-		doOutput();
+		//doOutput();
 		getsym();    //预读一个单词 不管成功与否 都得返回true 因为预读成功与否不影响对“整数”的判断
-		outputfile << "<无符号整数>" << endl;
+		//outputfile << "<无符号整数>" << endl;
 		return true;
 	}
 	else {
@@ -305,13 +305,13 @@ bool unsignedInteger() {
 bool integer() {
 	int re;
 	if (symbol == PLUS || symbol == MINU) {
-		doOutput();
+		//doOutput();
 		re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		if (unsignedInteger()) {  //调用无符号整数
-			outputfile << "<整数>" << endl;
+			//outputfile << "<整数>" << endl;
 			return true;
 		}
 		else {
@@ -320,7 +320,7 @@ bool integer() {
 	}
 	else {
 		if (unsignedInteger()) {  //直接调用无符号整数
-			outputfile << "<整数>" << endl;
+			//outputfile << "<整数>" << endl;
 			return true;
 		}
 		else {
@@ -332,7 +332,7 @@ bool integer() {
 //＜声明头部＞   ::=  int＜标识符＞ |char＜标识符＞
 bool declarationHead(string& tmp) {
 	if (symbol == INTTK || symbol == CHARTK) {
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
@@ -341,9 +341,9 @@ bool declarationHead(string& tmp) {
 			return false;
 		}
 		//当前是标识符 成功了
-		doOutput();
+		//doOutput();
 		tmp = string(token);
-		outputfile << "<声明头部>" << endl;
+		//outputfile << "<声明头部>" << endl;
 		re = getsym();  //预读 不管读到什么
 		return true;
 	}
@@ -369,7 +369,7 @@ bool variableDeclaration(bool isCompoundStatement) {
 				return false;
 			}
 			if (symbol == SEMICN) {  //读到分号  ＜变量定义＞;这部分结束了
-				doOutput();
+				//doOutput();
 				//接下来分析{＜变量定义＞;}
 				while (true) {
 					int re = getsym();
@@ -386,9 +386,9 @@ bool variableDeclaration(bool isCompoundStatement) {
 					if (symbol != SEMICN) {  //变量定义后边不是分号
 						return false;
 					}
-					doOutput();
+					//doOutput();
 				}
-				outputfile << "<变量说明>" << endl;
+				//outputfile << "<变量说明>" << endl;
 				return true;
 			}
 			else {
@@ -431,7 +431,7 @@ bool variableDeclaration(bool isCompoundStatement) {
 									return false;
 								}
 								if (symbol == SEMICN) {  //读到分号  ＜变量定义＞;这部分结束了
-									doOutput();
+									//doOutput();
 									//接下来分析{＜变量定义＞;}
 									//注意的是在分析中 可能就遇到函数了  也就是每一次分析“＜变量定义＞;”的时候 他都有可能是函数
 									while (true) {
@@ -471,7 +471,7 @@ bool variableDeclaration(bool isCompoundStatement) {
 																		return false;
 																	}
 																	if (symbol == SEMICN) {  //读到分号  ＜变量定义＞;这部分结束了
-																		doOutput();
+																		//doOutput();
 																	}
 																	else {
 																		return false;
@@ -490,7 +490,7 @@ bool variableDeclaration(bool isCompoundStatement) {
 											}
 										}
 									}
-									outputfile << "<变量说明>" << endl;
+									//outputfile << "<变量说明>" << endl;
 									return true;
 								}
 								else {
@@ -517,21 +517,21 @@ bool variableDeclaration(bool isCompoundStatement) {
 //                              {,(＜标识符＞|＜标识符＞'['＜无符号整数＞']' )}
 bool variableDefinition() {
 	if (symbol == INTTK || symbol == CHARTK) {
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		else {
 			if (symbol == IDENFR) {   //标识符
-				doOutput();
+				//doOutput();
 				re = getsym();
 				//if (re < 0) {
 				//	return false;   //错的 标识符可以没有下一个单词
 				//}
 				//else {
 				if (symbol == LBRACK) {  //[
-					doOutput();
+					//doOutput();
 					re = getsym();  //预读一个 然后进入判别 无符号整数
 					if (re < 0) {
 						return false;
@@ -545,7 +545,7 @@ bool variableDefinition() {
 							return false;
 						}
 						else {  // ]
-							doOutput();
+							//doOutput();
 							re = getsym();  //多读一个 不管是啥 因为如果没有[的时候 也已经预读了一个
 						}
 					}
@@ -556,7 +556,7 @@ bool variableDefinition() {
 					if (symbol != COMMA) {  //不是 ,  说明没有这部分内容
 						break;
 					}
-					doOutput();
+					//doOutput();
 					//当前是, 判断下一个是不是标识符
 					re = getsym();
 					if (re < 0) {
@@ -564,10 +564,10 @@ bool variableDefinition() {
 					}
 					else {
 						if (symbol == IDENFR) {   //标识符
-							doOutput();
+							//doOutput();
 							re = getsym();
 							if (symbol == LBRACK) {  //[
-								doOutput();
+								//doOutput();
 								re = getsym();  //预读一个 然后进入判别 无符号整数
 								if (re < 0) {
 									return false;
@@ -581,7 +581,7 @@ bool variableDefinition() {
 										return false;
 									}
 									else {  // ]
-										doOutput();
+										//doOutput();
 										re = getsym();  //多读一个 不管是啥 因为如果没有[的时候 也已经预读了一个
 									}
 								}
@@ -592,7 +592,7 @@ bool variableDefinition() {
 						}
 					}
 				}
-				outputfile << "<变量定义>" << endl;
+				//outputfile << "<变量定义>" << endl;
 				return true;
 				//}
 			}
@@ -618,7 +618,7 @@ bool haveReturnValueFunction() {
 		return false;
 	}
 	if (symbol == LPARENT) {  //声明头部后边是(
-		doOutput();
+		//doOutput();
 		int re = getsym();  //为分析参数表预读
 		if (re < 0) {
 			return false;
@@ -632,7 +632,7 @@ bool haveReturnValueFunction() {
 			return false;
 		}
 		if (symbol == RPARENT) {  //参数表后边是)
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
@@ -641,7 +641,7 @@ bool haveReturnValueFunction() {
 				return false;
 			}
 			//当前是{  为分析复合语句预读
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
@@ -654,8 +654,8 @@ bool haveReturnValueFunction() {
 				return false;
 			}
 			if (symbol == RBRACE) {  //复合语句后边是}
-				doOutput();
-				outputfile << "<有返回值函数定义>" << endl;
+				//doOutput();
+				//outputfile << "<有返回值函数定义>" << endl;
 				//haveReturnValueFunctionSet.insert(tmp);
 				re = getsym();  //预读 不管读到什么
 				return true;
@@ -679,7 +679,7 @@ bool noReturnValueFunction() {
 	string tmp;
 	int old = oldIndex;   //记录读取完void只有的oldIndex 是void的起始位置
 	if (symbol == VOIDTK) {
-		//doOutput();
+		////doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
@@ -687,7 +687,7 @@ bool noReturnValueFunction() {
 		if (symbol != IDENFR && symbol != MAINTK) {  //不是标识符 也不是 main
 			return false;
 		}
-		//doOutput();
+		////doOutput();
 		//当前是标识符 需要知道这个标识符是不是main
 		if (symbol == MAINTK) {  //说明是main函数 需要恢复回去
 			retractString(old);   //回退到void的起始位置
@@ -696,9 +696,9 @@ bool noReturnValueFunction() {
 		}
 		//说明是无返回值函数了 token存的不是main
 		symbol = VOIDTK;  //没有修改token 后边直接回复symbol就可以了
-		doOutput();
+		//doOutput();
 		symbol = IDENFR;
-		doOutput();
+		//doOutput();
 		tmp = string(token);
 		noReturnValueFunctionSet.insert(tmp);  //把函数名加入到无返回值函数的集合中
 		//当前是标识符 看下一个是不是(
@@ -707,7 +707,7 @@ bool noReturnValueFunction() {
 			return false;
 		}
 		if (symbol == LPARENT) {  //标识符后边是(
-			doOutput();
+			//doOutput();
 			re = getsym();  //为分析参数表预读
 			if (re < 0) {
 				return false;
@@ -721,7 +721,7 @@ bool noReturnValueFunction() {
 				return false;
 			}
 			if (symbol == RPARENT) {  //参数表后边是)
-				doOutput();
+				//doOutput();
 				re = getsym();
 				if (re < 0) {
 					return false;
@@ -730,7 +730,7 @@ bool noReturnValueFunction() {
 					return false;
 				}
 				//当前是{  为分析复合语句预读
-				doOutput();
+				//doOutput();
 				re = getsym();
 				if (re < 0) {
 					return false;
@@ -743,8 +743,8 @@ bool noReturnValueFunction() {
 					return false;
 				}
 				if (symbol == RBRACE) {  //复合语句后边是}
-					doOutput();
-					outputfile << "<无返回值函数定义>" << endl;
+					//doOutput();
+					//outputfile << "<无返回值函数定义>" << endl;
 					//noReturnValueFunctionSet.insert(tmp);  //把函数名加入到无返回值函数的集合中
 					re = getsym();  //预读 不管读到什么
 					return true;
@@ -770,11 +770,11 @@ bool noReturnValueFunction() {
 bool parameterTable() {
 	//参数表可以为空  参数表为空时 当前字符就是)右括号
 	if (symbol == RPARENT) {
-		outputfile << "<参数表>" << endl;
+		//outputfile << "<参数表>" << endl;
 		return true;
 	}
 	if (symbol == INTTK || symbol == CHARTK) {
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
@@ -783,7 +783,7 @@ bool parameterTable() {
 			return false;
 		}
 		//当前是标识符  开始分析{,＜类型标识符＞＜标识符＞}
-		doOutput();
+		//doOutput();
 		while (true) {
 			re = getsym();
 			if (re < 0) {
@@ -793,7 +793,7 @@ bool parameterTable() {
 				break;
 			}
 			//当前是, 看下一个是不是类型标识符
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
@@ -802,7 +802,7 @@ bool parameterTable() {
 				return false;
 			}
 			//当前是类型标识符 看下一个是不是标识符
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
@@ -811,9 +811,9 @@ bool parameterTable() {
 				return false;
 			}
 			//当前是标识符
-			doOutput();
+			//doOutput();
 		}
-		outputfile << "<参数表>" << endl;
+		//outputfile << "<参数表>" << endl;
 		return true;
 	}
 	else {
@@ -829,7 +829,7 @@ bool compoundStatement() {
 	variableDeclaration(true);  //在这调用 说明只可能是变量说明，不可能是有返回值的函数 不需要判别了
 	//调用语句列
 	if (statementList()) {
-		outputfile << "<复合语句>" << endl;
+		//outputfile << "<复合语句>" << endl;
 		return true;
 	}
 	else {
@@ -840,33 +840,33 @@ bool compoundStatement() {
 //＜主函数＞    ::= void main‘(’‘)’ ‘{’＜复合语句＞‘}’
 bool mainFunction() {
 	if (symbol == VOIDTK) {
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		if (symbol == MAINTK) {  //void后边是main
 			//当前是main 看下一个是不是(
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
 			}
 			if (symbol == LPARENT) {  //main后边是(
-				doOutput();
+				//doOutput();
 				re = getsym();  //看下一个是不是)
 				if (re < 0) {
 					return false;
 				}
 				if (symbol == RPARENT) {  //(后边是)
-					doOutput();
+					//doOutput();
 					re = getsym();
 					if (re < 0) {
 						return false;
 					}
 					if (symbol == LBRACE) { //)后边是{
 						//当前是{  为分析复合语句预读
-						doOutput();
+						//doOutput();
 						re = getsym();
 						if (re < 0) {
 							return false;
@@ -879,8 +879,8 @@ bool mainFunction() {
 							return false;
 						}
 						if (symbol == RBRACE) {  //复合语句后边是}
-							doOutput();
-							outputfile << "<主函数>" << endl;
+							//doOutput();
+							//outputfile << "<主函数>" << endl;
 							re = getsym();  //预读 不管读到什么
 							return true;
 						}
@@ -913,7 +913,7 @@ bool mainFunction() {
 bool expression() {
 	int re;
 	if (symbol == PLUS || symbol == MINU) {
-		doOutput();
+		//doOutput();
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -932,7 +932,7 @@ bool expression() {
 		if (symbol != PLUS && symbol != MINU) {  //不是+不是-
 			break;
 		}
-		doOutput();
+		//doOutput();
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -942,7 +942,7 @@ bool expression() {
 			return false;
 		}
 	}
-	outputfile << "<表达式>" << endl;
+	//outputfile << "<表达式>" << endl;
 	return true;
 }
 
@@ -960,7 +960,7 @@ bool item() {
 		if (symbol != MULT && symbol != DIV) {  //不是* 也不是/
 			break;
 		}
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
@@ -970,7 +970,7 @@ bool item() {
 			return false;
 		}
 	}
-	outputfile << "<项>" << endl;
+	//outputfile << "<项>" << endl;
 	return true;
 }
 
@@ -986,9 +986,9 @@ bool factor() {
 		}
 		if (symbol == LBRACK) {  //是[
 			symbol = IDENFR;
-			doOutput();  //因为[不会修改token 只需要改一下symbol 就能输出刚才的标识符了
+			//doOutput();  //因为[不会修改token 只需要改一下symbol 就能输出刚才的标识符了
 			symbol = LBRACK;
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
@@ -999,9 +999,9 @@ bool factor() {
 			}
 			//表达式分析成功 并预读了一个单词
 			if (symbol == RBRACK) {  //是]
-				doOutput();
+				//doOutput();
 				re = getsym();   //为下一个预读 不管是啥
-				outputfile << "<因子>" << endl;
+				//outputfile << "<因子>" << endl;
 				return true;
 			}
 			else {
@@ -1016,21 +1016,21 @@ bool factor() {
 				return false;
 			}
 			//调用有返回值的函数调用语句成功 并预读了一个单词
-			outputfile << "<因子>" << endl;
+			//outputfile << "<因子>" << endl;
 			return true;
 		}
 		else {  //标识符后边不是[ 也不是(  对应文法＜标识符＞  直接返回 这个单词就是为下一个预读的单词了
 			//但是如果直接返回 那么这个标识符就没有输出出来
 			retractString(old);   //回退到标识符的起始位置
 			getsym();   //把标识符重新读出来
-			doOutput();
-			outputfile << "<因子>" << endl;
+			//doOutput();
+			//outputfile << "<因子>" << endl;
 			getsym();  //预读一个
 			return true;
 		}
 	}
 	else if (symbol == LPARENT) {  //当前是(  对应文法 '('＜表达式＞')'
-		doOutput();
+		//doOutput();
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1041,9 +1041,9 @@ bool factor() {
 		}
 		//表达式分析成功 并预读了一个单词
 		if (symbol == RPARENT) {  //是)
-			doOutput();
+			//doOutput();
 			re = getsym();   //为下一个预读 不管是啥
-			outputfile << "<因子>" << endl;
+			//outputfile << "<因子>" << endl;
 			return true;
 		}
 		else {
@@ -1051,13 +1051,13 @@ bool factor() {
 		}
 	}
 	else if (symbol == CHARCON) {  //当前是字符 对应文法 ＜字符＞
-		doOutput();
+		//doOutput();
 		re = getsym();   //为下一个预读 不管是啥
-		outputfile << "<因子>" << endl;
+		//outputfile << "<因子>" << endl;
 		return true;
 	}
 	else if (integer()) {  //当前是整数   并预读了一个单词
-		outputfile << "<因子>" << endl;
+		//outputfile << "<因子>" << endl;
 		return true;
 	}
 	else {
@@ -1069,8 +1069,8 @@ bool factor() {
 //              |＜无返回值函数调用语句＞;｜＜赋值语句＞;｜＜读语句＞;｜＜写语句＞;｜＜空＞;|＜返回语句＞;
 bool statement() {
 	if (symbol == SEMICN) {  //;分号  一个分号直接就是一个语句
-		doOutput();
-		outputfile << "<语句>" << endl;
+		//doOutput();
+		//outputfile << "<语句>" << endl;
 		getsym();  //预读一个 不管是啥
 		return true;
 	}
@@ -1078,8 +1078,8 @@ bool statement() {
 		if (returnStatement()) {
 			//分析返回语句成功 并预读了一个符号
 			if (symbol == SEMICN) {  //;分号
-				doOutput();
-				outputfile << "<语句>" << endl;
+				//doOutput();
+				//outputfile << "<语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
 			}
@@ -1095,8 +1095,8 @@ bool statement() {
 		if (readStatement()) {
 			//分析读语句成功 并预读了一个符号
 			if (symbol == SEMICN) {  //;分号
-				doOutput();
-				outputfile << "<语句>" << endl;
+				//doOutput();
+				//outputfile << "<语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
 			}
@@ -1112,8 +1112,8 @@ bool statement() {
 		if (writeStatement()) {
 			//分析写语句成功 并预读了一个符号
 			if (symbol == SEMICN) {  //;分号
-				doOutput();
-				outputfile << "<语句>" << endl;
+				//doOutput();
+				//outputfile << "<语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
 			}
@@ -1128,7 +1128,7 @@ bool statement() {
 	else if (symbol == IFTK) {  //＜条件语句＞
 		if (conditionStatement()) {
 			//分析条件语句成功 并预读了一个符号
-			outputfile << "<语句>" << endl;
+			//outputfile << "<语句>" << endl;
 			return true;
 		}
 		else {
@@ -1138,7 +1138,7 @@ bool statement() {
 	else if (symbol == WHILETK || symbol == DOTK || symbol == FORTK) {  //＜循环语句＞
 		if (repeatStatement()) {
 			//分析循环语句成功 并预读了一个符号
-			outputfile << "<语句>" << endl;
+			//outputfile << "<语句>" << endl;
 			return true;
 		}
 		else {
@@ -1146,7 +1146,7 @@ bool statement() {
 		}
 	}
 	else if (symbol == LBRACE) {  //'{'＜语句列＞'}'
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
@@ -1156,8 +1156,8 @@ bool statement() {
 		}
 		//分析语句列 并预读了一个符号
 		if (symbol == RBRACE) {  //}
-			doOutput();
-			outputfile << "<语句>" << endl;
+			//doOutput();
+			//outputfile << "<语句>" << endl;
 			getsym();  //预读一个 不管是啥
 			return true;
 		}
@@ -1179,8 +1179,8 @@ bool statement() {
 			}
 			//分析赋值语句成功 并预读了一个单词
 			if (symbol == SEMICN) {  //;分号
-				doOutput();
-				outputfile << "<语句>" << endl;
+				//doOutput();
+				//outputfile << "<语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
 			}
@@ -1197,8 +1197,8 @@ bool statement() {
 				}
 				//分析有返回值函数调用语句成功 并预读了一个单词
 				if (symbol == SEMICN) {  //;分号
-					doOutput();
-					outputfile << "<语句>" << endl;
+					//doOutput();
+					//outputfile << "<语句>" << endl;
 					getsym();  //预读一个 不管是啥
 					return true;
 				}
@@ -1212,8 +1212,8 @@ bool statement() {
 				}
 				//分析无返回值函数调用语句成功 并预读了一个单词
 				if (symbol == SEMICN) {  //;分号
-					doOutput();
-					outputfile << "<语句>" << endl;
+					//doOutput();
+					//outputfile << "<语句>" << endl;
 					getsym();  //预读一个 不管是啥
 					return true;
 				}
@@ -1237,13 +1237,13 @@ bool statement() {
 //＜赋值语句＞   ::=  ＜标识符＞＝＜表达式＞|＜标识符＞'['＜表达式＞']'=＜表达式＞
 bool assignStatement() {
 	if (symbol == IDENFR) {  //是标识符
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		if (symbol == LBRACK) {  //[   对应文法＜标识符＞'['＜表达式＞']'=＜表达式＞
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
@@ -1254,13 +1254,13 @@ bool assignStatement() {
 			}
 			//分析表达式成功 并预读了一个单词
 			if (symbol == RBRACK) {  //]
-				doOutput();
+				//doOutput();
 				re = getsym();
 				if (re < 0) {
 					return false;
 				}
 				if (symbol == ASSIGN) {  // =
-					doOutput();
+					//doOutput();
 					re = getsym();
 					if (re < 0) {
 						return false;
@@ -1270,7 +1270,7 @@ bool assignStatement() {
 						return false;
 					}
 					//分析表达式成功 并预读了一个单词
-					outputfile << "<赋值语句>" << endl;
+					//outputfile << "<赋值语句>" << endl;
 					return true;
 				}
 				else {
@@ -1282,7 +1282,7 @@ bool assignStatement() {
 			}
 		}
 		else  if (symbol == ASSIGN) {  //= 对应文法 ＜标识符＞＝＜表达式＞
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
@@ -1292,7 +1292,7 @@ bool assignStatement() {
 				return false;
 			}
 			//分析表达式成功 并预读了一个单词
-			outputfile << "<赋值语句>" << endl;
+			//outputfile << "<赋值语句>" << endl;
 			return true;
 		}
 		else {
@@ -1307,13 +1307,13 @@ bool assignStatement() {
 //＜条件语句＞  ::= if '('＜条件＞')'＜语句＞［else＜语句＞］
 bool conditionStatement() {
 	if (symbol == IFTK) {  //if
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		if (symbol == LPARENT) {  //(
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
@@ -1323,7 +1323,7 @@ bool conditionStatement() {
 			}
 			//分析条件成功 并预读了一个单词
 			if (symbol == RPARENT) {  //)
-				doOutput();
+				//doOutput();
 				re = getsym();
 				if (re < 0) {
 					return false;
@@ -1334,7 +1334,7 @@ bool conditionStatement() {
 				//分析语句成功 并预读了一个单词
 				//开始分析［else＜语句＞］
 				if (symbol == ELSETK) {  //else
-					doOutput();
+					//doOutput();
 					re = getsym();
 					if (re < 0) {
 						return false;
@@ -1345,7 +1345,7 @@ bool conditionStatement() {
 					//分析语句成功 并预读了一个单词
 					//return true;
 				} //不是else 说明没有这部分 是可以的
-				outputfile << "<条件语句>" << endl;
+				//outputfile << "<条件语句>" << endl;
 				return true;
 			}
 			else {
@@ -1368,7 +1368,7 @@ bool condition() {
 	}
 	//分析表达式成功 并预读一个单词
 	if (symbol == LSS || symbol == LEQ || symbol == GRE || symbol == GEQ || symbol == EQL || symbol == NEQ) {  //关系运算符
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
@@ -1378,11 +1378,11 @@ bool condition() {
 			return false;
 		}
 		//分析表达式成功 并预读了一个单词
-		outputfile << "<条件>" << endl;
+		//outputfile << "<条件>" << endl;
 		return true;
 	}
 	else {
-		outputfile << "<条件>" << endl;
+		//outputfile << "<条件>" << endl;
 		return true;
 	}
 }
@@ -1391,13 +1391,13 @@ bool condition() {
 //              |for'('＜标识符＞＝＜表达式＞;＜条件＞;＜标识符＞＝＜标识符＞(+|-)＜步长＞')'＜语句＞
 bool repeatStatement() {
 	if (symbol == WHILETK) {  //while '('＜条件＞')'＜语句＞
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		if (symbol == LPARENT) {  //(
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
@@ -1407,7 +1407,7 @@ bool repeatStatement() {
 			}
 			//分析条件成功 并预读了一个单词
 			if (symbol == RPARENT) {  //)
-				doOutput();
+				//doOutput();
 				re = getsym();
 				if (re < 0) {
 					return false;
@@ -1416,7 +1416,7 @@ bool repeatStatement() {
 					return false;
 				}
 				//分析语句成功 并预读了一个单词
-				outputfile << "<循环语句>" << endl;
+				//outputfile << "<循环语句>" << endl;
 				return true;
 			}
 			else {
@@ -1428,7 +1428,7 @@ bool repeatStatement() {
 		}
 	}
 	else if (symbol == DOTK) {  // do＜语句＞while '('＜条件＞')'
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
@@ -1438,13 +1438,13 @@ bool repeatStatement() {
 		}
 		//分析语句成功 并预读了一个单词
 		if (symbol == WHILETK) {
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
 			}
 			if (symbol == LPARENT) {  //(
-				doOutput();
+				//doOutput();
 				re = getsym();
 				if (re < 0) {
 					return false;
@@ -1454,8 +1454,8 @@ bool repeatStatement() {
 				}
 				//分析条件成功 并预读了一个单词
 				if (symbol == RPARENT) {  //)
-					doOutput();
-					outputfile << "<循环语句>" << endl;
+					//doOutput();
+					//outputfile << "<循环语句>" << endl;
 					getsym(); //预读一个 不管是啥
 					return true;
 				}
@@ -1472,7 +1472,7 @@ bool repeatStatement() {
 		}
 	}
 	else if (symbol == FORTK) {  //for'('＜标识符＞＝＜表达式＞;＜条件＞;＜标识符＞＝＜标识符＞(+|-)＜步长＞')'＜语句＞
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
@@ -1480,7 +1480,7 @@ bool repeatStatement() {
 		if (symbol != LPARENT) {  //(
 			return false;
 		}
-		doOutput();  //是(
+		//doOutput();  //是(
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1488,7 +1488,7 @@ bool repeatStatement() {
 		if (symbol != IDENFR) {  //不是标识符
 			return false;
 		}
-		doOutput();   //是标识符
+		//doOutput();   //是标识符
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1496,7 +1496,7 @@ bool repeatStatement() {
 		if (symbol != ASSIGN) {  //不是=
 			return false;
 		}
-		doOutput();   //是=
+		//doOutput();   //是=
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1508,7 +1508,7 @@ bool repeatStatement() {
 		if (symbol != SEMICN) {  //不是;
 			return false;
 		}
-		doOutput(); //是;
+		//doOutput(); //是;
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1520,7 +1520,7 @@ bool repeatStatement() {
 		if (symbol != SEMICN) {  //不是;
 			return false;
 		}
-		doOutput();  //是;
+		//doOutput();  //是;
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1528,7 +1528,7 @@ bool repeatStatement() {
 		if (symbol != IDENFR) {  //不是标识符
 			return false;
 		}
-		doOutput();  //是标识符
+		//doOutput();  //是标识符
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1536,7 +1536,7 @@ bool repeatStatement() {
 		if (symbol != ASSIGN) {  //不是=
 			return false;
 		}
-		doOutput();   //是=
+		//doOutput();   //是=
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1544,7 +1544,7 @@ bool repeatStatement() {
 		if (symbol != IDENFR) {  //不是标识符
 			return false;
 		}
-		doOutput();  //是标识符
+		//doOutput();  //是标识符
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1552,7 +1552,7 @@ bool repeatStatement() {
 		if (symbol != PLUS && symbol != MINU) { //不是+ -
 			return false;
 		}
-		doOutput();  //是+-
+		//doOutput();  //是+-
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1564,7 +1564,7 @@ bool repeatStatement() {
 		if (symbol != RPARENT) {  //不是)
 			return false;
 		}
-		doOutput();  //是)
+		//doOutput();  //是)
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1573,7 +1573,7 @@ bool repeatStatement() {
 			return false;
 		}
 		//分析语句成功 并预读了一个单词
-		outputfile << "<循环语句>" << endl;
+		//outputfile << "<循环语句>" << endl;
 		return true;
 	}
 	else {
@@ -1584,7 +1584,7 @@ bool repeatStatement() {
 //＜步长＞::= ＜无符号整数＞
 bool step() {
 	if (unsignedInteger()) {
-		outputfile << "<步长>" << endl;
+		//outputfile << "<步长>" << endl;
 		return true;
 	}
 	else {
@@ -1600,13 +1600,13 @@ bool callHaveReturnValueFunction() {
 			return false;
 		}
 		//否则才有可能是有返回值函数的调用语句
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		if (symbol == LPARENT) {  //是(
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
@@ -1617,8 +1617,8 @@ bool callHaveReturnValueFunction() {
 			}
 			//调用值参数表成功 并预读了一个单词
 			if (symbol == RPARENT) {  //是)
-				doOutput();
-				outputfile << "<有返回值函数调用语句>" << endl;
+				//doOutput();
+				//outputfile << "<有返回值函数调用语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
 			}
@@ -1643,13 +1643,13 @@ bool callNoReturnValueFunction() {
 			return false;
 		}
 		//否则才有可能是无返回值函数的调用语句
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		if (symbol == LPARENT) {  //是(
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
@@ -1660,8 +1660,8 @@ bool callNoReturnValueFunction() {
 			}
 			//调用值参数表成功 并预读了一个单词
 			if (symbol == RPARENT) {  //是)
-				doOutput();
-				outputfile << "<无返回值函数调用语句>" << endl;
+				//doOutput();
+				//outputfile << "<无返回值函数调用语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
 			}
@@ -1682,7 +1682,7 @@ bool callNoReturnValueFunction() {
 bool valueParameterTable() {
 	//值参数表可以为空  值参数表为空时 当前字符就是)右括号
 	if (symbol == RPARENT) {
-		outputfile << "<值参数表>" << endl;
+		//outputfile << "<值参数表>" << endl;
 		return true;
 	}
 	if (!expression()) {  //调用分析表达式
@@ -1698,7 +1698,7 @@ bool valueParameterTable() {
 			break;
 		}
 		//当前是逗号 看下一个是不是表达式
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
@@ -1708,7 +1708,7 @@ bool valueParameterTable() {
 		}
 		//分析表达式成功 并预读了一个单词
 	}
-	outputfile << "<值参数表>" << endl;
+	//outputfile << "<值参数表>" << endl;
 	return true;
 }
 
@@ -1719,26 +1719,26 @@ bool statementList() {
 			break;
 		}
 	}
-	outputfile << "<语句列>" << endl;
+	//outputfile << "<语句列>" << endl;
 	return true;   //?????如果第一次进while就不是语句 会不会有问题？
 }
 
 //＜读语句＞    ::=  scanf '('＜标识符＞{,＜标识符＞}')’
 bool readStatement() {
 	if (symbol == SCANFTK) {
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		if (symbol == LPARENT) {  //是(
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
 			}
 			if (symbol == IDENFR) {
-				doOutput();
+				//doOutput();
 				//开始分析{,＜标识符＞}
 				while (true) {
 					re = getsym();
@@ -1749,7 +1749,7 @@ bool readStatement() {
 						break;
 					}
 					//当前是逗号 看下一个是不是标识符
-					doOutput();
+					//doOutput();
 					re = getsym();
 					if (re < 0) {
 						return false;
@@ -1758,11 +1758,11 @@ bool readStatement() {
 						return false;
 					}
 					//当前是标识符
-					doOutput();
+					//doOutput();
 				}
 				if (symbol == RPARENT) {  //)
-					doOutput();
-					outputfile << "<读语句>" << endl;
+					//doOutput();
+					//outputfile << "<读语句>" << endl;
 					getsym();  //预读一个 不管是啥
 					return true;
 				}
@@ -1786,20 +1786,20 @@ bool readStatement() {
 //＜写语句＞    ::= printf '(' ＜字符串＞,＜表达式＞ ')'| printf '('＜字符串＞ ')'| printf '('＜表达式＞')’
 bool writeStatement() {
 	if (symbol == PRINTFTK) {
-		doOutput();
+		//doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		if (symbol == LPARENT) {  //是(
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
 			}
 			if (strings()) {  //字符串常量  预读一个单词
 				if (symbol == COMMA) {  //,  printf '(' ＜字符串＞,＜表达式＞ ')'
-					doOutput();
+					//doOutput();
 					re = getsym();
 					if (re < 0) {
 						return false;
@@ -1809,8 +1809,8 @@ bool writeStatement() {
 					}
 					//分析表达式成功 并预读了一个单词
 					if (symbol == RPARENT) {  //)
-						doOutput();
-						outputfile << "<写语句>" << endl;
+						//doOutput();
+						//outputfile << "<写语句>" << endl;
 						getsym();  //预读一个 不管是啥
 						return true;
 					}
@@ -1819,8 +1819,8 @@ bool writeStatement() {
 					}
 				}
 				else if (symbol == RPARENT) {  //)  printf '('＜字符串＞ ')'
-					doOutput();
-					outputfile << "<写语句>" << endl;
+					//doOutput();
+					//outputfile << "<写语句>" << endl;
 					getsym();  //预读一个 不管是啥
 					return true;
 				}
@@ -1834,8 +1834,8 @@ bool writeStatement() {
 				}
 				//分析表达式成功 并预读了一个单词
 				if (symbol == RPARENT) {  //)
-					doOutput();
-					outputfile << "<写语句>" << endl;
+					//doOutput();
+					//outputfile << "<写语句>" << endl;
 					getsym();  //预读一个 不管是啥
 					return true;
 				}
@@ -1856,15 +1856,15 @@ bool writeStatement() {
 //＜返回语句＞   ::=  return['('＜表达式＞')']  
 bool returnStatement() {
 	if (symbol == RETURNTK) {  //return 
-		doOutput();
+		//doOutput();
 		//开始分析 ['('＜表达式＞')']    可有可无的
 		int re = getsym();
 		if (re < 0) {   // 后边可以没有
-			outputfile << "<返回语句>" << endl;
+			//outputfile << "<返回语句>" << endl;
 			return true;
 		}
 		if (symbol == LPARENT) {  //是(
-			doOutput();
+			//doOutput();
 			re = getsym();
 			if (re < 0) {
 				return false;
@@ -1874,8 +1874,8 @@ bool returnStatement() {
 			}
 			//分析表达式成功 并预读了一个单词
 			if (symbol == RPARENT) {  //)
-				doOutput();
-				outputfile << "<返回语句>" << endl;
+				//doOutput();
+				//outputfile << "<返回语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
 			}
@@ -1884,7 +1884,7 @@ bool returnStatement() {
 			}
 		}
 		else {  //return 后边不是( 也可以 
-			outputfile << "<返回语句>" << endl;
+			//outputfile << "<返回语句>" << endl;
 			return true;
 		}
 	}
