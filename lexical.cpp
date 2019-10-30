@@ -19,6 +19,7 @@ extern char reservedWord[20][10];
 extern string filecontent;  //文件的内容
 extern ifstream inputfile;
 extern ofstream outputfile;
+extern ofstream errorfile;
 extern int indexs;  //文件的索引
 extern int oldIndex;    //用于做恢复
 extern int line;  //行号
@@ -153,6 +154,13 @@ bool isStringChar()
 	return ((ch >= 35 && ch <= 126) || ch == 32 || ch == 33);
 }
 
+bool isValid()
+{
+	return isPlus() || isMinu() || isMult() || isDiv() || isLss() || isGre() || isExcla() 
+		|| isAssign() || isSemicn() || isComma() || isLparent() || isRparent() 
+		|| isLbrack() || isRbrack() || isLbrace() || isRbrace() || isSquo() || isDquo();
+}
+
 void clearToken()
 {  //清空token
 	tokenI = 0;
@@ -201,7 +209,7 @@ int transNum()
 	return res;
 }
 
-int getsym()
+int getsym(int out)
 {
 	oldIndex = indexs;  //记录没有读取之前的indexs为oldIndex
 	clearToken();
@@ -251,11 +259,63 @@ int getsym()
 				symbol = CHARCON;  //字符常量
 			}
 			else {
-				//wrong! retract();
+				//wrong! retract(); 缺少右单引号 不符合词法
+				if (out) {
+					errorfile << line << " a\n";  //不符合词法
+				}
+				int old = indexs;
+				while (1) {
+					if (isSquo()) {
+						break;
+					}
+					if (isNewline()) {
+						line--;
+						retractString(old-1);  //回到这个读错了的 本该是'的位置
+						break;
+					}
+					if (isComma() || isSemicn()) {  //, ;
+						indexs--;  //需要把,;退回去
+						break;
+					}
+					get_ch();
+				}
+				con_ch = tmp;
+				symbol = CHARCON;  //字符常量
 			}
 		}
 		else {
-			//wrong! retract();
+			//wrong! retract();  字符不是a-z A-Z _+-*/
+			if (out) {
+				errorfile << line << " a\n";  //不符合词法
+			}
+			char tmp = ch;
+			get_ch();
+			if (isSquo()) {
+				con_ch = tmp;
+				symbol = CHARCON;  //字符常量
+			}
+			else {
+				//wrong! retract(); 缺少右单引号 不符合词法
+				//errorfile << line << " a\n";  //不符合词法
+				int old = indexs;
+				while (1) {
+					if (isSquo()) {
+						break;
+					}
+					if (isNewline()) {
+						line--;
+						retractString(old - 1);  //回到这个读错了的 本该是'的位置
+						break;
+					}
+					if (isComma() || isSemicn()) {  //, ;
+						indexs--;  //需要把,;退回去
+						break;
+					}
+					get_ch();
+				}
+				con_ch = tmp;
+				symbol = CHARCON;  //字符常量
+			}
 		}
 		return 1;
 	}
@@ -271,8 +331,22 @@ int getsym()
 			token[tokenI] = '\0';
 			strcpy(s, token);  //存到s中
 		}
-		else {
-			//wrong! retract();
+		else {  //wrong! retract(); 缺少右双引号 不符合词法
+			if (isNewline()) {
+				line--;
+				if (out) {
+					errorfile << line << " a\n";  //不符合词法
+				}
+				symbol = STRCON;  //字符串常量
+				token[tokenI] = '\0';
+				strcpy(s, token);  //存到s中
+				while (1) {
+					indexs--;
+					if (filecontent[indexs] == ')') {
+						break;
+					}
+				}
+			}
 		}
 		return 1;
 	}
@@ -320,7 +394,12 @@ int getsym()
 			symbol = NEQ;
 		}
 		else {
-			//wrong! retract();
+			//wrong! retract();  ！后边缺少=
+			retract();
+			if (out) {
+				errorfile << line << " a\n";  //不符合词法
+			}
+			symbol = NEQ;
 		}
 		return 1;
 	}
@@ -368,8 +447,12 @@ int getsym()
 		return 1;
 	}
 	else {
-		return -1;
 		//wrong! retract();
+		if (out) {
+			errorfile << line << " a\n";  //不符合词法
+		}
+		return getsym(out);
+		//return -1;
 	}
 }
 

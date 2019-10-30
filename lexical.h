@@ -54,6 +54,8 @@ bool isEOF();
 
 bool isStringChar();
 
+bool isValid();
+
 void clearToken();
 
 void catToken();
@@ -68,7 +70,7 @@ int reserver();
 
 int transNum();
 
-int getsym();
+int getsym(int out=1);
 
 void doOutput();
 
