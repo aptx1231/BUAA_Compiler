@@ -1127,7 +1127,8 @@ bool mainFunction() {
 }
 
 //＜表达式＞    ::= ［＋｜－］＜项＞{＜加法运算符＞＜项＞}  
-bool expression() {
+bool expression(int& type) {
+	bool first = false;
 	int re;
 	if (symbol == PLUS || symbol == MINU) {
 		doOutput();
@@ -1135,12 +1136,14 @@ bool expression() {
 		if (re < 0) {
 			return false;
 		}
+		first = true;
 	}
 	//进入项的分析
-	if (!item()) {
+	if (!item(type)) {
 		return false;
 	}
 	//项分析成功 并预读了一个单词
+	bool flag = false;
 	//开始分析{＜加法运算符＞＜项＞}  
 	while (true) {
 		if (isEOF()) {
@@ -1149,14 +1152,24 @@ bool expression() {
 		if (symbol != PLUS && symbol != MINU) {  //不是+不是-
 			break;
 		}
+		//项中包括了加法减法 就一定是int了
+		flag = true;
 		doOutput();
 		re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		//进入项的分析
-		if (!item()) {
+		if (!item(type)) {
 			return false;
+		}
+	}
+	if (first) {  //带有最前边的+-号 一定是int
+		type = 1;
+	}
+	else {
+		if (flag) {  //项中包括了加法减法 就一定是int
+			type = 1;
 		}
 	}
 	outputfile << "<表达式>" << endl;
@@ -1164,12 +1177,13 @@ bool expression() {
 }
 
 //＜项＞     ::= ＜因子＞{＜乘法运算符＞＜因子＞}
-bool item() {
-	if (!factor()) {  //直接分析因子
+bool item(int& type) {
+	if (!factor(type)) {  //直接分析因子
 		return false;
 	}
 	//因子分析成功 并预读了一个单词
 	//开始分析 {＜乘法运算符＞＜因子＞}
+	bool flag = false;
 	while (true) {
 		if (isEOF()) {
 			break;
@@ -1178,14 +1192,19 @@ bool item() {
 			break;
 		}
 		doOutput();
+		//项中包括了乘法除法 就一定是int了
+		flag = true;
 		int re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		//进入因子的分析
-		if (!factor()) {
+		if (!factor(type)) {
 			return false;
 		}
+	}
+	if (flag) {  //项中包括了乘法除法 就一定是int了 
+		type = 1;
 	}
 	outputfile << "<项>" << endl;
 	return true;
@@ -1193,7 +1212,7 @@ bool item() {
 
 //＜因子＞    ::= ＜标识符＞｜＜标识符＞'['＜表达式＞']'|'('＜表达式＞')'｜＜整数＞|＜字符＞｜＜有返回值函数调用语句＞
 //注意 ＜有返回值函数调用语句＞ ::= ＜标识符＞'('＜值参数表＞')’跟 ＜标识符＞｜＜标识符＞'['＜表达式＞']'|'('＜表达式＞')' 有前缀的冲突
-bool factor() {
+bool factor(int& type) {
 	int re;
 	int old = oldIndex;  //记录读取完标识符之后的oldIndex 是标识符的起始位置
 	while (isspace(filecontent[old])) {
@@ -1207,10 +1226,16 @@ bool factor() {
 		if (symbol == LBRACK) {  //是[
 			symbol = IDENFR;
 			string name = string(token);
-			if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
-				|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
-				) {
-				errorfile << line << " c\n";  //未定义的名字
+			if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
+				type = localSymbolTable[name].type;
+			}
+			else {
+				if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
+					type = globalSymbolTable[name].type;
+				}
+				else {
+					errorfile << line << " c\n";  //未定义的名字
+				}
 			}
 			doOutput();  //因为[不会修改token 只需要改一下symbol 就能输出刚才的标识符了
 			symbol = LBRACK;
@@ -1220,7 +1245,9 @@ bool factor() {
 				return false;
 			}
 			//进入到对表达式的分析
-			if (!expression()) {
+			int t; 
+			//＜标识符＞'['＜表达式＞']'的类型取决于标识符 而不是后边的数组下标 所以不能用type 否则type被修改了
+			if (!expression(t)) {
 				return false;
 			}
 			//表达式分析成功 并预读了一个单词
@@ -1248,6 +1275,7 @@ bool factor() {
 					return false;
 				}
 				//调用有返回值的函数调用语句成功 并预读了一个单词
+				type = globalSymbolTable[name].type;
 				outputfile << "<因子>" << endl;
 				return true;
 			}
@@ -1269,10 +1297,16 @@ bool factor() {
 			retractString(old);   //回退到标识符的起始位置
 			getsym(0);   //把标识符重新读出来
 			string name = string(token);
-			if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
-				|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
-				) {
-				errorfile << line << " c\n";  //未定义的名字
+			if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
+				type = localSymbolTable[name].type;
+			}
+			else {
+				if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
+					type = globalSymbolTable[name].type;
+				}
+				else {
+					errorfile << line << " c\n";  //未定义的名字
+				}
 			}
 			doOutput();
 			outputfile << "<因子>" << endl;
@@ -1287,9 +1321,10 @@ bool factor() {
 			return false;
 		}
 		//进入到对表达式的分析
-		if (!expression()) {
+		if (!expression(type)) {
 			return false;
 		}
+		type = 1;  //(表达式)这个的类型就是int
 		//表达式分析成功 并预读了一个单词
 		if (symbol == RPARENT) {  //是)
 			doOutput();
@@ -1302,16 +1337,19 @@ bool factor() {
 		}
 	}
 	else if (symbol == CHARCON) {  //当前是字符 对应文法 ＜字符＞
+		type = 2;  //字符常量类型是char 
 		doOutput();
 		re = getsym();   //为下一个预读 不管是啥
 		outputfile << "<因子>" << endl;
 		return true;
 	}
 	else if (integer()) {  //当前是整数   并预读了一个单词
+		type = 1;  //整形常量 类型是int
 		outputfile << "<因子>" << endl;
 		return true;
 	}
 	else {
+		type = 0;
 		return false;
 	}
 }
@@ -1524,7 +1562,8 @@ bool assignStatement() {
 				return false;
 			}
 			//开始分析表达式
-			if (!expression()) {
+			int t;
+			if (!expression(t)) {  //t是数组下标的类型
 				return false;
 			}
 			//分析表达式成功 并预读了一个单词
@@ -1541,7 +1580,8 @@ bool assignStatement() {
 						return false;
 					}
 					//开始分析表达式
-					if (!expression()) {
+					int tt;
+					if (!expression(tt)) {
 						return false;
 					}
 					//分析表达式成功 并预读了一个单词
@@ -1563,7 +1603,8 @@ bool assignStatement() {
 				return false;
 			}
 			//开始分析表达式
-			if (!expression()) {
+			int t;
+			if (!expression(t)) {
 				return false;
 			}
 			//分析表达式成功 并预读了一个单词
@@ -1638,7 +1679,8 @@ bool conditionStatement() {
 
 //＜条件＞  ::=  ＜表达式＞＜关系运算符＞＜表达式＞｜＜表达式＞
 bool condition() {
-	if (!expression()) {  //直接调用表达式
+	int typeLeft, typeRight;
+	if (!expression(typeLeft)) {  //直接调用表达式
 		return false;
 	}
 	//分析表达式成功 并预读一个单词
@@ -1649,14 +1691,20 @@ bool condition() {
 			return false;
 		}
 		//开始分析表达式
-		if (!expression()) {
+		if (!expression(typeRight)) {
 			return false;
 		}
 		//分析表达式成功 并预读了一个单词
+		if (typeLeft != 1 || typeRight != 1) {
+			errorfile << line << " f\n";  //条件判断中出现不合法的类型 要求全是int才行
+		}
 		outputfile << "<条件>" << endl;
 		return true;
 	}
 	else {
+		if (typeLeft != 1) {
+			errorfile << line << " f\n";  //条件判断中出现不合法的类型 要求是int才行
+		}
 		outputfile << "<条件>" << endl;
 		return true;
 	}
@@ -1782,7 +1830,8 @@ bool repeatStatement() {
 		if (re < 0) {
 			return false;
 		}
-		if (!expression()) {  //分析表达式
+		int t;
+		if (!expression(t)) {  //分析表达式
 			return false;
 		}
 		//分析表达式成功 并预读了一个单词
@@ -1889,6 +1938,7 @@ bool step() {
 //现在的写法 一旦进入了这个函数 那么这个函数名就是合法的 即存在于全局表 不存在与局部表 且 返回值是int/char
 bool callHaveReturnValueFunction() {
 	if (symbol == IDENFR) {  //标识符是函数名 需要查全局符号表
+		string name = string(token);
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -1901,7 +1951,7 @@ bool callHaveReturnValueFunction() {
 				return false;
 			}
 			//开始调用值参数表
-			if (!valueParameterTable()) {
+			if (!valueParameterTable(name)) {
 				return false;
 			}
 			//调用值参数表成功 并预读了一个单词
@@ -1928,6 +1978,7 @@ bool callHaveReturnValueFunction() {
 //现在的写法 一旦进入了这个函数 那么这个函数名就是合法的 即存在于全局表 不存在与局部表 且 返回值是void
 bool callNoReturnValueFunction() {
 	if (symbol == IDENFR) {  //标识符
+		string name = string(token);
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -1940,7 +1991,7 @@ bool callNoReturnValueFunction() {
 				return false;
 			}
 			//开始调用值参数表
-			if (!valueParameterTable()) {
+			if (!valueParameterTable(name)) {
 				return false;
 			}
 			//调用值参数表成功 并预读了一个单词
@@ -1964,15 +2015,21 @@ bool callNoReturnValueFunction() {
 }
 
 //＜值参数表＞  ::= ＜表达式＞{,＜表达式＞}｜＜空＞
-bool valueParameterTable() {
+bool valueParameterTable(string funcName) {
 	//值参数表可以为空  值参数表为空时 当前字符就是)右括号
 	if (symbol == RPARENT) {
+		if (globalSymbolTable[funcName].parameterTable.size() != 0) {
+			errorfile << line << " d\n";  //参数个数不匹配
+		}
 		outputfile << "<值参数表>" << endl;
 		return true;
 	}
-	if (!expression()) {  //调用分析表达式
+	vector<int> typeList;  //值参数类型
+	int type;
+	if (!expression(type)) {  //调用分析表达式
 		return false;
 	}
+	typeList.push_back(type);
 	//分析表达式成功 并预读了一个单词
 	//开始分析{,＜表达式＞}
 	while (true) {
@@ -1988,10 +2045,22 @@ bool valueParameterTable() {
 		if (re < 0) {
 			return false;
 		}
-		if (!expression()) {  //调用分析表达式
+		if (!expression(type)) {  //调用分析表达式
 			return false;
 		}
 		//分析表达式成功 并预读了一个单词
+		typeList.push_back(type);
+	}
+	if (typeList.size() != globalSymbolTable[funcName].parameterTable.size()) {
+		errorfile << line << " d\n";  //参数个数不匹配
+	}
+	else {
+		for (int i = 0; i < typeList.size(); i++) {
+			if (typeList[i] != globalSymbolTable[funcName].parameterTable[i]) {
+				errorfile << line << " e\n";  //参数类型不匹配
+				break;
+			}
+		}
 	}
 	outputfile << "<值参数表>" << endl;
 	return true;
@@ -2101,7 +2170,8 @@ bool writeStatement() {
 					if (re < 0) {
 						return false;
 					}
-					if (!expression()) {  //分析表达式
+					int t;
+					if (!expression(t)) {  //分析表达式
 						return false;
 					}
 					//分析表达式成功 并预读了一个单词
@@ -2126,7 +2196,8 @@ bool writeStatement() {
 				}
 			}
 			else {  //判断是不是表达式  printf '('＜表达式＞')’
-				if (!expression()) {  //分析表达式
+				int t;
+				if (!expression(t)) {  //分析表达式
 					return false;
 				}
 				//分析表达式成功 并预读了一个单词
@@ -2166,7 +2237,8 @@ bool returnStatement() {
 			if (re < 0) {
 				return false;
 			}
-			if (!expression()) {  //分析表达式
+			int t;
+			if (!expression(t)) {  //分析表达式
 				return false;
 			}
 			//分析表达式成功 并预读了一个单词

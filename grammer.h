@@ -36,11 +36,11 @@ bool compoundStatement();
 //＜主函数＞    ::= void main‘(’‘)’ ‘{’＜复合语句＞‘}’
 bool mainFunction();
 //＜表达式＞    ::= ［＋｜－］＜项＞{＜加法运算符＞＜项＞}  
-bool expression();
+bool expression(int& type);
 //＜项＞     ::= ＜因子＞{＜乘法运算符＞＜因子＞}
-bool item();
+bool item(int& type);
 //＜因子＞    ::= ＜标识符＞｜＜标识符＞'['＜表达式＞']'|'('＜表达式＞')'｜＜整数＞|＜字符＞｜＜有返回值函数调用语句＞
-bool factor();
+bool factor(int& type);
 //＜语句＞    ::= ＜条件语句＞｜＜循环语句＞| '{'＜语句列＞'}'| ＜有返回值函数调用语句＞; 
 //              |＜无返回值函数调用语句＞;｜＜赋值语句＞;｜＜读语句＞;｜＜写语句＞;｜＜空＞;|＜返回语句＞;
 bool statement();
@@ -60,7 +60,7 @@ bool callHaveReturnValueFunction();
 //＜无返回值函数调用语句＞ ::= ＜标识符＞'('＜值参数表＞')’
 bool callNoReturnValueFunction();
 //＜值参数表＞  ::= ＜表达式＞{,＜表达式＞}｜＜空＞
-bool valueParameterTable();
+bool valueParameterTable(string funcName);
 //＜语句列＞   ::= ｛＜语句＞｝
 bool statementList();
 //＜读语句＞    ::=  scanf '('＜标识符＞{,＜标识符＞}')’
