@@ -88,6 +88,11 @@ bool constDeclaration(bool isglobal) {
 				if (isEOF()) {   //预读到了结尾
 					return false;
 				}
+				if (symbol != SEMICN) {
+					retractString(oldIndex);
+					errorfile << line << " k\n";  //缺少分号
+					symbol = SEMICN;
+				}
 				if (symbol == SEMICN) {  //分号
 					doOutput();
 					//开始分析{ const＜常量定义＞;}
@@ -112,8 +117,10 @@ bool constDeclaration(bool isglobal) {
 							return false;
 						}
 						//常量定义调用完成 预读了一个符号
-						if (symbol != SEMICN) {  //缺少分号
-							return false;
+						if (symbol != SEMICN) {
+							retractString(oldIndex);
+							errorfile << line << " k\n";  //缺少分号
+							symbol = SEMICN;
 						}
 						doOutput();
 					}
@@ -449,6 +456,11 @@ bool variableDeclaration(bool isglobal) {
 			if (isEOF()) {
 				return false;
 			}
+			if (symbol != SEMICN) {
+				retractString(oldIndex);
+				errorfile << line << " k\n";  //缺少分号
+				symbol = SEMICN;
+			}
 			if (symbol == SEMICN) {  //读到分号  ＜变量定义＞;这部分结束了
 				doOutput();
 				//接下来分析{＜变量定义＞;}
@@ -464,8 +476,10 @@ bool variableDeclaration(bool isglobal) {
 					if (isEOF()) {
 						return false;
 					}
-					if (symbol != SEMICN) {  //变量定义后边不是分号
-						return false;
+					if (symbol != SEMICN) {
+						retractString(oldIndex);
+						errorfile << line << " k\n";  //缺少分号
+						symbol = SEMICN;
 					}
 					doOutput();
 				}
@@ -482,9 +496,6 @@ bool variableDeclaration(bool isglobal) {
 	}
 	else {  //需要考虑 可能是函数  区分的位置在第三位 函数 int a (  而 变量定义是 int a ,[;这类的
 		int old = oldIndex;   //记录读取完int/char之后保留的那个oldIndex 这个就是int/char的起始位置
-		while (isspace(filecontent[old])) {
-			old++;
-		}
 		if (symbol == INTTK || symbol == CHARTK) {
 			int re = getsym(0);  //读下一个
 			if (re < 0) {
@@ -514,6 +525,11 @@ bool variableDeclaration(bool isglobal) {
 								if (isEOF()) {
 									return false;
 								}
+								if (symbol != SEMICN) {
+									retractString(oldIndex);
+									errorfile << line << " k\n";  //缺少分号
+									symbol = SEMICN;
+								}
 								if (symbol == SEMICN) {  //读到分号  ＜变量定义＞;这部分结束了
 									doOutput();
 									//接下来分析{＜变量定义＞;}
@@ -525,9 +541,6 @@ bool variableDeclaration(bool isglobal) {
 										}
 										else {
 											old = oldIndex;  //记录读取完int/char之后保留的那个oldIndex 这个就是int/char的起始位置
-											while (isspace(filecontent[old])) {
-												old++;
-											}
 											if (symbol == INTTK || symbol == CHARTK) {  //拿到了int/char 说明有可能是变量定义了
 												re = getsym(0);  //读下一个
 												if (re < 0) {
@@ -556,6 +569,11 @@ bool variableDeclaration(bool isglobal) {
 																	//变量定义成功 预读了一个符号
 																	if (isEOF()) {
 																		return false;
+																	}
+																	if (symbol != SEMICN) {
+																		retractString(oldIndex); //多读了 退回去
+																		errorfile << line << " k\n";  //缺少分号
+																		symbol = SEMICN;
 																	}
 																	if (symbol == SEMICN) {  //读到分号  ＜变量定义＞;这部分结束了
 																		doOutput();
@@ -848,9 +866,6 @@ bool noReturnValueFunction() {
 	//无返回值函数和main函数前缀有冲突 需要多读一个做预判
 	string name;
 	int old = oldIndex;   //记录读取完void只有的oldIndex 是void的起始位置
-	while (isspace(filecontent[old])) {
-		old++;
-	}
 	if (symbol == VOIDTK) {
 		//doOutput();
 		int re = getsym(0);
@@ -1215,9 +1230,6 @@ bool item(int& type) {
 bool factor(int& type) {
 	int re;
 	int old = oldIndex;  //记录读取完标识符之后的oldIndex 是标识符的起始位置
-	while (isspace(filecontent[old])) {
-		old++;
-	}
 	if (symbol == IDENFR) {  //当前是标识符  对应文法 ＜标识符＞｜＜标识符＞'['＜表达式＞']' 也可能是 ＜有返回值函数调用语句＞
 		re = getsym(0);
 		if (re < 0) {
@@ -1369,6 +1381,11 @@ bool statement() {
 	else if (symbol == RETURNTK) {  //＜返回语句＞;
 		if (returnStatement()) {
 			//分析返回语句成功 并预读了一个符号
+			if (symbol != SEMICN) {
+				retractString(oldIndex);
+				errorfile << line << " k\n";  //缺少分号
+				symbol = SEMICN;
+			}
 			if (symbol == SEMICN) {  //;分号
 				doOutput();
 				outputfile << "<语句>" << endl;
@@ -1386,6 +1403,11 @@ bool statement() {
 	else if (symbol == SCANFTK) {  //＜读语句＞;
 		if (readStatement()) {
 			//分析读语句成功 并预读了一个符号
+			if (symbol != SEMICN) {
+				retractString(oldIndex);
+				errorfile << line << " k\n";  //缺少分号
+				symbol = SEMICN;
+			}
 			if (symbol == SEMICN) {  //;分号
 				doOutput();
 				outputfile << "<语句>" << endl;
@@ -1403,6 +1425,11 @@ bool statement() {
 	else if (symbol == PRINTFTK) {  //＜写语句＞;
 		if (writeStatement()) {
 			//分析写语句成功 并预读了一个符号
+			if (symbol != SEMICN) {
+				retractString(oldIndex);
+				errorfile << line << " k\n";  //缺少分号
+				symbol = SEMICN;
+			}
 			if (symbol == SEMICN) {  //;分号
 				doOutput();
 				outputfile << "<语句>" << endl;
@@ -1459,9 +1486,6 @@ bool statement() {
 	}
 	else if (symbol == IDENFR) {  //＜有返回值函数调用语句＞; |＜无返回值函数调用语句＞;｜＜赋值语句＞;
 		int old = oldIndex;  //记录下读取完标识符之后的oldIndex 就是这个标识符的起始位置
-		while (isspace(filecontent[old])) {
-			old++;
-		}
 		int re = getsym(0);
 		if (re < 0) {
 			return false;
@@ -1473,6 +1497,11 @@ bool statement() {
 				return false;
 			}
 			//分析赋值语句成功 并预读了一个单词
+			if (symbol != SEMICN) {
+				retractString(oldIndex);
+				errorfile << line << " k\n";  //缺少分号
+				symbol = SEMICN;
+			}
 			if (symbol == SEMICN) {  //;分号
 				doOutput();
 				outputfile << "<语句>" << endl;
@@ -1496,6 +1525,11 @@ bool statement() {
 						return false;
 					}
 					//分析无返回值函数调用语句成功 并预读了一个单词
+					if (symbol != SEMICN) {
+						retractString(oldIndex);
+						errorfile << line << " k\n";  //缺少分号
+						symbol = SEMICN;
+					}
 					if (symbol == SEMICN) {  //;分号
 						doOutput();
 						outputfile << "<语句>" << endl;
@@ -1511,6 +1545,11 @@ bool statement() {
 						return false;
 					}
 					//分析有返回值函数调用语句成功 并预读了一个单词
+					if (symbol != SEMICN) {
+						retractString(oldIndex);
+						errorfile << line << " k\n";  //缺少分号
+						symbol = SEMICN;
+					}
 					if (symbol == SEMICN) {  //;分号
 						doOutput();
 						outputfile << "<语句>" << endl;
@@ -1866,24 +1905,38 @@ bool repeatStatement() {
 			return false;
 		}
 		//分析表达式成功 并预读了一个单词
-		if (symbol != SEMICN) {  //不是;
-			return false;
+		if (symbol != SEMICN) {
+			retractString(oldIndex);
+			errorfile << line << " k\n";  //缺少分号
+			symbol = SEMICN;
 		}
-		doOutput(); //是;
-		re = getsym();
-		if (re < 0) {
+		if (symbol == SEMICN) {  //;分号
+			doOutput(); //是;
+			re = getsym();
+			if (re < 0) {
+				return false;
+			}
+		}
+		else {
 			return false;
 		}
 		if (!condition()) {  //分析条件
 			return false;
 		}
 		//分析条件成功 并预读了一个单词
-		if (symbol != SEMICN) {  //不是;
-			return false;
+		if (symbol != SEMICN) {
+			retractString(oldIndex);
+			errorfile << line << " k\n";  //缺少分号
+			symbol = SEMICN;
 		}
-		doOutput();  //是;
-		re = getsym();
-		if (re < 0) {
+		if (symbol == SEMICN) {  //;分号
+			doOutput(); //是;
+			re = getsym();
+			if (re < 0) {
+				return false;
+			}
+		}
+		else {
 			return false;
 		}
 		if (symbol != IDENFR) {  //不是标识符

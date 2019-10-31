@@ -183,11 +183,19 @@ void get_ch()
 void retract()
 {  //把字符写回到输入流
 	//ungetc(ch, inputfile);
+	if (ch == '\n') {
+		line--;
+	}
 	indexs--;
 }
 
-void retractString(int oldIndex) {
-	indexs = oldIndex;
+void retractString(int old) {
+	for (int i = old; i < indexs; i++) {
+		if (filecontent[i] == '\n') {
+			line--;
+		}
+	}
+	indexs = old;
 }
 
 int reserver()
