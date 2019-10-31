@@ -10,27 +10,27 @@ bool strings();
 //＜程序＞  ::= ［＜常量说明＞］［＜变量说明＞］{＜有返回值函数定义＞|＜无返回值函数定义＞}＜主函数＞
 bool procedure();
 //＜常量说明＞ ::=  const＜常量定义＞;{ const＜常量定义＞;}
-bool constDeclaration();
+bool constDeclaration(bool isglobal);
 //＜常量定义＞ ::= int＜标识符＞＝＜整数＞{,＜标识符＞＝＜整数＞}
 //                  | char＜标识符＞＝＜字符＞{,＜标识符＞＝＜字符＞}
-bool constDefinition();
+bool constDefinition(bool isglobal);
 //＜无符号整数＞  ::= ＜非零数字＞｛＜数字＞｝| 0
 bool unsignedInteger();
 //＜整数＞ ::= ［＋｜－］＜无符号整数＞
 bool integer();
 //＜声明头部＞   ::=  int＜标识符＞ |char＜标识符＞
-bool declarationHead(string& tmp);
+bool declarationHead(string& tmp, int& type);
 //＜变量说明＞  ::= ＜变量定义＞;{＜变量定义＞;}
-bool variableDeclaration(bool isCompoundStatement);
+bool variableDeclaration(bool isglobal);
 //＜变量定义＞  ::= ＜类型标识符＞(＜标识符＞|＜标识符＞'['＜无符号整数＞']')
 //                              {,(＜标识符＞|＜标识符＞'['＜无符号整数＞']' )}
-bool variableDefinition();
+bool variableDefinition(bool isglobal);
 //＜有返回值函数定义＞  ::=  ＜声明头部＞'('＜参数表＞')' '{'＜复合语句＞'}’
 bool haveReturnValueFunction();
 //＜无返回值函数定义＞  ::= void＜标识符＞'('＜参数表＞')''{'＜复合语句＞'}’
 bool noReturnValueFunction();
 //＜参数表＞    ::=  ＜类型标识符＞＜标识符＞{,＜类型标识符＞＜标识符＞}| ＜空＞
-bool parameterTable();
+bool parameterTable(string funcName, bool isRedefine);
 //＜复合语句＞  ::=  ［＜常量说明＞］［＜变量说明＞］＜语句列＞
 bool compoundStatement();
 //＜主函数＞    ::= void main‘(’‘)’ ‘{’＜复合语句＞‘}’

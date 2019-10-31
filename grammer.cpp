@@ -11,6 +11,8 @@
 using namespace std;
 
 extern char token[100000];
+extern int num;   //记录整形常量
+extern char con_ch;  //记录字符型常量
 extern enum typeId symbol;
 extern ofstream outputfile;
 extern int oldIndex;    //用于做恢复
@@ -38,9 +40,9 @@ bool strings() {
 //＜程序＞  ::= ［＜常量说明＞］［＜变量说明＞］{＜有返回值函数定义＞|＜无返回值函数定义＞}＜主函数＞
 bool procedure() {
 	//尝试调用常量说明 因为是[] 是可以没有的 所以即便返回false也不能说程序分析失败,程序分析还要继续
-	constDeclaration();
+	constDeclaration(true);
 	//尝试调用变量说明
-	variableDeclaration(false);
+	variableDeclaration(true);
 	while (true) {
 		if (symbol == INTTK || symbol == CHARTK) {
 			if (!haveReturnValueFunction()) {//尝试调用有返回值函数
@@ -73,7 +75,7 @@ bool procedure() {
 }
 
 //＜常量说明＞ ::=  const＜常量定义＞;{ const＜常量定义＞;}
-bool constDeclaration() {
+bool constDeclaration(bool isglobal) {
 	if (symbol == CONSTTK) {
 		doOutput();
 		int re = getsym();  //读下一个 然后进入常量定义
@@ -81,7 +83,7 @@ bool constDeclaration() {
 			return false;
 		}
 		else {
-			if (!constDefinition()) { //调用常量定义
+			if (!constDefinition(isglobal)) { //调用常量定义
 				return false;
 			}  //返回之后 会预读一个 不需要再读了
 			else {
@@ -105,7 +107,7 @@ bool constDeclaration() {
 						if (re < 0) {  //const 后缺少东西
 							return false;
 						}
-						if (!constDefinition()) { //调用常量定义
+						if (!constDefinition(isglobal)) { //调用常量定义
 							return false;
 						}
 						if (isEOF()) {   //预读到了结尾
@@ -133,7 +135,8 @@ bool constDeclaration() {
 
 //＜常量定义＞ ::= int＜标识符＞＝＜整数＞{,＜标识符＞＝＜整数＞}
 //                  | char＜标识符＞＝＜字符＞{,＜标识符＞＝＜字符＞}
-bool constDefinition() {
+bool constDefinition(bool isglobal) {
+	string name;
 	if (symbol == INTTK) {
 		doOutput();
 		int re = getsym();  //读下一个 然后进入标识符
@@ -142,6 +145,7 @@ bool constDefinition() {
 		}
 		else {
 			if (symbol == IDENFR) {  //读到标识符
+				name = string(token);
 				doOutput();
 				re = getsym();  //读下一个 进入=
 				if (re < 0) {
@@ -157,6 +161,22 @@ bool constDefinition() {
 						else {
 							if (integer()) {  //整数  预读了下一个单词
 								//开始分析{,＜标识符＞＝＜整数＞}部分
+								if (isglobal) {
+									if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
+										globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, num)));
+									}
+									else {  //找到了 说明重定义了
+										errorfile << line << " b\n";
+									}
+								}
+								else {
+									if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
+										localSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, num)));
+									}
+									else {  //找到了 说明重定义了
+										errorfile << line << " b\n";
+									}
+								}
 								while (true) {
 									if (isEOF()) {  //预读到了结尾
 										break;
@@ -174,6 +194,7 @@ bool constDefinition() {
 										return false;
 									}
 									doOutput();
+									name = string(token);
 									//当前是标识符
 									re = getsym();
 									if (re < 0) {  //标识符后缺少东西
@@ -190,6 +211,22 @@ bool constDefinition() {
 									}
 									if (!integer()) { //=后不是整数
 										return false;
+									}
+									if (isglobal) {
+										if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
+											globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, num)));
+										}
+										else {  //找到了 说明重定义了
+											errorfile << line << " b\n";
+										}
+									}
+									else {
+										if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
+											localSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, num)));
+										}
+										else {  //找到了 说明重定义了
+											errorfile << line << " b\n";
+										}
 									}
 								}
 								outputfile << "<常量定义>" << endl;
@@ -219,6 +256,7 @@ bool constDefinition() {
 		else {
 			if (symbol == IDENFR) {  //读到标识符
 				doOutput();
+				name = string(token);
 				re = getsym();  //读下一个 进入=
 				if (re < 0) {
 					return false;
@@ -233,6 +271,22 @@ bool constDefinition() {
 						else {
 							if (symbol == CHARCON) {  //字符常量
 								doOutput();
+								if (isglobal) {
+									if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
+										globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 2, 0, con_ch)));
+									}
+									else {  //找到了 说明重定义了
+										errorfile << line << " b\n";
+									}
+								}
+								else {
+									if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
+										localSymbolTable.insert(make_pair(name, symbolItem(name, 2, 2, 0, con_ch)));
+									}
+									else {  //找到了 说明重定义了
+										errorfile << line << " b\n";
+									}
+								}
 								//开始分析{,＜标识符＞＝＜字符＞}部分
 								while (true) {
 									re = getsym();
@@ -252,6 +306,7 @@ bool constDefinition() {
 										return false;
 									}
 									doOutput();
+									name = string(token);
 									//当前是标识符
 									re = getsym();
 									if (re < 0) {  //标识符后缺少东西
@@ -270,6 +325,22 @@ bool constDefinition() {
 										return false;
 									}
 									doOutput();
+									if (isglobal) {
+										if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
+											globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 2, 0, con_ch)));
+										}
+										else {  //找到了 说明重定义了
+											errorfile << line << " b\n";
+										}
+									}
+									else {
+										if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
+											localSymbolTable.insert(make_pair(name, symbolItem(name, 2, 2, 0, con_ch)));
+										}
+										else {  //找到了 说明重定义了
+											errorfile << line << " b\n";
+										}
+									}
 								}
 								outputfile << "<常量定义>" << endl;
 								return true;
@@ -336,8 +407,14 @@ bool integer() {
 }
 
 //＜声明头部＞   ::=  int＜标识符＞ |char＜标识符＞
-bool declarationHead(string& tmp) {
+bool declarationHead(string& tmp, int& type) {
 	if (symbol == INTTK || symbol == CHARTK) {
+		if (symbol == INTTK) {
+			type = 1;
+		}
+		else {
+			type = 2;
+		}
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -359,15 +436,15 @@ bool declarationHead(string& tmp) {
 }
 
 //＜变量说明＞  ::= ＜变量定义＞;{＜变量定义＞;}
-bool variableDeclaration(bool isCompoundStatement) {
+bool variableDeclaration(bool isglobal) {
 	//变量说明 变量定义 跟 有返回值的函数定义前缀有冲突
 	//但是只是在＜程序＞::=［＜常量说明＞］［＜变量说明＞］{＜有返回值函数定义＞|＜无返回值函数定义＞}＜主函数＞
 	//在程序这个文法出二者需要做区别
 	//在＜复合语句＞  ::=  ［＜常量说明＞］［＜变量说明＞］＜语句列＞
 	//复合语句这个文法中 二者不会出现同时出现 所以可以正常处理
-	if (isCompoundStatement) {  //不要考虑是不是有返回值的函数了
+	if (!isglobal) {  //不要考虑是不是有返回值的函数了
 		if (symbol == INTTK || symbol == CHARTK) {
-			if (!variableDefinition()) {  //调用变量定义
+			if (!variableDefinition(isglobal)) {  //调用变量定义
 				return false;
 			}
 			//变量定义成功 预读了一个符号
@@ -382,7 +459,7 @@ bool variableDeclaration(bool isCompoundStatement) {
 					if (re < 0) {
 						break;
 					}
-					if (!variableDefinition()) {  //不是变量定义 可以break
+					if (!variableDefinition(isglobal)) {  //不是变量定义 可以break
 						break;
 					}
 					//当前是变量定义 并且已经预读了
@@ -432,7 +509,7 @@ bool variableDeclaration(bool isCompoundStatement) {
 							getsym();  //把int/char读出来
 							//开始调用变量定义
 							if (symbol == INTTK || symbol == CHARTK) {
-								if (!variableDefinition()) {  //调用变量定义
+								if (!variableDefinition(isglobal)) {  //调用变量定义
 									return false;
 								}
 								//变量定义成功 预读了一个符号
@@ -475,7 +552,7 @@ bool variableDeclaration(bool isCompoundStatement) {
 																getsym();  //把int/char读出来
 																//开始调用变量定义
 																if (symbol == INTTK || symbol == CHARTK) {
-																	if (!variableDefinition()) {  //调用变量定义
+																	if (!variableDefinition(isglobal)) {  //调用变量定义
 																		break;
 																	}
 																	//变量定义成功 预读了一个符号
@@ -527,8 +604,16 @@ bool variableDeclaration(bool isCompoundStatement) {
 }
 //＜变量定义＞  ::= ＜类型标识符＞(＜标识符＞|＜标识符＞'['＜无符号整数＞']')
 //                              {,(＜标识符＞|＜标识符＞'['＜无符号整数＞']' )}
-bool variableDefinition() {
+bool variableDefinition(bool isglobal) {
+	string name;
+	int type;
 	if (symbol == INTTK || symbol == CHARTK) {
+		if (symbol == INTTK) {
+			type = 1;
+		}
+		else {
+			type = 2;
+		}
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -537,11 +622,8 @@ bool variableDefinition() {
 		else {
 			if (symbol == IDENFR) {   //标识符
 				doOutput();
+				name = string(token);
 				re = getsym();
-				//if (re < 0) {
-				//	return false;   //错的 标识符可以没有下一个单词
-				//}
-				//else {
 				if (symbol == LBRACK) {  //[
 					doOutput();
 					re = getsym();  //预读一个 然后进入判别 无符号整数
@@ -558,10 +640,44 @@ bool variableDefinition() {
 						}
 						else {  // ]
 							doOutput();
+							if (isglobal) {
+								if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
+									globalSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', num)));
+								}
+								else {  //找到了 说明重定义了
+									errorfile << line << " b\n";
+								}
+							}
+							else {
+								if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
+									localSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', num)));
+								}
+								else {  //找到了 说明重定义了
+									errorfile << line << " b\n";
+								}
+							}
 							re = getsym();  //多读一个 不管是啥 因为如果没有[的时候 也已经预读了一个
 						}
 					}
 				}  //如果不是[ 就相当于预读了
+				else {
+					if (isglobal) {
+						if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
+							globalSymbolTable.insert(make_pair(name, symbolItem(name, 1, type)));
+						}
+						else {  //找到了 说明重定义了
+							errorfile << line << " b\n";
+						}
+					}
+					else {
+						if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
+							localSymbolTable.insert(make_pair(name, symbolItem(name, 1, type)));
+						}
+						else {  //找到了 说明重定义了
+							errorfile << line << " b\n";
+						}
+					}
+				}
 				//不是[ 或者[]处理完 接下来分析 {,(＜标识符＞|＜标识符＞'['＜无符号整数＞']' )}
 				//稍有不同 因为上一步已经读了一个单词 进入循环不要立刻读单词
 				while (true) {
@@ -577,6 +693,7 @@ bool variableDefinition() {
 					else {
 						if (symbol == IDENFR) {   //标识符
 							doOutput();
+							name = string(token);
 							re = getsym();
 							if (symbol == LBRACK) {  //[
 								doOutput();
@@ -594,10 +711,44 @@ bool variableDefinition() {
 									}
 									else {  // ]
 										doOutput();
+										if (isglobal) {
+											if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
+												globalSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', num)));
+											}
+											else {  //找到了 说明重定义了
+												errorfile << line << " b\n";
+											}
+										}
+										else {
+											if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
+												localSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', num)));
+											}
+											else {  //找到了 说明重定义了
+												errorfile << line << " b\n";
+											}
+										}
 										re = getsym();  //多读一个 不管是啥 因为如果没有[的时候 也已经预读了一个
 									}
 								}
 							}  //如果不是[ 就相当于预读了
+							else {
+								if (isglobal) {
+									if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
+										globalSymbolTable.insert(make_pair(name, symbolItem(name, 1, type)));
+									}
+									else {  //找到了 说明重定义了
+										errorfile << line << " b\n";
+									}
+								}
+								else {
+									if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
+										localSymbolTable.insert(make_pair(name, symbolItem(name, 1, type)));
+									}
+									else {  //找到了 说明重定义了
+										errorfile << line << " b\n";
+									}
+								}
+							}
 						}
 						else {
 							return false;
@@ -620,12 +771,21 @@ bool variableDefinition() {
 
 //＜有返回值函数定义＞  ::=  ＜声明头部＞'('＜参数表＞')' '{'＜复合语句＞'}’
 bool haveReturnValueFunction() {
-	string tmp;
-	if (!declarationHead(tmp)) {  //调用声明头部
+	string name;
+	int type;
+	if (!declarationHead(name, type)) {  //调用声明头部
 		return false;
 	}
 	//调用声明头部成功 预读了一个符号
-	haveReturnValueFunctionSet.insert(tmp);
+	haveReturnValueFunctionSet.insert(name);
+	bool isRedefine = false;
+	if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
+		globalSymbolTable.insert(make_pair(name, symbolItem(name, 3, type)));
+	}
+	else {  //找到了 说明重定义了
+		errorfile << line << " b\n";
+		isRedefine = true;
+	}
 	if (isEOF()) {
 		return false;
 	}
@@ -636,7 +796,7 @@ bool haveReturnValueFunction() {
 			return false;
 		}
 		//开始分析参数表
-		if (!parameterTable()) {
+		if (!parameterTable(name, isRedefine)) {
 			return false;
 		}
 		//分析参数表成功 预读了一个符号
@@ -670,6 +830,8 @@ bool haveReturnValueFunction() {
 				outputfile << "<有返回值函数定义>" << endl;
 				//haveReturnValueFunctionSet.insert(tmp);
 				re = getsym();  //预读 不管读到什么
+				showLocal();
+				localSymbolTable.clear();
 				return true;
 			}
 			else {
@@ -688,7 +850,7 @@ bool haveReturnValueFunction() {
 //＜无返回值函数定义＞  ::= void＜标识符＞'('＜参数表＞')''{'＜复合语句＞'}’
 bool noReturnValueFunction() {
 	//无返回值函数和main函数前缀有冲突 需要多读一个做预判
-	string tmp;
+	string name;
 	int old = oldIndex;   //记录读取完void只有的oldIndex 是void的起始位置
 	while (isspace(filecontent[old])) {
 		old++;
@@ -714,8 +876,16 @@ bool noReturnValueFunction() {
 		doOutput();
 		symbol = IDENFR;
 		doOutput();
-		tmp = string(token);
-		noReturnValueFunctionSet.insert(tmp);  //把函数名加入到无返回值函数的集合中
+		name = string(token);
+		noReturnValueFunctionSet.insert(name);  //把函数名加入到无返回值函数的集合中
+		bool isRedefine = false;
+		if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
+			globalSymbolTable.insert(make_pair(name, symbolItem(name, 3, 3)));
+		}
+		else {  //找到了 说明重定义了
+			errorfile << line << " b\n";
+			isRedefine = true;
+		}
 		//当前是标识符 看下一个是不是(
 		re = getsym();
 		if (re < 0) {
@@ -728,7 +898,7 @@ bool noReturnValueFunction() {
 				return false;
 			}
 			//开始分析参数表
-			if (!parameterTable()) {
+			if (!parameterTable(name, isRedefine)) {
 				return false;
 			}
 			//分析参数表成功 预读了一个符号
@@ -762,6 +932,8 @@ bool noReturnValueFunction() {
 					outputfile << "<无返回值函数定义>" << endl;
 					//noReturnValueFunctionSet.insert(tmp);  //把函数名加入到无返回值函数的集合中
 					re = getsym();  //预读 不管读到什么
+					showLocal();
+					localSymbolTable.clear();
 					return true;
 				}
 				else {
@@ -782,13 +954,21 @@ bool noReturnValueFunction() {
 }
 
 //＜参数表＞    ::=  ＜类型标识符＞＜标识符＞{,＜类型标识符＞＜标识符＞}| ＜空＞
-bool parameterTable() {
+bool parameterTable(string funcName, bool isRedefine) {
 	//参数表可以为空  参数表为空时 当前字符就是)右括号
+	string name;
+	int type;
 	if (symbol == RPARENT) {
 		outputfile << "<参数表>" << endl;
 		return true;
 	}
 	if (symbol == INTTK || symbol == CHARTK) {
+		if (symbol == INTTK) {
+			type = 1;
+		}
+		else {
+			type = 2;
+		}
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -798,6 +978,16 @@ bool parameterTable() {
 			return false;
 		}
 		//当前是标识符  开始分析{,＜类型标识符＞＜标识符＞}
+		name = string(token);
+		if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
+			localSymbolTable.insert(make_pair(name, symbolItem(name, 1, type)));
+			if (!isRedefine) {
+				globalSymbolTable[funcName].insert(type);
+			}
+		}
+		else {  //找到了 说明重定义了
+			errorfile << line << " b\n";
+		}
 		doOutput();
 		while (true) {
 			re = getsym();
@@ -816,6 +1006,12 @@ bool parameterTable() {
 			if (symbol != INTTK && symbol != CHARTK) {
 				return false;
 			}
+			if (symbol == INTTK) {
+				type = 1;
+			}
+			else {
+				type = 2;
+			}
 			//当前是类型标识符 看下一个是不是标识符
 			doOutput();
 			re = getsym();
@@ -827,6 +1023,16 @@ bool parameterTable() {
 			}
 			//当前是标识符
 			doOutput();
+			name = string(token);
+			if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
+				localSymbolTable.insert(make_pair(name, symbolItem(name, 1, type)));
+				if (!isRedefine) {
+					globalSymbolTable[funcName].insert(type);
+				}
+			}
+			else {  //找到了 说明重定义了
+				errorfile << line << " b\n";
+			}
 		}
 		outputfile << "<参数表>" << endl;
 		return true;
@@ -839,9 +1045,9 @@ bool parameterTable() {
 //＜复合语句＞  ::=  ［＜常量说明＞］［＜变量说明＞］＜语句列＞
 bool compoundStatement() {
 	//尝试调用常量说明 因为是[] 是可以没有的 所以即便返回false也不能说程序分析失败,程序分析还要继续
-	constDeclaration();
+	constDeclaration(false);
 	//尝试调用变量说明
-	variableDeclaration(true);  //在这调用 说明只可能是变量说明，不可能是有返回值的函数 不需要判别了
+	variableDeclaration(false);  //在这调用 说明只可能是变量说明，不可能是有返回值的函数 不需要判别了
 	//调用语句列
 	if (statementList()) {
 		outputfile << "<复合语句>" << endl;

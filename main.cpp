@@ -57,5 +57,22 @@ int main() {
 	}
 	inputfile.close();
 	outputfile.close();
+	showGlobal();
 	return 0;
+}
+
+void showGlobal() {
+	cout << "----------------\n";
+	for (map<string, symbolItem>::iterator it = globalSymbolTable.begin(); it != globalSymbolTable.end(); it++) {
+		(*it).second.output();
+	}
+	cout << "----------------\n";
+}
+
+void showLocal() {
+	cout << "----------------\n";
+	for (map<string, symbolItem>::iterator it = localSymbolTable.begin(); it != localSymbolTable.end(); it++) {
+		(*it).second.output();
+	}
+	cout << "----------------\n";
 }
