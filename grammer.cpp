@@ -1226,11 +1226,11 @@ bool factor(int& type) {
 		if (symbol == LBRACK) {  //是[
 			symbol = IDENFR;
 			string name = string(token);
-			if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
+			if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind == 4) { //数组类型kind=4
 				type = localSymbolTable[name].type;
 			}
 			else {
-				if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
+				if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind == 4) { //数组类型kind=4
 					type = globalSymbolTable[name].type;
 				}
 				else {
@@ -1249,6 +1249,9 @@ bool factor(int& type) {
 			//＜标识符＞'['＜表达式＞']'的类型取决于标识符 而不是后边的数组下标 所以不能用type 否则type被修改了
 			if (!expression(t)) {
 				return false;
+			}
+			if (t != 1) {
+				errorfile << line << " i\n";  //数组元素下标类型不是int
 			}
 			//表达式分析成功 并预读了一个单词
 			if (symbol == RBRACK) {  //是]
@@ -1545,17 +1548,17 @@ bool statement() {
 bool assignStatement() {
 	if (symbol == IDENFR) {  //是标识符
 		string name = string(token);
-		if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
-			|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
-			) {
-			errorfile << line << " c\n";  //未定义的名字
-		}
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		if (symbol == LBRACK) {  //[   对应文法＜标识符＞'['＜表达式＞']'=＜表达式＞
+			if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind == 4)  //数组kind=4
+				|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind == 4))
+				) {
+				errorfile << line << " c\n";  //未定义的名字
+			}
 			doOutput();
 			re = getsym();
 			if (re < 0) {
@@ -1565,6 +1568,9 @@ bool assignStatement() {
 			int t;
 			if (!expression(t)) {  //t是数组下标的类型
 				return false;
+			}
+			if (t != 1) {
+				errorfile << line << " i\n";  //数组元素下标类型不是int
 			}
 			//分析表达式成功 并预读了一个单词
 			if (symbol == RBRACK) {  //]
@@ -1597,6 +1603,21 @@ bool assignStatement() {
 			}
 		}
 		else  if (symbol == ASSIGN) {  //= 对应文法 ＜标识符＞＝＜表达式＞
+			if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
+				if (localSymbolTable[name].kind == 2) {  //const
+					errorfile << line << " j\n";  //改变常量的值了
+				}
+			}
+			else {
+				if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
+					if (globalSymbolTable[name].kind == 2) {  //const
+						errorfile << line << " j\n";  //改变常量的值了
+					}
+				}
+				else {
+					errorfile << line << " c\n";  //未定义的名字
+				}
+			}
 			doOutput();
 			re = getsym();
 			if (re < 0) {
@@ -1813,10 +1834,20 @@ bool repeatStatement() {
 		}
 		doOutput();   //是标识符
 		string name = string(token);
-		if (!( (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
-			|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) )
-			) {
-			errorfile << line << " c\n";  //未定义的名字
+		if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
+			if (localSymbolTable[name].kind == 2) {  //const
+				errorfile << line << " j\n";  //改变常量的值了
+			}
+		}
+		else {
+			if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
+				if (globalSymbolTable[name].kind == 2) {  //const
+					errorfile << line << " j\n";  //改变常量的值了
+				}
+			}
+			else {
+				errorfile << line << " c\n";  //未定义的名字
+			}
 		}
 		re = getsym();
 		if (re < 0) {
@@ -1860,10 +1891,20 @@ bool repeatStatement() {
 		}
 		doOutput();  //是标识符
 		name = string(token);
-		if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
-			|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
-			) {
-			errorfile << line << " c\n";  //未定义的名字
+		if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
+			if (localSymbolTable[name].kind == 2) {  //const
+				errorfile << line << " j\n";  //改变常量的值了
+			}
+		}
+		else {
+			if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
+				if (globalSymbolTable[name].kind == 2) {  //const
+					errorfile << line << " j\n";  //改变常量的值了
+				}
+			}
+			else {
+				errorfile << line << " c\n";  //未定义的名字
+			}
 		}
 		re = getsym();
 		if (re < 0) {
@@ -1882,10 +1923,20 @@ bool repeatStatement() {
 		}
 		doOutput();  //是标识符
 		name = string(token);
-		if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
-			|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
-			) {
-			errorfile << line << " c\n";  //未定义的名字
+		if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
+			if (localSymbolTable[name].kind == 2) {  //const
+				errorfile << line << " j\n";  //改变常量的值了
+			}
+		}
+		else {
+			if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
+				if (globalSymbolTable[name].kind == 2) {  //const
+					errorfile << line << " j\n";  //改变常量的值了
+				}
+			}
+			else {
+				errorfile << line << " c\n";  //未定义的名字
+			}
 		}
 		re = getsym();
 		if (re < 0) {
@@ -2093,10 +2144,20 @@ bool readStatement() {
 			}
 			if (symbol == IDENFR) {
 				string name = string(token);
-				if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
-					|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
-					) {
-					errorfile << line << " c\n";  //未定义的名字
+				if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
+					if (localSymbolTable[name].kind == 2) {  //const
+						errorfile << line << " j\n";  //改变常量的值了
+					}
+				}
+				else {
+					if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
+						if (globalSymbolTable[name].kind == 2) {  //const
+							errorfile << line << " j\n";  //改变常量的值了
+						}
+					}
+					else {
+						errorfile << line << " c\n";  //未定义的名字
+					}
 				}
 				doOutput();
 				//开始分析{,＜标识符＞}
@@ -2119,10 +2180,20 @@ bool readStatement() {
 					}
 					//当前是标识符
 					name = string(token);
-					if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
-						|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
-						) {
-						errorfile << line << " c\n";  //未定义的名字
+					if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
+						if (localSymbolTable[name].kind == 2) {  //const
+							errorfile << line << " j\n";  //改变常量的值了
+						}
+					}
+					else {
+						if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
+							if (globalSymbolTable[name].kind == 2) {  //const
+								errorfile << line << " j\n";  //改变常量的值了
+							}
+						}
+						else {
+							errorfile << line << " c\n";  //未定义的名字
+						}
 					}
 					doOutput();
 				}
