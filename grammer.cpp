@@ -17,8 +17,6 @@ extern enum typeId symbol;
 extern ofstream outputfile;
 extern int oldIndex;    //用于做恢复
 extern ofstream errorfile;
-extern set<string> haveReturnValueFunctionSet;
-extern set<string> noReturnValueFunctionSet;
 extern int line;  //行号
 extern string filecontent;  //文件的内容
 extern map<string, symbolItem> globalSymbolTable;
@@ -777,7 +775,6 @@ bool haveReturnValueFunction() {
 		return false;
 	}
 	//调用声明头部成功 预读了一个符号
-	haveReturnValueFunctionSet.insert(name);
 	bool isRedefine = false;
 	if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
 		globalSymbolTable.insert(make_pair(name, symbolItem(name, 3, type)));
@@ -828,7 +825,6 @@ bool haveReturnValueFunction() {
 			if (symbol == RBRACE) {  //复合语句后边是}
 				doOutput();
 				outputfile << "<有返回值函数定义>" << endl;
-				//haveReturnValueFunctionSet.insert(tmp);
 				re = getsym();  //预读 不管读到什么
 				showLocal();
 				localSymbolTable.clear();
@@ -877,7 +873,6 @@ bool noReturnValueFunction() {
 		symbol = IDENFR;
 		doOutput();
 		name = string(token);
-		noReturnValueFunctionSet.insert(name);  //把函数名加入到无返回值函数的集合中
 		bool isRedefine = false;
 		if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
 			globalSymbolTable.insert(make_pair(name, symbolItem(name, 3, 3)));
@@ -930,7 +925,6 @@ bool noReturnValueFunction() {
 				if (symbol == RBRACE) {  //复合语句后边是}
 					doOutput();
 					outputfile << "<无返回值函数定义>" << endl;
-					//noReturnValueFunctionSet.insert(tmp);  //把函数名加入到无返回值函数的集合中
 					re = getsym();  //预读 不管读到什么
 					showLocal();
 					localSymbolTable.clear();
@@ -1103,6 +1097,8 @@ bool mainFunction() {
 							doOutput();
 							outputfile << "<主函数>" << endl;
 							re = getsym();  //预读 不管读到什么
+							showLocal();
+							localSymbolTable.clear();
 							return true;
 						}
 						else {
@@ -1210,6 +1206,12 @@ bool factor() {
 		}
 		if (symbol == LBRACK) {  //是[
 			symbol = IDENFR;
+			string name = string(token);
+			if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
+				|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
+				) {
+				errorfile << line << " c\n";  //未定义的名字
+			}
 			doOutput();  //因为[不会修改token 只需要改一下symbol 就能输出刚才的标识符了
 			symbol = LBRACK;
 			doOutput();
@@ -1236,17 +1238,42 @@ bool factor() {
 			retractString(old);   //回退到标识符的起始位置
 			getsym(0);   //把标识符重新读出来
 			//开始调用 有返回值的函数调用语句
-			if (!callHaveReturnValueFunction()) {
-				return false;
+			string name = string(token);
+			if (globalSymbolTable.find(name) != globalSymbolTable.end()
+				&& globalSymbolTable[name].kind == 3
+				&& (globalSymbolTable[name].type == 1 || globalSymbolTable[name].type == 2)
+				&& localSymbolTable.find(name) == localSymbolTable.end()
+				) {
+				if (!callHaveReturnValueFunction()) {
+					return false;
+				}
+				//调用有返回值的函数调用语句成功 并预读了一个单词
+				outputfile << "<因子>" << endl;
+				return true;
 			}
-			//调用有返回值的函数调用语句成功 并预读了一个单词
-			outputfile << "<因子>" << endl;
-			return true;
+			else {
+				errorfile << line << " c\n";  //未定义的名字
+				while (1) {
+					get_ch();
+					if (isRparent()) {  //)  作为因子出现的 不能一直读到;了 )就得停
+						break;
+					}
+				}
+				outputfile << "<因子>" << endl;
+				getsym();  //预读一个 不管是啥
+				return true;
+			}
 		}
 		else {  //标识符后边不是[ 也不是(  对应文法＜标识符＞  直接返回 这个单词就是为下一个预读的单词了
 			//但是如果直接返回 那么这个标识符就没有输出出来
 			retractString(old);   //回退到标识符的起始位置
 			getsym(0);   //把标识符重新读出来
+			string name = string(token);
+			if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
+				|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
+				) {
+				errorfile << line << " c\n";  //未定义的名字
+			}
 			doOutput();
 			outputfile << "<因子>" << endl;
 			getsym();  //预读一个
@@ -1418,38 +1445,53 @@ bool statement() {
 		else if (symbol == LPARENT) {  //( 说明是函数调用语句
 			retractString(old);
 			getsym(0);
-			if (haveReturnValueFunctionSet.find(string(token)) != haveReturnValueFunctionSet.end()) {  //有返回值函数名集合包含当前标识符
-				if (!callHaveReturnValueFunction()) {
-					return false;
+			string name = string(token);
+			if (globalSymbolTable.find(name) != globalSymbolTable.end()
+				&& globalSymbolTable[name].kind == 3
+				&& localSymbolTable.find(name) == localSymbolTable.end()
+				) {
+				if (globalSymbolTable[name].type == 3) {  //func void
+					if (!callNoReturnValueFunction()) {
+						return false;
+					}
+					//分析无返回值函数调用语句成功 并预读了一个单词
+					if (symbol == SEMICN) {  //;分号
+						doOutput();
+						outputfile << "<语句>" << endl;
+						getsym();  //预读一个 不管是啥
+						return true;
+					}
+					else {
+						return false;
+					}
 				}
-				//分析有返回值函数调用语句成功 并预读了一个单词
-				if (symbol == SEMICN) {  //;分号
-					doOutput();
-					outputfile << "<语句>" << endl;
-					getsym();  //预读一个 不管是啥
-					return true;
-				}
-				else {
-					return false;
-				}
-			}
-			else if (noReturnValueFunctionSet.find(string(token)) != noReturnValueFunctionSet.end()) {  //无返回值函数名集合包含当前标识符
-				if (!callNoReturnValueFunction()) {
-					return false;
-				}
-				//分析无返回值函数调用语句成功 并预读了一个单词
-				if (symbol == SEMICN) {  //;分号
-					doOutput();
-					outputfile << "<语句>" << endl;
-					getsym();  //预读一个 不管是啥
-					return true;
-				}
-				else {
-					return false;
+				else {  //func int char
+					if (!callHaveReturnValueFunction()) {
+						return false;
+					}
+					//分析有返回值函数调用语句成功 并预读了一个单词
+					if (symbol == SEMICN) {  //;分号
+						doOutput();
+						outputfile << "<语句>" << endl;
+						getsym();  //预读一个 不管是啥
+						return true;
+					}
+					else {
+						return false;
+					}
 				}
 			}
 			else {
-				return false;
+				errorfile << line << " c\n";  //未定义的名字
+				while (1) {
+					get_ch();
+					if (isSemicn()) {  //;
+						break;
+					}
+				}
+				outputfile << "<语句>" << endl;
+				getsym();  //预读一个 不管是啥
+				return true;
 			}
 		}
 		else {
@@ -1464,6 +1506,12 @@ bool statement() {
 //＜赋值语句＞   ::=  ＜标识符＞＝＜表达式＞|＜标识符＞'['＜表达式＞']'=＜表达式＞
 bool assignStatement() {
 	if (symbol == IDENFR) {  //是标识符
+		string name = string(token);
+		if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
+			|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
+			) {
+			errorfile << line << " c\n";  //未定义的名字
+		}
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -1716,6 +1764,12 @@ bool repeatStatement() {
 			return false;
 		}
 		doOutput();   //是标识符
+		string name = string(token);
+		if (!( (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
+			|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) )
+			) {
+			errorfile << line << " c\n";  //未定义的名字
+		}
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1756,6 +1810,12 @@ bool repeatStatement() {
 			return false;
 		}
 		doOutput();  //是标识符
+		name = string(token);
+		if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
+			|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
+			) {
+			errorfile << line << " c\n";  //未定义的名字
+		}
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1772,6 +1832,12 @@ bool repeatStatement() {
 			return false;
 		}
 		doOutput();  //是标识符
+		name = string(token);
+		if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
+			|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
+			) {
+			errorfile << line << " c\n";  //未定义的名字
+		}
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -1820,13 +1886,9 @@ bool step() {
 }
 
 //＜有返回值函数调用语句＞ ::= ＜标识符＞'('＜值参数表＞')’
+//现在的写法 一旦进入了这个函数 那么这个函数名就是合法的 即存在于全局表 不存在与局部表 且 返回值是int/char
 bool callHaveReturnValueFunction() {
-	if (symbol == IDENFR) {  //标识符
-		//如果标识符不在有返回值函数名的集合中 说明出错
-		if (haveReturnValueFunctionSet.find(string(token)) == haveReturnValueFunctionSet.end()) {
-			return false;
-		}
-		//否则才有可能是有返回值函数的调用语句
+	if (symbol == IDENFR) {  //标识符是函数名 需要查全局符号表
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -1863,13 +1925,9 @@ bool callHaveReturnValueFunction() {
 }
 
 //＜无返回值函数调用语句＞ ::= ＜标识符＞'('＜值参数表＞')’
+//现在的写法 一旦进入了这个函数 那么这个函数名就是合法的 即存在于全局表 不存在与局部表 且 返回值是void
 bool callNoReturnValueFunction() {
 	if (symbol == IDENFR) {  //标识符
-		//如果标识符不在无返回值函数名的集合中 说明出错
-		if (noReturnValueFunctionSet.find(string(token)) == noReturnValueFunctionSet.end()) {
-			return false;
-		}
-		//否则才有可能是无返回值函数的调用语句
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -1965,6 +2023,12 @@ bool readStatement() {
 				return false;
 			}
 			if (symbol == IDENFR) {
+				string name = string(token);
+				if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
+					|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
+					) {
+					errorfile << line << " c\n";  //未定义的名字
+				}
 				doOutput();
 				//开始分析{,＜标识符＞}
 				while (true) {
@@ -1985,6 +2049,12 @@ bool readStatement() {
 						return false;
 					}
 					//当前是标识符
+					name = string(token);
+					if (!((localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3)
+						|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3))
+						) {
+						errorfile << line << " c\n";  //未定义的名字
+					}
 					doOutput();
 				}
 				if (symbol == RPARENT) {  //)

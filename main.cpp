@@ -27,8 +27,6 @@ ofstream outputfile;
 ofstream errorfile;
 int indexs = 0;  //文件的索引
 int oldIndex;    //用于做恢复
-set<string> haveReturnValueFunctionSet;
-set<string> noReturnValueFunctionSet;
 int line = 1;  //记录行号
 map<string, symbolItem> globalSymbolTable;
 map<string, symbolItem> localSymbolTable;
