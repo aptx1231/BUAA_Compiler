@@ -1870,6 +1870,11 @@ bool repeatStatement() {
 			return false;
 		}
 		//分析语句成功 并预读了一个单词
+		if (symbol != WHILETK) {
+			retractString(oldIndex);
+			errorfile << line << " n\n";  //缺少while
+			symbol = WHILETK;
+		}
 		if (symbol == WHILETK) {
 			doOutput();
 			re = getsym();
