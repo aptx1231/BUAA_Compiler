@@ -182,41 +182,44 @@ bool constDefinition(bool isglobal) {
 										errorfile << line << " b\n";
 									}
 								}
-								while (true) {
-									if (isEOF()) {  //预读到了结尾
-										break;
-									}
-									if (symbol != COMMA) {  //这个是可以没有的
-										break;
-									}
-									doOutput();
-									//当前是,逗号 继续向下看
-									re = getsym();
-									if (re < 0) {  //, 后缺少东西
-										return false;
-									}
-									if (symbol != IDENFR) { //,后不是标识符
-										return false;
-									}
-									doOutput();
-									name = string(token);
-									//当前是标识符
-									re = getsym();
-									if (re < 0) {  //标识符后缺少东西
-										return false;
-									}
-									if (symbol != ASSIGN) { //标识符后不是=
-										return false;
-									}
-									doOutput();
-									//当前是=
-									re = getsym();
-									if (re < 0) {  //=后缺少东西
-										return false;
-									}
-									if (!integer()) { //=后不是整数
-										return false;
-									}
+							}
+							else {  //分析整数失败 没有预读 需要补一个
+								errorfile << line << " o\n";
+								getsym();
+							}
+							while (true) {
+								if (isEOF()) {  //预读到了结尾
+									break;
+								}
+								if (symbol != COMMA) {  //这个是可以没有的
+									break;
+								}
+								doOutput();
+								//当前是,逗号 继续向下看
+								re = getsym();
+								if (re < 0) {  //, 后缺少东西
+									return false;
+								}
+								if (symbol != IDENFR) { //,后不是标识符
+									return false;
+								}
+								doOutput();
+								name = string(token);
+								//当前是标识符
+								re = getsym();
+								if (re < 0) {  //标识符后缺少东西
+									return false;
+								}
+								if (symbol != ASSIGN) { //标识符后不是=
+									return false;
+								}
+								doOutput();
+								//当前是=
+								re = getsym();
+								if (re < 0) {  //=后缺少东西
+									return false;
+								}
+								if (integer()) {
 									if (isglobal) {
 										if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
 											globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, num)));
@@ -234,12 +237,13 @@ bool constDefinition(bool isglobal) {
 										}
 									}
 								}
-								outputfile << "<常量定义>" << endl;
-								return true;
+								else {  //分析整数失败 没有预读 需要补一个
+									errorfile << line << " o\n";
+									getsym();
+								}
 							}
-							else {
-								return false;
-							}
+							outputfile << "<常量定义>" << endl;
+							return true;
 						}
 					}
 					else {
@@ -292,43 +296,45 @@ bool constDefinition(bool isglobal) {
 										errorfile << line << " b\n";
 									}
 								}
-								//开始分析{,＜标识符＞＝＜字符＞}部分
-								while (true) {
-									re = getsym();
-									if (re < 0) {  //这个是可以没有的
-										break;
-									}
-									if (symbol != COMMA) {  //这个是可以没有的
-										break;
-									}
-									doOutput();
-									//当前是,逗号 继续向下看
-									re = getsym();
-									if (re < 0) {  //, 后缺少东西
-										return false;
-									}
-									if (symbol != IDENFR) { //,后不是标识符
-										return false;
-									}
-									doOutput();
-									name = string(token);
-									//当前是标识符
-									re = getsym();
-									if (re < 0) {  //标识符后缺少东西
-										return false;
-									}
-									if (symbol != ASSIGN) { //标识符后不是=
-										return false;
-									}
-									doOutput();
-									//当前是=
-									re = getsym();
-									if (re < 0) {  //=后缺少东西
-										return false;
-									}
-									if (symbol != CHARCON) { //=后不是字符
-										return false;
-									}
+							}
+							else {
+								errorfile << line << " o\n";
+							}
+							//开始分析{,＜标识符＞＝＜字符＞}部分
+							while (true) {
+								re = getsym();
+								if (re < 0) {  //这个是可以没有的
+									break;
+								}
+								if (symbol != COMMA) {  //这个是可以没有的
+									break;
+								}
+								doOutput();
+								//当前是,逗号 继续向下看
+								re = getsym();
+								if (re < 0) {  //, 后缺少东西
+									return false;
+								}
+								if (symbol != IDENFR) { //,后不是标识符
+									return false;
+								}
+								doOutput();
+								name = string(token);
+								//当前是标识符
+								re = getsym();
+								if (re < 0) {  //标识符后缺少东西
+									return false;
+								}
+								if (symbol != ASSIGN) { //标识符后不是=
+									return false;
+								}
+								doOutput();
+								//当前是=
+								re = getsym();
+								if (re < 0) {  //=后缺少东西
+									return false;
+								}
+								if (symbol == CHARCON) {
 									doOutput();
 									if (isglobal) {
 										if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
@@ -347,12 +353,12 @@ bool constDefinition(bool isglobal) {
 										}
 									}
 								}
-								outputfile << "<常量定义>" << endl;
-								return true;
+								else {
+									errorfile << line << " o\n";
+								}
 							}
-							else {
-								return false;
-							}
+							outputfile << "<常量定义>" << endl;
+							return true;
 						}
 					}
 					else {
