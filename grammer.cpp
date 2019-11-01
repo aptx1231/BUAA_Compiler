@@ -818,6 +818,11 @@ bool haveReturnValueFunction() {
 		if (isEOF()) {
 			return false;
 		}
+		if (symbol != RPARENT) {
+			retractString(oldIndex);
+			errorfile << line << " l\n";  //缺少右小括号
+			symbol = RPARENT;
+		}
 		if (symbol == RPARENT) {  //参数表后边是)
 			doOutput();
 			re = getsym();
@@ -915,6 +920,11 @@ bool noReturnValueFunction() {
 			if (isEOF()) {
 				return false;
 			}
+			if (symbol != RPARENT) {
+				retractString(oldIndex);
+				errorfile << line << " l\n";  //缺少右小括号
+				symbol = RPARENT;
+			}
 			if (symbol == RPARENT) {  //参数表后边是)
 				doOutput();
 				re = getsym();
@@ -967,7 +977,7 @@ bool parameterTable(string funcName, bool isRedefine) {
 	//参数表可以为空  参数表为空时 当前字符就是)右括号
 	string name;
 	int type;
-	if (symbol == RPARENT) {
+	if (symbol == RPARENT || symbol == LBRACE) {  //) {
 		outputfile << "<参数表>" << endl;
 		return true;
 	}
@@ -1087,6 +1097,11 @@ bool mainFunction() {
 				re = getsym();  //看下一个是不是)
 				if (re < 0) {
 					return false;
+				}
+				if (symbol != RPARENT) {
+					retractString(oldIndex);
+					errorfile << line << " l\n";  //缺少右小括号
+					symbol = RPARENT;
 				}
 				if (symbol == RPARENT) {  //(后边是)
 					doOutput();
@@ -1341,6 +1356,11 @@ bool factor(int& type) {
 		}
 		type = 1;  //(表达式)这个的类型就是int
 		//表达式分析成功 并预读了一个单词
+		if (symbol != RPARENT) {
+			retractString(oldIndex);
+			errorfile << line << " l\n";  //缺少右小括号
+			symbol = RPARENT;
+		}
 		if (symbol == RPARENT) {  //是)
 			doOutput();
 			re = getsym();   //为下一个预读 不管是啥
@@ -1698,6 +1718,11 @@ bool conditionStatement() {
 				return false;
 			}
 			//分析条件成功 并预读了一个单词
+			if (symbol != RPARENT) {
+				retractString(oldIndex);
+				errorfile << line << " l\n";  //缺少右小括号
+				symbol = RPARENT;
+			}
 			if (symbol == RPARENT) {  //)
 				doOutput();
 				re = getsym();
@@ -1789,6 +1814,11 @@ bool repeatStatement() {
 				return false;
 			}
 			//分析条件成功 并预读了一个单词
+			if (symbol != RPARENT) {
+				retractString(oldIndex);
+				errorfile << line << " l\n";  //缺少右小括号
+				symbol = RPARENT;
+			}
 			if (symbol == RPARENT) {  //)
 				doOutput();
 				re = getsym();
@@ -1836,6 +1866,11 @@ bool repeatStatement() {
 					return false;
 				}
 				//分析条件成功 并预读了一个单词
+				if (symbol != RPARENT) {
+					retractString(oldIndex);
+					errorfile << line << " l\n";  //缺少右小括号
+					symbol = RPARENT;
+				}
 				if (symbol == RPARENT) {  //)
 					doOutput();
 					outputfile << "<循环语句>" << endl;
@@ -2007,6 +2042,11 @@ bool repeatStatement() {
 			return false;
 		}
 		//分析步长成功 并预读了一个单词
+		if (symbol != RPARENT) {
+			retractString(oldIndex);
+			errorfile << line << " l\n";  //缺少右小括号
+			symbol = RPARENT;
+		}
 		if (symbol != RPARENT) {  //不是)
 			return false;
 		}
@@ -2059,6 +2099,11 @@ bool callHaveReturnValueFunction() {
 				return false;
 			}
 			//调用值参数表成功 并预读了一个单词
+			if (symbol != RPARENT) {
+				retractString(oldIndex);
+				errorfile << line << " l\n";  //缺少右小括号
+				symbol = RPARENT;
+			}
 			if (symbol == RPARENT) {  //是)
 				doOutput();
 				outputfile << "<有返回值函数调用语句>" << endl;
@@ -2099,6 +2144,11 @@ bool callNoReturnValueFunction() {
 				return false;
 			}
 			//调用值参数表成功 并预读了一个单词
+			if (symbol != RPARENT) {
+				retractString(oldIndex);
+				errorfile << line << " l\n";  //缺少右小括号
+				symbol = RPARENT;
+			}
 			if (symbol == RPARENT) {  //是)
 				doOutput();
 				outputfile << "<无返回值函数调用语句>" << endl;
@@ -2121,7 +2171,10 @@ bool callNoReturnValueFunction() {
 //＜值参数表＞  ::= ＜表达式＞{,＜表达式＞}｜＜空＞
 bool valueParameterTable(string funcName) {
 	//值参数表可以为空  值参数表为空时 当前字符就是)右括号
-	if (symbol == RPARENT) {
+	if (symbol == RPARENT
+		|| symbol == LSS || symbol == LEQ || symbol == GRE || symbol == GEQ || symbol == EQL || symbol == NEQ  //关系运算符
+		|| symbol == PLUS || symbol == MINU || symbol == MULT || symbol == DIV  //+-*/
+		|| symbol == SEMICN || symbol == RBRACK || symbol == COMMA) {  //, ; ]
 		if (globalSymbolTable[funcName].parameterTable.size() != 0) {
 			errorfile << line << " d\n";  //参数个数不匹配
 		}
@@ -2250,6 +2303,11 @@ bool readStatement() {
 					}
 					doOutput();
 				}
+				if (symbol != RPARENT) {
+					retractString(oldIndex);
+					errorfile << line << " l\n";  //缺少右小括号
+					symbol = RPARENT;
+				}
 				if (symbol == RPARENT) {  //)
 					doOutput();
 					outputfile << "<读语句>" << endl;
@@ -2299,6 +2357,11 @@ bool writeStatement() {
 						return false;
 					}
 					//分析表达式成功 并预读了一个单词
+					if (symbol != RPARENT) {
+						retractString(oldIndex);
+						errorfile << line << " l\n";  //缺少右小括号
+						symbol = RPARENT;
+					}
 					if (symbol == RPARENT) {  //)
 						doOutput();
 						outputfile << "<写语句>" << endl;
@@ -2309,14 +2372,21 @@ bool writeStatement() {
 						return false;
 					}
 				}
-				else if (symbol == RPARENT) {  //)  printf '('＜字符串＞ ')'
-					doOutput();
-					outputfile << "<写语句>" << endl;
-					getsym();  //预读一个 不管是啥
-					return true;
-				}
 				else {
-					return false;
+					if (symbol != RPARENT) {
+						retractString(oldIndex);
+						errorfile << line << " l\n";  //缺少右小括号
+						symbol = RPARENT;
+					}
+					if (symbol == RPARENT) {  //)  printf '('＜字符串＞ ')'
+						doOutput();
+						outputfile << "<写语句>" << endl;
+						getsym();  //预读一个 不管是啥
+						return true;
+					}
+					else {
+						return false;
+					}
 				}
 			}
 			else {  //判断是不是表达式  printf '('＜表达式＞')’
@@ -2325,6 +2395,11 @@ bool writeStatement() {
 					return false;
 				}
 				//分析表达式成功 并预读了一个单词
+				if (symbol != RPARENT) {
+					retractString(oldIndex);
+					errorfile << line << " l\n";  //缺少右小括号
+					symbol = RPARENT;
+				}
 				if (symbol == RPARENT) {  //)
 					doOutput();
 					outputfile << "<写语句>" << endl;
@@ -2366,6 +2441,11 @@ bool returnStatement() {
 				return false;
 			}
 			//分析表达式成功 并预读了一个单词
+			if (symbol != RPARENT) {
+				retractString(oldIndex);
+				errorfile << line << " l\n";  //缺少右小括号
+				symbol = RPARENT;
+			}
 			if (symbol == RPARENT) {  //)
 				doOutput();
 				outputfile << "<返回语句>" << endl;
