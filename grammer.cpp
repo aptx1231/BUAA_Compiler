@@ -652,6 +652,11 @@ bool variableDefinition(bool isglobal) {
 						}
 						//当前是无符号整数 已经预读了下一个 判断是不是]
 						if (symbol != RBRACK) {
+							retractString(oldIndex);
+							errorfile << line << " m\n";  //缺少右中括号
+							symbol = RBRACK;
+						}
+						if (symbol != RBRACK) {
 							return false;
 						}
 						else {  // ]
@@ -722,6 +727,11 @@ bool variableDefinition(bool isglobal) {
 										return false;
 									}
 									//当前是无符号整数 已经预读了下一个 判断是不是]
+									if (symbol != RBRACK) {
+										retractString(oldIndex);
+										errorfile << line << " m\n";  //缺少右中括号
+										symbol = RBRACK;
+									}
 									if (symbol != RBRACK) {
 										return false;
 									}
@@ -1281,6 +1291,11 @@ bool factor(int& type) {
 				errorfile << line << " i\n";  //数组元素下标类型不是int
 			}
 			//表达式分析成功 并预读了一个单词
+			if (symbol != RBRACK) {
+				retractString(oldIndex);
+				errorfile << line << " m\n";  //缺少右中括号
+				symbol = RBRACK;
+			}
 			if (symbol == RBRACK) {  //是]
 				doOutput();
 				re = getsym();   //为下一个预读 不管是啥
@@ -1632,6 +1647,11 @@ bool assignStatement() {
 				errorfile << line << " i\n";  //数组元素下标类型不是int
 			}
 			//分析表达式成功 并预读了一个单词
+			if (symbol != RBRACK) {
+				retractString(oldIndex);
+				errorfile << line << " m\n";  //缺少右中括号
+				symbol = RBRACK;
+			}
 			if (symbol == RBRACK) {  //]
 				doOutput();
 				re = getsym();
