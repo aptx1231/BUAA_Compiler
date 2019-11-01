@@ -21,6 +21,8 @@ extern int line;  //行号
 extern string filecontent;  //文件的内容
 extern map<string, symbolItem> globalSymbolTable;
 extern map<string, symbolItem> localSymbolTable;
+int curFuncReturnType = -1;
+int realReturnType = -1;
 
 //＜字符串＞   ::=  "｛十进制编码为32,33,35-126的ASCII字符｝"
 bool strings() {
@@ -817,6 +819,7 @@ bool haveReturnValueFunction() {
 		errorfile << line << " b\n";
 		isRedefine = true;
 	}
+	curFuncReturnType = type;
 	if (isEOF()) {
 		return false;
 	}
@@ -854,6 +857,7 @@ bool haveReturnValueFunction() {
 			if (re < 0) {
 				return false;
 			}
+			realReturnType = -1;  //初始化一下真实的返回类型 用于判断是否遇到过return语句
 			if (!compoundStatement()) {  //开始分析复合语句
 				return false;
 			}
@@ -863,10 +867,14 @@ bool haveReturnValueFunction() {
 			}
 			if (symbol == RBRACE) {  //复合语句后边是}
 				doOutput();
+				if (realReturnType == -1) {  //没有遇到过return语句
+					errorfile << line << " h\n";  //有返回值的函数缺少return语句
+				}
 				outputfile << "<有返回值函数定义>" << endl;
 				re = getsym();  //预读 不管读到什么
 				showLocal();
 				localSymbolTable.clear();
+				curFuncReturnType = -1; //把函数类型恢复到-1
 				return true;
 			}
 			else {
@@ -917,6 +925,7 @@ bool noReturnValueFunction() {
 			errorfile << line << " b\n";
 			isRedefine = true;
 		}
+		curFuncReturnType = 3;  //void
 		//当前是标识符 看下一个是不是(
 		re = getsym();
 		if (re < 0) {
@@ -956,6 +965,7 @@ bool noReturnValueFunction() {
 				if (re < 0) {
 					return false;
 				}
+				realReturnType = -1;  //初始化一下真实的返回类型 用于判断是否遇到过return语句
 				if (!compoundStatement()) {  //开始分析复合语句
 					return false;
 				}
@@ -969,6 +979,7 @@ bool noReturnValueFunction() {
 					re = getsym();  //预读 不管读到什么
 					showLocal();
 					localSymbolTable.clear();
+					curFuncReturnType = -1; //把函数类型恢复到-1
 					return true;
 				}
 				else {
@@ -2454,10 +2465,16 @@ bool writeStatement() {
 //＜返回语句＞   ::=  return['('＜表达式＞')']  
 bool returnStatement() {
 	if (symbol == RETURNTK) {  //return 
+		int type;
 		doOutput();
 		//开始分析 ['('＜表达式＞')']    可有可无的
 		int re = getsym();
 		if (re < 0) {   // 后边可以没有
+			type = 3;
+			realReturnType = type;
+			if (curFuncReturnType == 1 || curFuncReturnType == 2) {
+				errorfile << line << " h\n";  //有返回值的函数存在不匹配的return语句
+			}
 			outputfile << "<返回语句>" << endl;
 			return true;
 		}
@@ -2467,11 +2484,19 @@ bool returnStatement() {
 			if (re < 0) {
 				return false;
 			}
-			int t;
-			if (!expression(t)) {  //分析表达式
+			if (!expression(type)) {  //分析表达式 return的返回类型就是表达式的类型
 				return false;
 			}
+			realReturnType = type;
 			//分析表达式成功 并预读了一个单词
+			if (curFuncReturnType == 3) {
+				errorfile << line << " g\n";  //无返回值的函数存在不匹配的return语句
+			}
+			else if (curFuncReturnType == 1 || curFuncReturnType == 2) {
+				if (curFuncReturnType != type) {
+					errorfile << line << " h\n";  //有返回值的函数存在不匹配的return语句
+				}
+			}
 			if (symbol != RPARENT) {
 				retractString(oldIndex);
 				errorfile << line << " l\n";  //缺少右小括号
@@ -2488,6 +2513,11 @@ bool returnStatement() {
 			}
 		}
 		else {  //return 后边不是( 也可以 
+			type = 3;
+			realReturnType = type;
+			if (curFuncReturnType == 1 || curFuncReturnType == 2) {
+				errorfile << line << " h\n";  //有返回值的函数存在不匹配的return语句
+			}
 			outputfile << "<返回语句>" << endl;
 			return true;
 		}
