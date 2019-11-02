@@ -1630,6 +1630,10 @@ bool statement() {
 			return false;
 		}
 	}
+	else if (symbol == ELSETK || symbol == RBRACE) {
+		errorfile << line << " k\n";
+		return true;
+	}
 	else {
 		return false;
 	}
@@ -2267,7 +2271,7 @@ bool valueParameterTable(string funcName) {
 
 //＜语句列＞   ::= ｛＜语句＞｝
 bool statementList() {
-	while (true) {
+	while (symbol != RBRACE) {  //while (true)
 		if (!statement()) {  //判断是不是语句
 			break;
 		}
