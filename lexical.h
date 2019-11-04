@@ -56,6 +56,8 @@ bool isStringChar();
 
 bool isValid();
 
+bool isFactorFellow();
+
 void clearToken();
 
 void catToken();

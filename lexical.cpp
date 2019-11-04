@@ -154,11 +154,11 @@ bool isStringChar()
 	return ((ch >= 35 && ch <= 126) || ch == 32 || ch == 33);
 }
 
-bool isValid()
+bool isFactorFellow()
 {
-	return isPlus() || isMinu() || isMult() || isDiv() || isLss() || isGre() || isExcla() 
-		|| isAssign() || isSemicn() || isComma() || isLparent() || isRparent() 
-		|| isLbrack() || isRbrack() || isLbrace() || isRbrace() || isSquo() || isDquo();
+	return (isLss() || isGre() || isAssign() || isExcla()
+		|| isPlus() || isMinu() || isMult() || isDiv()
+		|| isRparent() || isRbrack() || isComma() || isSemicn());
 }
 
 void clearToken()
@@ -173,7 +173,6 @@ void catToken()
 
 void get_ch()
 {  //读一个字符
-	//ch = fgetc(inputfile);
 	ch = filecontent[indexs++];
 	if (ch == '\n') {
 		line++;
@@ -182,7 +181,6 @@ void get_ch()
 
 void retract()
 {  //把字符写回到输入流
-	//ungetc(ch, inputfile);
 	if (ch == '\n') {
 		line--;
 	}
@@ -277,11 +275,10 @@ int getsym(int out)
 						break;
 					}
 					if (isNewline()) {
-						line--;
 						retractString(old-1);  //回到这个读错了的 本该是'的位置
 						break;
 					}
-					if (isComma() || isSemicn()) {  //, ;
+					if (isFactorFellow()) {  //, ; + - * / > < ! =
 						indexs--;  //需要把,;退回去
 						break;
 					}
@@ -304,18 +301,16 @@ int getsym(int out)
 			}
 			else {
 				//wrong! retract(); 缺少右单引号 不符合词法
-				//errorfile << line << " a\n";  //不符合词法
 				int old = indexs;
 				while (1) {
 					if (isSquo()) {
 						break;
 					}
 					if (isNewline()) {
-						line--;
 						retractString(old - 1);  //回到这个读错了的 本该是'的位置
 						break;
 					}
-					if (isComma() || isSemicn()) {  //, ;
+					if (isFactorFellow()) {  //, ; + - * / > < ! =
 						indexs--;  //需要把,;退回去
 						break;
 					}
@@ -345,15 +340,16 @@ int getsym(int out)
 				if (out) {
 					errorfile << line << " a\n";  //不符合词法
 				}
-				symbol = STRCON;  //字符串常量
-				token[tokenI] = '\0';
-				strcpy(s, token);  //存到s中
 				while (1) {
 					indexs--;
 					if (filecontent[indexs] == ')') {
 						break;
 					}
+					tokenI--;
 				}
+				symbol = STRCON;  //字符串常量
+				token[tokenI] = '\0';
+				strcpy(s, token);  //存到s中
 			}
 		}
 		return 1;
@@ -460,7 +456,6 @@ int getsym(int out)
 			errorfile << line << " a\n";  //不符合词法
 		}
 		return getsym(out);
-		//return -1;
 	}
 }
 
