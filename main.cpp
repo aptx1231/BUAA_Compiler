@@ -8,6 +8,7 @@
 #include "lexical.h"
 #include "grammer.h"
 #include "main.h"
+#include <sstream>
 using namespace std;
 
 char ch;
@@ -25,16 +26,21 @@ string filecontent;  //文件的内容
 ifstream inputfile;
 ofstream outputfile;
 ofstream errorfile;
+ofstream midCodefile;
 int indexs = 0;  //文件的索引
 int oldIndex;    //用于做恢复
 int line = 1;  //记录行号
+int labelId = 0; //标号的id
+int tmpVarId = 0;  //中间变量的id
 map<string, symbolItem> globalSymbolTable;
 map<string, symbolItem> localSymbolTable;
+vector<midCode> midCodeTable;
 
 int main() {
 	inputfile.open("testfile.txt", ios::in);
 	outputfile.open("output.txt", ios::out);
 	errorfile.open("error.txt", ios::out);
+	midCodefile.open("midCode.txt", ios::out);
 	indexs = 0;
 	string tmpIn;
 	while (getline(inputfile, tmpIn)) {  //读取文件内容
@@ -53,8 +59,11 @@ int main() {
 			//error()
 		}
 	}
+	outputMidCode();
 	inputfile.close();
 	outputfile.close();
+	errorfile.close();
+	midCodefile.close();
 	showGlobal();
 	return 0;
 }
@@ -73,4 +82,114 @@ void showLocal() {
 		(*it).second.output();
 	}
 	cout << "----------------\n";
+}
+
+string int2string(int t) {
+	stringstream ss;
+	ss << t;
+	return ss.str();
+}
+
+string genLabel() {
+	labelId++;
+	return "Label" + int2string(labelId);
+}
+
+string genTmp() {
+	tmpVarId++;
+	return "T" + int2string(tmpVarId);
+}
+
+void outputMidCode() {
+	for (int i = 0; i < midCodeTable.size(); i++) {
+		midCode mc = midCodeTable[i];
+		switch (mc.op) {
+			case PLUSOP:
+				midCodefile << mc.z << " = " << mc.x << " + " << mc.y << "\n";
+				break;
+			case MINUOP:
+				midCodefile << mc.z << " = " << mc.x << " - " << mc.y << "\n";
+				break;
+			case MULTOP:
+				midCodefile << mc.z << " = " << mc.x << " * " << mc.y << "\n";
+				break;
+			case DIVOP:
+				midCodefile << mc.z << " = " << mc.x << " / " << mc.y << "\n";
+				break;
+			case LSSOP:
+				midCodefile << mc.z << " = (" << mc.x << " < " << mc.y << ")\n";
+				break;
+			case LEQOP:
+				midCodefile << mc.z << " = (" << mc.x << " <= " << mc.y << ")\n";
+				break;
+			case GREOP:
+				midCodefile << mc.z << " = (" << mc.x << " > " << mc.y << ")\n";
+				break;
+			case GEQOP:
+				midCodefile << mc.z << " = (" << mc.x << " >= " << mc.y << ")\n";
+				break;
+			case EQLOP:
+				midCodefile << mc.z << " = (" << mc.x << " == " << mc.y << ")\n";
+				break;
+			case NEQOP:
+				midCodefile << mc.z << " = (" << mc.x << " != " << mc.y << ")\n";
+				break;
+			case ASSIGNOP:
+				midCodefile << mc.z << " = " << mc.x <<  "\n";
+				break;
+			case GOTO:
+				midCodefile << "GOTO " << mc.z << "\n";
+				break;
+			case BZ:
+				midCodefile << "BZ " << mc.z << "(" << mc.x << "=0)" << "\n";
+				break;
+			case BNZ:
+				midCodefile << "BNZ " << mc.z << "(" << mc.x << "=1)" << "\n";
+				break;
+			case PUSH:
+				midCodefile << "PUSH " << mc.z << "\n";
+				break;
+			case CALL:
+				midCodefile << "CALL " << mc.z << "\n";
+				break;
+			case RET:
+				midCodefile << "RET " << mc.z << "\n";
+				break;
+			case RETVALUE:
+				midCodefile << "RETVALUE " << mc.z << " = " << mc.x << "\n";
+				break;
+			case SCAN:
+				midCodefile << "SCAN " << mc.z << "\n";
+				break;
+			case PRINT:
+				midCodefile << "PRINT " << mc.z << "\n";
+				break;
+			case LABEL:
+				midCodefile << mc.z << ": \n";
+				break;
+			case CONST:
+				midCodefile << "CONST " << mc.z << " " << mc.x << " = " << mc.y << endl;
+				break;
+			case ARRAY:
+				midCodefile << "ARRAY " << mc.z << " " << mc.x << "[" << mc.y << "]" << endl;
+				break;
+			case VAR:
+				midCodefile << "VAR " << mc.z << " " << mc.x << endl;
+				break;
+			case FUNC:
+				midCodefile << "FUNC " << mc.z << " " << mc.x << "()" << endl;
+				break;
+			case PARAM:
+				midCodefile << "PARA " << mc.z << " " << mc.x << endl;
+				break;
+			case GETARRAY:
+				midCodefile << mc.z << " = " << mc.x << "[" << mc.y << "]\n";
+				break;
+			case PUTARRAY:
+				midCodefile << mc.z << "[" << mc.x << "]" << " = " << mc.y << "\n";
+				break;
+			default:
+				break;
+		}
+	}
 }

@@ -13,6 +13,7 @@ using namespace std;
 extern char token[100000];
 extern int num;   //记录整形常量
 extern char con_ch;  //记录字符型常量
+extern char s[100000];  //记录字符串常量
 extern enum typeId symbol;
 extern ofstream outputfile;
 extern int oldIndex;    //用于做恢复
@@ -21,6 +22,7 @@ extern int line;  //行号
 extern string filecontent;  //文件的内容
 extern map<string, symbolItem> globalSymbolTable;
 extern map<string, symbolItem> localSymbolTable;
+extern vector<midCode> midCodeTable;
 int curFuncReturnType = -1;
 int realReturnType = -1;
 
@@ -166,11 +168,12 @@ bool constDefinition(bool isglobal) {
 							return false;
 						}
 						else {
-							if (integer()) {  //整数  预读了下一个单词
+							int conInt;
+							if (integer(conInt)) {  //整数  预读了下一个单词
 								//开始分析{,＜标识符＞＝＜整数＞}部分
 								if (isglobal) {
 									if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-										globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, num)));
+										globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, conInt)));
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
@@ -178,12 +181,13 @@ bool constDefinition(bool isglobal) {
 								}
 								else {
 									if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-										localSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, num)));
+										localSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, conInt)));
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
 									}
 								}
+								midCodeTable.push_back(midCode(CONST, "int", name, int2string(conInt)));
 							}
 							else {  //分析整数失败 没有预读 需要补一个
 								errorfile << line << " o\n";
@@ -221,10 +225,10 @@ bool constDefinition(bool isglobal) {
 								if (re < 0) {  //=后缺少东西
 									return false;
 								}
-								if (integer()) {
+								if (integer(conInt)) {
 									if (isglobal) {
 										if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-											globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, num)));
+											globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, conInt)));
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
@@ -232,12 +236,13 @@ bool constDefinition(bool isglobal) {
 									}
 									else {
 										if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-											localSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, num)));
+											localSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, conInt)));
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
 										}
 									}
+									midCodeTable.push_back(midCode(CONST, "int", name, int2string(conInt)));
 								}
 								else {  //分析整数失败 没有预读 需要补一个
 									errorfile << line << " o\n";
@@ -298,6 +303,7 @@ bool constDefinition(bool isglobal) {
 										errorfile << line << " b\n";
 									}
 								}
+								midCodeTable.push_back(midCode(CONST, "char", name, "\'" + string(1, con_ch) + "\'"));
 							}
 							else {
 								errorfile << line << " o\n";
@@ -354,6 +360,7 @@ bool constDefinition(bool isglobal) {
 											errorfile << line << " b\n";
 										}
 									}
+									midCodeTable.push_back(midCode(CONST, "char", name, "\'" + string(1, con_ch) + "\'"));
 								}
 								else {
 									errorfile << line << " o\n";
@@ -379,9 +386,10 @@ bool constDefinition(bool isglobal) {
 }
 
 //＜无符号整数＞  ::= ＜非零数字＞｛＜数字＞｝| 0
-bool unsignedInteger() {
+bool unsignedInteger(int& value) {
 	if (symbol == INTCON) {
 		doOutput();
+		value = num;
 		getsym();    //预读一个单词 不管成功与否 都得返回true 因为预读成功与否不影响对“整数”的判断
 		outputfile << "<无符号整数>" << endl;
 		return true;
@@ -392,15 +400,19 @@ bool unsignedInteger() {
 }
 
 //＜整数＞ ::= ［＋｜－］＜无符号整数＞
-bool integer() {
+bool integer(int& value) {
 	int re;
 	if (symbol == PLUS || symbol == MINU) {
+		bool isPLUS = (symbol == PLUS);
 		doOutput();
 		re = getsym();
 		if (re < 0) {
 			return false;
 		}
-		if (unsignedInteger()) {  //调用无符号整数
+		if (unsignedInteger(value)) {  //调用无符号整数
+			if (!isPLUS) {  //减号
+				value = -value;
+			}
 			outputfile << "<整数>" << endl;
 			return true;
 		}
@@ -409,7 +421,7 @@ bool integer() {
 		}
 	}
 	else {
-		if (unsignedInteger()) {  //直接调用无符号整数
+		if (unsignedInteger(value)) {  //直接调用无符号整数
 			outputfile << "<整数>" << endl;
 			return true;
 		}
@@ -655,7 +667,8 @@ bool variableDefinition(bool isglobal) {
 						return false;
 					}
 					else {
-						if (!unsignedInteger()) {  //不是无符号整数
+						int conInt;
+						if (!unsignedInteger(conInt)) {  //不是无符号整数
 							return false;
 						}
 						//当前是无符号整数 已经预读了下一个 判断是不是]
@@ -671,7 +684,7 @@ bool variableDefinition(bool isglobal) {
 							doOutput();
 							if (isglobal) {
 								if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-									globalSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', num)));
+									globalSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', conInt)));
 								}
 								else {  //找到了 说明重定义了
 									errorfile << line << " b\n";
@@ -679,13 +692,14 @@ bool variableDefinition(bool isglobal) {
 							}
 							else {
 								if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-									localSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', num)));
+									localSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', conInt)));
 								}
 								else {  //找到了 说明重定义了
 									errorfile << line << " b\n";
 								}
 							}
 							re = getsym();  //多读一个 不管是啥 因为如果没有[的时候 也已经预读了一个
+							midCodeTable.push_back(midCode(ARRAY, type==1 ? "int" : "char", name, int2string(conInt)));
 						}
 					}
 				}  //如果不是[ 就相当于预读了
@@ -706,6 +720,7 @@ bool variableDefinition(bool isglobal) {
 							errorfile << line << " b\n";
 						}
 					}
+					midCodeTable.push_back(midCode(VAR, type == 1 ? "int" : "char", name, ""));
 				}
 				//不是[ 或者[]处理完 接下来分析 {,(＜标识符＞|＜标识符＞'['＜无符号整数＞']' )}
 				//稍有不同 因为上一步已经读了一个单词 进入循环不要立刻读单词
@@ -731,7 +746,8 @@ bool variableDefinition(bool isglobal) {
 									return false;
 								}
 								else {
-									if (!unsignedInteger()) {  //不是无符号整数
+									int conInt;
+									if (!unsignedInteger(conInt)) {  //不是无符号整数
 										return false;
 									}
 									//当前是无符号整数 已经预读了下一个 判断是不是]
@@ -747,7 +763,7 @@ bool variableDefinition(bool isglobal) {
 										doOutput();
 										if (isglobal) {
 											if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-												globalSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', num)));
+												globalSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', conInt)));
 											}
 											else {  //找到了 说明重定义了
 												errorfile << line << " b\n";
@@ -755,13 +771,14 @@ bool variableDefinition(bool isglobal) {
 										}
 										else {
 											if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-												localSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', num)));
+												localSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', conInt)));
 											}
 											else {  //找到了 说明重定义了
 												errorfile << line << " b\n";
 											}
 										}
 										re = getsym();  //多读一个 不管是啥 因为如果没有[的时候 也已经预读了一个
+										midCodeTable.push_back(midCode(ARRAY, type == 1 ? "int" : "char", name, int2string(conInt)));
 									}
 								}
 							}  //如果不是[ 就相当于预读了
@@ -782,6 +799,7 @@ bool variableDefinition(bool isglobal) {
 										errorfile << line << " b\n";
 									}
 								}
+								midCodeTable.push_back(midCode(VAR, type == 1 ? "int" : "char", name, ""));
 							}
 						}
 						else {
@@ -814,6 +832,7 @@ bool haveReturnValueFunction() {
 	bool isRedefine = false;
 	if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
 		globalSymbolTable.insert(make_pair(name, symbolItem(name, 3, type)));
+		midCodeTable.push_back(midCode(FUNC, type == 1 ? "int" : "char", name, ""));
 	}
 	else {  //找到了 说明重定义了
 		errorfile << line << " b\n";
@@ -920,6 +939,7 @@ bool noReturnValueFunction() {
 		bool isRedefine = false;
 		if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
 			globalSymbolTable.insert(make_pair(name, symbolItem(name, 3, 3)));
+			midCodeTable.push_back(midCode(FUNC, "void", name, ""));
 		}
 		else {  //找到了 说明重定义了
 			errorfile << line << " b\n";
@@ -1030,6 +1050,7 @@ bool parameterTable(string funcName, bool isRedefine) {
 			if (!isRedefine) {
 				globalSymbolTable[funcName].insert(type);
 			}
+			midCodeTable.push_back(midCode(PARAM, type == 1 ? "int" : "char", name, ""));
 		}
 		else {  //找到了 说明重定义了
 			errorfile << line << " b\n";
@@ -1075,6 +1096,7 @@ bool parameterTable(string funcName, bool isRedefine) {
 				if (!isRedefine) {
 					globalSymbolTable[funcName].insert(type);
 				}
+				midCodeTable.push_back(midCode(PARAM, type == 1 ? "int" : "char", name, ""));
 			}
 			else {  //找到了 说明重定义了
 				errorfile << line << " b\n";
@@ -1119,6 +1141,7 @@ bool mainFunction() {
 			if (re < 0) {
 				return false;
 			}
+			midCodeTable.push_back(midCode(FUNC, "void", "main", ""));
 			if (symbol == LPARENT) {  //main后边是(
 				doOutput();
 				re = getsym();  //看下一个是不是)
@@ -1184,10 +1207,12 @@ bool mainFunction() {
 }
 
 //＜表达式＞    ::= ［＋｜－］＜项＞{＜加法运算符＞＜项＞}  
-bool expression(int& type) {
+bool expression(int& type, string& ansTmp) {
 	bool first = false;
 	int re;
+	bool isPLUS;
 	if (symbol == PLUS || symbol == MINU) {
+		isPLUS = (symbol == PLUS);
 		doOutput();
 		re = getsym();
 		if (re < 0) {
@@ -1196,12 +1221,28 @@ bool expression(int& type) {
 		first = true;
 	}
 	//进入项的分析
-	if (!item(type)) {
+	string op1, op2, res;
+	if (!item(type, op1)) {
 		return false;
+	}
+	if (first) {  //第一项前边有正负号
+		if (!isPLUS) {  //减号
+			res = genTmp();
+			midCodeTable.push_back(midCode(MINUOP, res, int2string(0), op1));
+			op1 = res;
+		}
+		/*res = genTmp();
+		if (isPLUS) {
+			midCodeTable.push_back(midCode(PLUSOP, res, int2string(0), op1));
+		}
+		else {
+			midCodeTable.push_back(midCode(MINUOP, res, int2string(0), op1));
+		}
+		op1 = res;*/
 	}
 	//项分析成功 并预读了一个单词
 	bool flag = false;
-	//开始分析{＜加法运算符＞＜项＞}  
+	//开始分析{＜加法运算符＞＜项＞} 
 	while (true) {
 		if (isEOF()) {
 			break;
@@ -1210,6 +1251,7 @@ bool expression(int& type) {
 			break;
 		}
 		//项中包括了加法减法 就一定是int了
+		isPLUS = (symbol == PLUS);
 		flag = true;
 		doOutput();
 		re = getsym();
@@ -1217,9 +1259,12 @@ bool expression(int& type) {
 			return false;
 		}
 		//进入项的分析
-		if (!item(type)) {
+		if (!item(type, op2)) {
 			return false;
 		}
+		res = genTmp();
+		midCodeTable.push_back(midCode(isPLUS ? PLUSOP : MINUOP, res, op1, op2));
+		op1 = res;
 	}
 	if (first) {  //带有最前边的+-号 一定是int
 		type = 1;
@@ -1229,18 +1274,21 @@ bool expression(int& type) {
 			type = 1;
 		}
 	}
+	ansTmp = op1;
 	outputfile << "<表达式>" << endl;
 	return true;
 }
 
 //＜项＞     ::= ＜因子＞{＜乘法运算符＞＜因子＞}
-bool item(int& type) {
-	if (!factor(type)) {  //直接分析因子
+bool item(int& type, string& ansTmp) {
+	string op1, op2, res;
+	if (!factor(type, op1)) {  //直接分析因子
 		return false;
 	}
 	//因子分析成功 并预读了一个单词
 	//开始分析 {＜乘法运算符＞＜因子＞}
 	bool flag = false;
+	bool isMULT;
 	while (true) {
 		if (isEOF()) {
 			break;
@@ -1248,6 +1296,7 @@ bool item(int& type) {
 		if (symbol != MULT && symbol != DIV) {  //不是* 也不是/
 			break;
 		}
+		isMULT = (symbol == MULT);
 		doOutput();
 		//项中包括了乘法除法 就一定是int了
 		flag = true;
@@ -1256,22 +1305,27 @@ bool item(int& type) {
 			return false;
 		}
 		//进入因子的分析
-		if (!factor(type)) {
+		if (!factor(type, op2)) {
 			return false;
 		}
+		res = genTmp();
+		midCodeTable.push_back(midCode(isMULT ? MULTOP : DIVOP, res, op1, op2));
+		op1 = res;
 	}
 	if (flag) {  //项中包括了乘法除法 就一定是int了 
 		type = 1;
 	}
+	ansTmp = op1;
 	outputfile << "<项>" << endl;
 	return true;
 }
 
 //＜因子＞    ::= ＜标识符＞｜＜标识符＞'['＜表达式＞']'|'('＜表达式＞')'｜＜整数＞|＜字符＞｜＜有返回值函数调用语句＞
 //注意 ＜有返回值函数调用语句＞ ::= ＜标识符＞'('＜值参数表＞')’跟 ＜标识符＞｜＜标识符＞'['＜表达式＞']'|'('＜表达式＞')' 有前缀的冲突
-bool factor(int& type) {
+bool factor(int& type, string& ansTmp) {
 	int re;
 	int old = oldIndex;  //记录读取完标识符之后的oldIndex 是标识符的起始位置
+	int conInt;
 	if (symbol == IDENFR) {  //当前是标识符  对应文法 ＜标识符＞｜＜标识符＞'['＜表达式＞']' 也可能是 ＜有返回值函数调用语句＞
 		re = getsym(0);
 		if (re < 0) {
@@ -1300,8 +1354,9 @@ bool factor(int& type) {
 			}
 			//进入到对表达式的分析
 			int t; 
+			string op1;
 			//＜标识符＞'['＜表达式＞']'的类型取决于标识符 而不是后边的数组下标 所以不能用type 否则type被修改了
-			if (!expression(t)) {
+			if (!expression(t, op1)) {
 				return false;
 			}
 			if (t != 1) {
@@ -1316,6 +1371,9 @@ bool factor(int& type) {
 			if (symbol == RBRACK) {  //是]
 				doOutput();
 				re = getsym();   //为下一个预读 不管是啥
+				string op2 = genTmp();
+				midCodeTable.push_back(midCode(GETARRAY, op2, name, op1));
+				ansTmp = op2;
 				outputfile << "<因子>" << endl;
 				return true;
 			}
@@ -1336,6 +1394,9 @@ bool factor(int& type) {
 				if (!callHaveReturnValueFunction()) {
 					return false;
 				}
+				string op1 = genTmp();
+				midCodeTable.push_back(midCode(RETVALUE, op1, "RET", ""));
+				ansTmp = op1;
 				//调用有返回值的函数调用语句成功 并预读了一个单词
 				type = globalSymbolTable[name].type;
 				outputfile << "<因子>" << endl;
@@ -1371,6 +1432,7 @@ bool factor(int& type) {
 				}
 			}
 			doOutput();
+			ansTmp = name;  //直接返回token
 			outputfile << "<因子>" << endl;
 			getsym();  //预读一个
 			return true;
@@ -1383,7 +1445,7 @@ bool factor(int& type) {
 			return false;
 		}
 		//进入到对表达式的分析
-		if (!expression(type)) {
+		if (!expression(type, ansTmp)) {
 			return false;
 		}
 		type = 1;  //(表达式)这个的类型就是int
@@ -1407,11 +1469,13 @@ bool factor(int& type) {
 		type = 2;  //字符常量类型是char 
 		doOutput();
 		re = getsym();   //为下一个预读 不管是啥
+		ansTmp = "\'" + string(1, con_ch) + "\'"; //字符型 返回的名称加上''?????
 		outputfile << "<因子>" << endl;
 		return true;
 	}
-	else if (integer()) {  //当前是整数   并预读了一个单词
+	else if (integer(conInt)) {  //当前是整数   并预读了一个单词
 		type = 1;  //整形常量 类型是int
+		ansTmp = int2string(conInt);   //???会不会integer的预读 导致有问题呢
 		outputfile << "<因子>" << endl;
 		return true;
 	}
@@ -1641,6 +1705,7 @@ bool statement() {
 
 //＜赋值语句＞   ::=  ＜标识符＞＝＜表达式＞|＜标识符＞'['＜表达式＞']'=＜表达式＞
 bool assignStatement() {
+	string value;
 	if (symbol == IDENFR) {  //是标识符
 		string name = string(token);
 		doOutput();
@@ -1661,7 +1726,8 @@ bool assignStatement() {
 			}
 			//开始分析表达式
 			int t;
-			if (!expression(t)) {  //t是数组下标的类型
+			string op1;
+			if (!expression(t, op1)) {  //t是数组下标的类型
 				return false;
 			}
 			if (t != 1) {
@@ -1687,10 +1753,11 @@ bool assignStatement() {
 					}
 					//开始分析表达式
 					int tt;
-					if (!expression(tt)) {
+					if (!expression(tt, value)) {
 						return false;
 					}
 					//分析表达式成功 并预读了一个单词
+					midCodeTable.push_back(midCode(PUTARRAY, name, op1, value));
 					outputfile << "<赋值语句>" << endl;
 					return true;
 				}
@@ -1725,9 +1792,10 @@ bool assignStatement() {
 			}
 			//开始分析表达式
 			int t;
-			if (!expression(t)) {
+			if (!expression(t, value)) {
 				return false;
 			}
+			midCodeTable.push_back(midCode(ASSIGNOP, name, value, ""));
 			//分析表达式成功 并预读了一个单词
 			outputfile << "<赋值语句>" << endl;
 			return true;
@@ -1743,6 +1811,7 @@ bool assignStatement() {
 
 //＜条件语句＞  ::= if '('＜条件＞')'＜语句＞［else＜语句＞］
 bool conditionStatement() {
+	string laba, labb;
 	if (symbol == IFTK) {  //if
 		doOutput();
 		int re = getsym();
@@ -1755,7 +1824,8 @@ bool conditionStatement() {
 			if (re < 0) {
 				return false;
 			}
-			if (!condition()) {  //分析条件
+			string result;
+			if (!condition(result)) {  //分析条件
 				return false;
 			}
 			//分析条件成功 并预读了一个单词
@@ -1770,6 +1840,8 @@ bool conditionStatement() {
 				if (re < 0) {
 					return false;
 				}
+				laba = genLabel();  //建立标号a
+				midCodeTable.push_back(midCode(BZ, laba, result, ""));  //不满足条件(result==0)则跳转到标号a
 				if (!statement()) {  //分析语句
 					return false;
 				}
@@ -1777,6 +1849,9 @@ bool conditionStatement() {
 				//开始分析［else＜语句＞］
 				if (symbol == ELSETK) {  //else
 					doOutput();
+					labb = genLabel();  //建立标号b
+					midCodeTable.push_back(midCode(GOTO, labb, "", ""));  //无条件跳转到标号b
+					midCodeTable.push_back(midCode(LABEL, laba, "", ""));  //在else后边设置标号a
 					re = getsym();
 					if (re < 0) {
 						return false;
@@ -1784,9 +1859,13 @@ bool conditionStatement() {
 					if (!statement()) {  //分析语句
 						return false;
 					}
+					midCodeTable.push_back(midCode(LABEL, labb, "", ""));  //else的语句结束的后边设置标号b
 					//分析语句成功 并预读了一个单词
 					//return true;
 				} //不是else 说明没有这部分 是可以的
+				else {
+					midCodeTable.push_back(midCode(LABEL, laba, "", ""));  //没有else 在语句后边设置标号a
+				}
 				outputfile << "<条件语句>" << endl;
 				return true;
 			}
@@ -1804,26 +1883,44 @@ bool conditionStatement() {
 }
 
 //＜条件＞  ::=  ＜表达式＞＜关系运算符＞＜表达式＞｜＜表达式＞
-bool condition() {
+bool condition(string& result) {
+	result = genTmp();
 	int typeLeft, typeRight;
-	if (!expression(typeLeft)) {  //直接调用表达式
+	string v1, v2;
+	if (!expression(typeLeft, v1)) {  //直接调用表达式
 		return false;
 	}
 	//分析表达式成功 并预读一个单词
 	if (symbol == LSS || symbol == LEQ || symbol == GRE || symbol == GEQ || symbol == EQL || symbol == NEQ) {  //关系运算符
 		doOutput();
+		operation op;
+		switch (symbol) {
+			case LSS:
+				op = LSSOP; break;
+			case LEQ:
+				op = LEQOP; break;
+			case GRE:
+				op = GREOP; break;
+			case GEQ:
+				op = GEQOP; break;
+			case EQL:
+				op = EQLOP; break;
+			case NEQ:
+				op = NEQOP; break;
+		}
 		int re = getsym();
 		if (re < 0) {
 			return false;
 		}
 		//开始分析表达式
-		if (!expression(typeRight)) {
+		if (!expression(typeRight, v2)) {
 			return false;
 		}
 		//分析表达式成功 并预读了一个单词
 		if (typeLeft != 1 || typeRight != 1) {
 			errorfile << line << " f\n";  //条件判断中出现不合法的类型 要求全是int才行
 		}
+		midCodeTable.push_back(midCode(op, result, v1, v2));
 		outputfile << "<条件>" << endl;
 		return true;
 	}
@@ -1831,6 +1928,8 @@ bool condition() {
 		if (typeLeft != 1) {
 			errorfile << line << " f\n";  //条件判断中出现不合法的类型 要求是int才行
 		}
+		//只有一个表达式做条件 相当于 表达式!=0
+		midCodeTable.push_back(midCode(NEQOP, result, v1, int2string(0)));
 		outputfile << "<条件>" << endl;
 		return true;
 	}
@@ -1841,6 +1940,9 @@ bool condition() {
 bool repeatStatement() {
 	if (symbol == WHILETK) {  //while '('＜条件＞')'＜语句＞
 		doOutput();
+		string labr, labf;
+		labr = genLabel();
+		midCodeTable.push_back(midCode(LABEL, labr, "", ""));  //设置labr 用于执行一次循环之后跳回来
 		int re = getsym();
 		if (re < 0) {
 			return false;
@@ -1851,7 +1953,8 @@ bool repeatStatement() {
 			if (re < 0) {
 				return false;
 			}
-			if (!condition()) {  //分析条件
+			string result;
+			if (!condition(result)) {  //分析条件
 				return false;
 			}
 			//分析条件成功 并预读了一个单词
@@ -1866,9 +1969,13 @@ bool repeatStatement() {
 				if (re < 0) {
 					return false;
 				}
+				labf = genLabel();
+				midCodeTable.push_back(midCode(BZ, labf, result, ""));  //不满足条件(result==0)的话 跳转到labf
 				if (!statement()) {  //分析语句
 					return false;
 				}
+				midCodeTable.push_back(midCode(GOTO, labr, "", ""));  //执行了一次循环体 无条件回到labr
+				midCodeTable.push_back(midCode(LABEL, labf, "", ""));  //设置labf 用于结束循环
 				//分析语句成功 并预读了一个单词
 				outputfile << "<循环语句>" << endl;
 				return true;
@@ -1882,6 +1989,8 @@ bool repeatStatement() {
 		}
 	}
 	else if (symbol == DOTK) {  // do＜语句＞while '('＜条件＞')'
+		string labr = genLabel();
+		midCodeTable.push_back(midCode(LABEL, labr, "", "")); //设置labr 用于执行一次循环之后回跳
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -1908,7 +2017,8 @@ bool repeatStatement() {
 				if (re < 0) {
 					return false;
 				}
-				if (!condition()) {  //分析条件
+				string result;
+				if (!condition(result)) {  //分析条件
 					return false;
 				}
 				//分析条件成功 并预读了一个单词
@@ -1919,6 +2029,7 @@ bool repeatStatement() {
 				}
 				if (symbol == RPARENT) {  //)
 					doOutput();
+					midCodeTable.push_back(midCode(BNZ, labr, result, "")); //满足条件(result==1)的话 跳到labr 继续循环
 					outputfile << "<循环语句>" << endl;
 					getsym(); //预读一个 不管是啥
 					return true;
@@ -1936,6 +2047,7 @@ bool repeatStatement() {
 		}
 	}
 	else if (symbol == FORTK) {  //for'('＜标识符＞＝＜表达式＞;＜条件＞;＜标识符＞＝＜标识符＞(+|-)＜步长＞')'＜语句＞
+		string lbegin, lend;
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -1982,9 +2094,11 @@ bool repeatStatement() {
 			return false;
 		}
 		int t;
-		if (!expression(t)) {  //分析表达式
+		string value;
+		if (!expression(t, value)) {  //分析表达式
 			return false;
 		}
+		midCodeTable.push_back(midCode(ASSIGNOP, name, value, ""));
 		//分析表达式成功 并预读了一个单词
 		if (symbol != SEMICN) {
 			retractString(oldIndex);
@@ -2001,9 +2115,14 @@ bool repeatStatement() {
 		else {
 			return false;
 		}
-		if (!condition()) {  //分析条件
+		lbegin = genLabel();
+		midCodeTable.push_back(midCode(LABEL, lbegin, "", ""));  //在条件前边放lbegin
+		string result;
+		if (!condition(result)) {  //分析条件
 			return false;
 		}
+		lend = genLabel();
+		midCodeTable.push_back(midCode(BZ, lend, result, "")); //不满足条件(result==0)跳到lend 结束for
 		//分析条件成功 并预读了一个单词
 		if (symbol != SEMICN) {
 			retractString(oldIndex);
@@ -2040,6 +2159,7 @@ bool repeatStatement() {
 				errorfile << line << " c\n";  //未定义的名字
 			}
 		}
+		string nameLeft = name;
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -2072,6 +2192,7 @@ bool repeatStatement() {
 				errorfile << line << " c\n";  //未定义的名字
 			}
 		}
+		string nameRight = name;
 		re = getsym();
 		if (re < 0) {
 			return false;
@@ -2079,14 +2200,17 @@ bool repeatStatement() {
 		if (symbol != PLUS && symbol != MINU) { //不是+ -
 			return false;
 		}
+		bool isPLUS = (symbol == PLUS);
 		doOutput();  //是+-
 		re = getsym();
 		if (re < 0) {
 			return false;
 		}
-		if (!step()) {  //分析步长
+		int conInt;
+		if (!step(conInt)) {  //分析步长
 			return false;
 		}
+		string stepNum = int2string(conInt);
 		//分析步长成功 并预读了一个单词
 		if (symbol != RPARENT) {
 			retractString(oldIndex);
@@ -2104,6 +2228,9 @@ bool repeatStatement() {
 		if (!statement()) {  //分析语句
 			return false;
 		}
+		midCodeTable.push_back(midCode(isPLUS ? PLUSOP : MINUOP, nameLeft, nameRight, stepNum));  //增加步长
+		midCodeTable.push_back(midCode(GOTO, lbegin, "", ""));  //回到lbegin 进行条件判断
+		midCodeTable.push_back(midCode(LABEL, lend, "", ""));  //lend结束循环
 		//分析语句成功 并预读了一个单词
 		outputfile << "<循环语句>" << endl;
 		return true;
@@ -2114,8 +2241,8 @@ bool repeatStatement() {
 }
 
 //＜步长＞::= ＜无符号整数＞
-bool step() {
-	if (unsignedInteger()) {
+bool step(int& value) {
+	if (unsignedInteger(value)) {
 		outputfile << "<步长>" << endl;
 		return true;
 	}
@@ -2129,6 +2256,7 @@ bool step() {
 bool callHaveReturnValueFunction() {
 	if (symbol == IDENFR) {  //标识符是函数名 需要查全局符号表
 		string name = string(token);
+		midCodeTable.push_back(midCode(CALL, name, "", ""));
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -2174,6 +2302,7 @@ bool callHaveReturnValueFunction() {
 bool callNoReturnValueFunction() {
 	if (symbol == IDENFR) {  //标识符
 		string name = string(token);
+		midCodeTable.push_back(midCode(CALL, name, "", ""));
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -2217,22 +2346,26 @@ bool callNoReturnValueFunction() {
 //＜值参数表＞  ::= ＜表达式＞{,＜表达式＞}｜＜空＞
 bool valueParameterTable(string funcName) {
 	//值参数表可以为空  值参数表为空时 当前字符就是)右括号
-	if (symbol == RPARENT
-		|| symbol == LSS || symbol == LEQ || symbol == GRE || symbol == GEQ || symbol == EQL || symbol == NEQ  //关系运算符
-		|| symbol == PLUS || symbol == MINU || symbol == MULT || symbol == DIV  //+-*/
-		|| symbol == SEMICN || symbol == RBRACK || symbol == COMMA) {  //, ; ]
+	/*if (symbol == RPARENT) {
+		if (globalSymbolTable[funcName].parameterTable.size() != 0) {
+			errorfile << line << " d\n";  //参数个数不匹配
+		}
+		outputfile << "<值参数表>" << endl;
+		return true;
+	}*/
+	vector<int> typeList;  //值参数类型
+	int type;
+	string value;
+	if (!expression(type, value)) {  //调用分析表达式
+		//if (symbol == RPARENT) {  //说明值参数表为空  不是)说明缺少右括号
 		if (globalSymbolTable[funcName].parameterTable.size() != 0) {
 			errorfile << line << " d\n";  //参数个数不匹配
 		}
 		outputfile << "<值参数表>" << endl;
 		return true;
 	}
-	vector<int> typeList;  //值参数类型
-	int type;
-	if (!expression(type)) {  //调用分析表达式
-		return false;
-	}
 	typeList.push_back(type);
+	midCodeTable.push_back(midCode(PUSH, value, "", ""));
 	//分析表达式成功 并预读了一个单词
 	//开始分析{,＜表达式＞}
 	while (true) {
@@ -2248,11 +2381,12 @@ bool valueParameterTable(string funcName) {
 		if (re < 0) {
 			return false;
 		}
-		if (!expression(type)) {  //调用分析表达式
+		if (!expression(type, value)) {  //调用分析表达式
 			return false;
 		}
 		//分析表达式成功 并预读了一个单词
 		typeList.push_back(type);
+		midCodeTable.push_back(midCode(PUSH, value, "", ""));
 	}
 	if (typeList.size() != globalSymbolTable[funcName].parameterTable.size()) {
 		errorfile << line << " d\n";  //参数个数不匹配
@@ -2311,6 +2445,7 @@ bool readStatement() {
 						errorfile << line << " c\n";  //未定义的名字
 					}
 				}
+				midCodeTable.push_back(midCode(SCAN, name, "", ""));
 				doOutput();
 				//开始分析{,＜标识符＞}
 				while (true) {
@@ -2347,6 +2482,7 @@ bool readStatement() {
 							errorfile << line << " c\n";  //未定义的名字
 						}
 					}
+					midCodeTable.push_back(midCode(SCAN, name, "", ""));
 					doOutput();
 				}
 				if (symbol != RPARENT) {
@@ -2393,15 +2529,18 @@ bool writeStatement() {
 			}
 			if (strings()) {  //字符串常量  预读一个单词
 				if (symbol == COMMA) {  //,  printf '(' ＜字符串＞,＜表达式＞ ')'
+					midCodeTable.push_back(midCode(PRINT, "\""+string(s)+"\"", "", ""));
 					doOutput();
 					re = getsym();
 					if (re < 0) {
 						return false;
 					}
 					int t;
-					if (!expression(t)) {  //分析表达式
+					string value;
+					if (!expression(t, value)) {  //分析表达式
 						return false;
 					}
+					midCodeTable.push_back(midCode(PRINT, value, "", ""));
 					//分析表达式成功 并预读了一个单词
 					if (symbol != RPARENT) {
 						retractString(oldIndex);
@@ -2426,6 +2565,7 @@ bool writeStatement() {
 					}
 					if (symbol == RPARENT) {  //)  printf '('＜字符串＞ ')'
 						doOutput();
+						midCodeTable.push_back(midCode(PRINT, "\"" + string(s) + "\"", "", ""));
 						outputfile << "<写语句>" << endl;
 						getsym();  //预读一个 不管是啥
 						return true;
@@ -2437,9 +2577,11 @@ bool writeStatement() {
 			}
 			else {  //判断是不是表达式  printf '('＜表达式＞')’
 				int t;
-				if (!expression(t)) {  //分析表达式
+				string value;
+				if (!expression(t, value)) {  //分析表达式
 					return false;
 				}
+				midCodeTable.push_back(midCode(PRINT, value, "", ""));
 				//分析表达式成功 并预读了一个单词
 				if (symbol != RPARENT) {
 					retractString(oldIndex);
@@ -2488,7 +2630,8 @@ bool returnStatement() {
 			if (re < 0) {
 				return false;
 			}
-			if (!expression(type)) {  //分析表达式 return的返回类型就是表达式的类型
+			string value;
+			if (!expression(type, value)) {  //分析表达式 return的返回类型就是表达式的类型
 				return false;
 			}
 			realReturnType = type;
@@ -2508,6 +2651,7 @@ bool returnStatement() {
 			}
 			if (symbol == RPARENT) {  //)
 				doOutput();
+				midCodeTable.push_back(midCode(RET, value, "", ""));
 				outputfile << "<返回语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
@@ -2522,6 +2666,7 @@ bool returnStatement() {
 			if (curFuncReturnType == 1 || curFuncReturnType == 2) {
 				errorfile << line << " h\n";  //有返回值的函数存在不匹配的return语句
 			}
+			midCodeTable.push_back(midCode(RET, "", "", ""));
 			outputfile << "<返回语句>" << endl;
 			return true;
 		}
