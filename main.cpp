@@ -34,7 +34,8 @@ int labelId = 0; //标号的id
 int tmpVarId = 0;  //中间变量的id
 map<string, symbolItem> globalSymbolTable;
 map<string, symbolItem> localSymbolTable;
-map<string, map<string, symbolItem>> allLocalSymbolTable;  //
+map<string, map<string, symbolItem>> allLocalSymbolTable;  //保存所有的局部符号表 用于保留变量的地址
+vector<string> stringList;  //保存所有的字符串
 vector<midCode> midCodeTable;
 int globalAddr = 0;
 int localAddr = 0;
@@ -69,6 +70,7 @@ int main() {
 	midCodefile.close();
 	showGlobal();
 	showAll();
+	showString();
 	return 0;
 }
 
@@ -98,6 +100,13 @@ void showAll() {
 		}
 	}
 	cout << "----------------\n";
+}
+
+void showString() {
+	cout << "Show strings:\n";
+	for (int i = 0; i < stringList.size(); i++) {
+		cout << stringList[i] << "\n";
+	}
 }
 
 string int2string(int t) {

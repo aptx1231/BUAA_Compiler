@@ -117,6 +117,8 @@ void showLocal();
 
 void showAll();
 
+void showString();
+
 class midCode {  //z = x op y
 public:
 	operation op; // ²Ù×÷

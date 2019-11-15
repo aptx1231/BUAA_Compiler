@@ -23,6 +23,7 @@ extern string filecontent;  //文件的内容
 extern map<string, symbolItem> globalSymbolTable;
 extern map<string, symbolItem> localSymbolTable;
 extern map<string, map<string, symbolItem>> allLocalSymbolTable;
+extern vector<string> stringList;
 extern vector<midCode> midCodeTable;
 int curFuncReturnType = -1;
 int realReturnType = -1;
@@ -2559,6 +2560,7 @@ bool writeStatement() {
 				return false;
 			}
 			if (strings()) {  //字符串常量  预读一个单词
+				stringList.push_back(string(s));
 				if (symbol == COMMA) {  //,  printf '(' ＜字符串＞,＜表达式＞ ')'
 					midCodeTable.push_back(midCode(PRINT, "\""+string(s)+"\"", "", ""));
 					doOutput();
