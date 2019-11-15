@@ -34,7 +34,10 @@ int labelId = 0; //标号的id
 int tmpVarId = 0;  //中间变量的id
 map<string, symbolItem> globalSymbolTable;
 map<string, symbolItem> localSymbolTable;
+map<string, map<string, symbolItem>> allLocalSymbolTable;  //
 vector<midCode> midCodeTable;
+int globalAddr = 0;
+int localAddr = 0;
 
 int main() {
 	inputfile.open("testfile.txt", ios::in);
@@ -65,6 +68,7 @@ int main() {
 	errorfile.close();
 	midCodefile.close();
 	showGlobal();
+	showAll();
 	return 0;
 }
 
@@ -80,6 +84,18 @@ void showLocal() {
 	cout << "----------------\n";
 	for (map<string, symbolItem>::iterator it = localSymbolTable.begin(); it != localSymbolTable.end(); it++) {
 		(*it).second.output();
+	}
+	cout << "----------------\n";
+}
+
+void showAll() {
+	cout << "----------------\n";
+	for (map<string, map<string, symbolItem>>::iterator it = allLocalSymbolTable.begin(); it != allLocalSymbolTable.end(); it++) {
+		cout << "Func: " << (*it).first << "\n";
+		map<string, symbolItem> ss = (*it).second;
+		for (map<string, symbolItem>::iterator i = ss.begin(); i != ss.end(); i++) {
+			(*i).second.output();
+		}
 	}
 	cout << "----------------\n";
 }

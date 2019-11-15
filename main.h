@@ -51,11 +51,11 @@ public:
 	int type; //int char void
 	int constInt;
 	char constChar;
-	int length;  //数组长度
+	int length;  //数组长度  对于函数用于记录这个函数有多少变量（参数+局部+临时)
 	vector<int> parameterTable;  //参数类型
-
-	symbolItem(string s, int k=0, int t=0, int ci=0, char cc=' ', int l=0) :
-		name(s), kind(k), type(t), constInt(ci), constChar(cc), length(l) {
+	int addr;   //地址 
+	symbolItem(string s, int add = 0, int k=0, int t=0, int ci=0, char cc=' ', int l=0) :
+		name(s), kind(k), type(t), constInt(ci), constChar(cc), length(l), addr(add) {
 		parameterTable = vector<int>();
 	}
 	symbolItem() {}
@@ -79,15 +79,15 @@ public:
 		case 2:
 			cout << "const ";
 			if (type == 1) {
-				cout << constInt;
+				cout << constInt << " ";
 			}
 			else if (type == 2) {
-				cout << constChar;
+				cout << constChar << " ";
 			}
 			break;
 		case 3:
 			cout << "func ";
-			cout << "parameters: ";
+			cout << "parameters: (";
 			for (int i = 0; i < parameterTable.size(); i++) {
 				if (parameterTable[i] == 1) {
 					cout << "int ";
@@ -96,13 +96,14 @@ public:
 					cout << "char ";
 				}
 			}
-			cout << "\n";
+			cout << ")" << " 参数个数: " << length << " ";
 			break;
 		case 4:
 			cout << "array ";
-			cout << length;
+			cout << length << " ";
 			break;
 		}
+		cout << "addr: " << addr;
 		cout << "\n";
 	}
 	void insert(int t) {
@@ -113,6 +114,8 @@ public:
 void showGlobal();
 
 void showLocal();
+
+void showAll();
 
 class midCode {  //z = x op y
 public:

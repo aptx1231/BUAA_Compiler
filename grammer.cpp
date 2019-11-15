@@ -22,9 +22,12 @@ extern int line;  //行号
 extern string filecontent;  //文件的内容
 extern map<string, symbolItem> globalSymbolTable;
 extern map<string, symbolItem> localSymbolTable;
+extern map<string, map<string, symbolItem>> allLocalSymbolTable;
 extern vector<midCode> midCodeTable;
 int curFuncReturnType = -1;
 int realReturnType = -1;
+extern int globalAddr;
+extern int localAddr;
 
 //＜字符串＞   ::=  "｛十进制编码为32,33,35-126的ASCII字符｝"
 bool strings() {
@@ -173,7 +176,8 @@ bool constDefinition(bool isglobal) {
 								//开始分析{,＜标识符＞＝＜整数＞}部分
 								if (isglobal) {
 									if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-										globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, conInt)));
+										globalSymbolTable.insert(make_pair(name, symbolItem(name, globalAddr, 2, 1, conInt)));
+										globalAddr++;
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
@@ -181,7 +185,8 @@ bool constDefinition(bool isglobal) {
 								}
 								else {
 									if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-										localSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, conInt)));
+										localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 2, 1, conInt)));
+										localAddr++;
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
@@ -228,7 +233,8 @@ bool constDefinition(bool isglobal) {
 								if (integer(conInt)) {
 									if (isglobal) {
 										if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-											globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, conInt)));
+											globalSymbolTable.insert(make_pair(name, symbolItem(name, globalAddr, 2, 1, conInt)));
+											globalAddr++;
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
@@ -236,7 +242,8 @@ bool constDefinition(bool isglobal) {
 									}
 									else {
 										if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-											localSymbolTable.insert(make_pair(name, symbolItem(name, 2, 1, conInt)));
+											localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 2, 1, conInt)));
+											localAddr++;
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
@@ -289,7 +296,8 @@ bool constDefinition(bool isglobal) {
 								doOutput();
 								if (isglobal) {
 									if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-										globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 2, 0, con_ch)));
+										globalSymbolTable.insert(make_pair(name, symbolItem(name, globalAddr, 2, 2, 0, con_ch)));
+										globalAddr++;
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
@@ -297,7 +305,8 @@ bool constDefinition(bool isglobal) {
 								}
 								else {
 									if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-										localSymbolTable.insert(make_pair(name, symbolItem(name, 2, 2, 0, con_ch)));
+										localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 2, 2, 0, con_ch)));
+										localAddr++;
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
@@ -346,7 +355,8 @@ bool constDefinition(bool isglobal) {
 									doOutput();
 									if (isglobal) {
 										if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-											globalSymbolTable.insert(make_pair(name, symbolItem(name, 2, 2, 0, con_ch)));
+											globalSymbolTable.insert(make_pair(name, symbolItem(name, globalAddr, 2, 2, 0, con_ch)));
+											globalAddr++;
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
@@ -354,7 +364,8 @@ bool constDefinition(bool isglobal) {
 									}
 									else {
 										if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-											localSymbolTable.insert(make_pair(name, symbolItem(name, 2, 2, 0, con_ch)));
+											localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 2, 2, 0, con_ch)));
+											localAddr++;
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
@@ -684,7 +695,8 @@ bool variableDefinition(bool isglobal) {
 							doOutput();
 							if (isglobal) {
 								if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-									globalSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', conInt)));
+									globalSymbolTable.insert(make_pair(name, symbolItem(name, globalAddr, 4, type, 0, ' ', conInt)));
+									globalAddr += conInt;
 								}
 								else {  //找到了 说明重定义了
 									errorfile << line << " b\n";
@@ -692,7 +704,8 @@ bool variableDefinition(bool isglobal) {
 							}
 							else {
 								if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-									localSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', conInt)));
+									localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 4, type, 0, ' ', conInt)));
+									localAddr += conInt;
 								}
 								else {  //找到了 说明重定义了
 									errorfile << line << " b\n";
@@ -706,7 +719,8 @@ bool variableDefinition(bool isglobal) {
 				else {
 					if (isglobal) {
 						if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-							globalSymbolTable.insert(make_pair(name, symbolItem(name, 1, type)));
+							globalSymbolTable.insert(make_pair(name, symbolItem(name, globalAddr, 1, type)));
+							globalAddr++;
 						}
 						else {  //找到了 说明重定义了
 							errorfile << line << " b\n";
@@ -714,7 +728,8 @@ bool variableDefinition(bool isglobal) {
 					}
 					else {
 						if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-							localSymbolTable.insert(make_pair(name, symbolItem(name, 1, type)));
+							localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 1, type)));
+							localAddr++;
 						}
 						else {  //找到了 说明重定义了
 							errorfile << line << " b\n";
@@ -763,7 +778,8 @@ bool variableDefinition(bool isglobal) {
 										doOutput();
 										if (isglobal) {
 											if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-												globalSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', conInt)));
+												globalSymbolTable.insert(make_pair(name, symbolItem(name, globalAddr, 4, type, 0, ' ', conInt)));
+												globalAddr += conInt;
 											}
 											else {  //找到了 说明重定义了
 												errorfile << line << " b\n";
@@ -771,7 +787,8 @@ bool variableDefinition(bool isglobal) {
 										}
 										else {
 											if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-												localSymbolTable.insert(make_pair(name, symbolItem(name, 4, type, 0, ' ', conInt)));
+												localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 4, type, 0, ' ', conInt)));
+												localAddr += conInt;
 											}
 											else {  //找到了 说明重定义了
 												errorfile << line << " b\n";
@@ -785,7 +802,8 @@ bool variableDefinition(bool isglobal) {
 							else {
 								if (isglobal) {
 									if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-										globalSymbolTable.insert(make_pair(name, symbolItem(name, 1, type)));
+										globalSymbolTable.insert(make_pair(name, symbolItem(name, globalAddr, 1, type)));
+										globalAddr++;
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
@@ -793,7 +811,8 @@ bool variableDefinition(bool isglobal) {
 								}
 								else {
 									if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-										localSymbolTable.insert(make_pair(name, symbolItem(name, 1, type)));
+										localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 1, type)));
+										localAddr++;
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
@@ -831,7 +850,7 @@ bool haveReturnValueFunction() {
 	//调用声明头部成功 预读了一个符号
 	bool isRedefine = false;
 	if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-		globalSymbolTable.insert(make_pair(name, symbolItem(name, 3, type)));
+		globalSymbolTable.insert(make_pair(name, symbolItem(name, -1, 3, type)));
 		midCodeTable.push_back(midCode(FUNC, type == 1 ? "int" : "char", name, ""));
 	}
 	else {  //找到了 说明重定义了
@@ -892,7 +911,10 @@ bool haveReturnValueFunction() {
 				outputfile << "<有返回值函数定义>" << endl;
 				re = getsym();  //预读 不管读到什么
 				showLocal();
+				allLocalSymbolTable.insert(make_pair(name, localSymbolTable));
+				globalSymbolTable[name].length = localAddr;
 				localSymbolTable.clear();
+				localAddr = 0;
 				curFuncReturnType = -1; //把函数类型恢复到-1
 				return true;
 			}
@@ -938,7 +960,7 @@ bool noReturnValueFunction() {
 		name = string(token);
 		bool isRedefine = false;
 		if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-			globalSymbolTable.insert(make_pair(name, symbolItem(name, 3, 3)));
+			globalSymbolTable.insert(make_pair(name, symbolItem(name, -1, 3, 3)));
 			midCodeTable.push_back(midCode(FUNC, "void", name, ""));
 		}
 		else {  //找到了 说明重定义了
@@ -998,7 +1020,10 @@ bool noReturnValueFunction() {
 					outputfile << "<无返回值函数定义>" << endl;
 					re = getsym();  //预读 不管读到什么
 					showLocal();
+					allLocalSymbolTable.insert(make_pair(name, localSymbolTable));
+					globalSymbolTable[name].length = localAddr;
 					localSymbolTable.clear();
+					localAddr = 0;
 					curFuncReturnType = -1; //把函数类型恢复到-1
 					return true;
 				}
@@ -1046,7 +1071,8 @@ bool parameterTable(string funcName, bool isRedefine) {
 		//当前是标识符  开始分析{,＜类型标识符＞＜标识符＞}
 		name = string(token);
 		if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-			localSymbolTable.insert(make_pair(name, symbolItem(name, 1, type)));
+			localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 1, type)));
+			localAddr++;
 			if (!isRedefine) {
 				globalSymbolTable[funcName].insert(type);
 			}
@@ -1092,7 +1118,8 @@ bool parameterTable(string funcName, bool isRedefine) {
 			doOutput();
 			name = string(token);
 			if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-				localSymbolTable.insert(make_pair(name, symbolItem(name, 1, type)));
+				localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 1, type)));
+				localAddr++;
 				if (!isRedefine) {
 					globalSymbolTable[funcName].insert(type);
 				}
@@ -1141,6 +1168,7 @@ bool mainFunction() {
 			if (re < 0) {
 				return false;
 			}
+			globalSymbolTable.insert(make_pair("main", symbolItem("main", -1, 3, 3)));
 			midCodeTable.push_back(midCode(FUNC, "void", "main", ""));
 			if (symbol == LPARENT) {  //main后边是(
 				doOutput();
@@ -1178,7 +1206,10 @@ bool mainFunction() {
 							outputfile << "<主函数>" << endl;
 							re = getsym();  //预读 不管读到什么
 							showLocal();
+							allLocalSymbolTable.insert(make_pair("main", localSymbolTable));
+							globalSymbolTable["main"].length = localAddr;
 							localSymbolTable.clear();
+							localAddr = 0;
 							return true;
 						}
 						else {
