@@ -1260,6 +1260,8 @@ bool expression(int& type, string& ansTmp) {
 	if (first) {  //第一项前边有正负号
 		if (!isPLUS) {  //减号
 			res = genTmp();
+			localSymbolTable.insert(make_pair(res, symbolItem(res, localAddr, 1, 1)));  //kind=1=var,type=1=int
+			localAddr++;
 			midCodeTable.push_back(midCode(MINUOP, res, int2string(0), op1));
 			op1 = res;
 		}
@@ -1295,6 +1297,8 @@ bool expression(int& type, string& ansTmp) {
 			return false;
 		}
 		res = genTmp();
+		localSymbolTable.insert(make_pair(res, symbolItem(res, localAddr, 1, 1)));  //kind=1=var,type=1=int
+		localAddr++;
 		midCodeTable.push_back(midCode(isPLUS ? PLUSOP : MINUOP, res, op1, op2));
 		op1 = res;
 	}
@@ -1341,6 +1345,8 @@ bool item(int& type, string& ansTmp) {
 			return false;
 		}
 		res = genTmp();
+		localSymbolTable.insert(make_pair(res, symbolItem(res, localAddr, 1, 1)));  //kind=1=var,type=1=int
+		localAddr++;
 		midCodeTable.push_back(midCode(isMULT ? MULTOP : DIVOP, res, op1, op2));
 		op1 = res;
 	}
@@ -1404,6 +1410,8 @@ bool factor(int& type, string& ansTmp) {
 				doOutput();
 				re = getsym();   //为下一个预读 不管是啥
 				string op2 = genTmp();
+				localSymbolTable.insert(make_pair(op2, symbolItem(op2, localAddr, 1, type)));  //kind=1=var,type=数组的type
+				localAddr++;
 				midCodeTable.push_back(midCode(GETARRAY, op2, name, op1));
 				ansTmp = op2;
 				outputfile << "<因子>" << endl;
@@ -1426,11 +1434,13 @@ bool factor(int& type, string& ansTmp) {
 				if (!callHaveReturnValueFunction()) {
 					return false;
 				}
+				type = globalSymbolTable[name].type;
 				string op1 = genTmp();
+				localSymbolTable.insert(make_pair(op1, symbolItem(op1, localAddr, 1, type)));  //kind=1=var,type=函数返回类型
+				localAddr++;
 				midCodeTable.push_back(midCode(RETVALUE, op1, "RET", ""));
 				ansTmp = op1;
 				//调用有返回值的函数调用语句成功 并预读了一个单词
-				type = globalSymbolTable[name].type;
 				outputfile << "<因子>" << endl;
 				return true;
 			}
@@ -1917,6 +1927,8 @@ bool conditionStatement() {
 //＜条件＞  ::=  ＜表达式＞＜关系运算符＞＜表达式＞｜＜表达式＞
 bool condition(string& result) {
 	result = genTmp();
+	localSymbolTable.insert(make_pair(result, symbolItem(result, localAddr, 1, 1)));  //kind=1=var,type=1=int
+	localAddr++;
 	int typeLeft, typeRight;
 	string v1, v2;
 	if (!expression(typeLeft, v1)) {  //直接调用表达式
