@@ -235,7 +235,7 @@ void outputMidCode() {
 }
 
 void loadValue(string name, string regName, bool gene, int& va, bool& get) {
-	int addr, len;
+	int addr;
 	if (allLocalSymbolTable[curFuncName].find(name) != allLocalSymbolTable[curFuncName].end()) {
 		if (allLocalSymbolTable[curFuncName][name].kind == 2) {  //const
 			va = allLocalSymbolTable[curFuncName][name].type == 1 ?
@@ -247,8 +247,7 @@ void loadValue(string name, string regName, bool gene, int& va, bool& get) {
 		}
 		else {  //var
 			addr = allLocalSymbolTable[curFuncName][name].addr;
-			len = globalSymbolTable[curFuncName].length;
-			mipsCodeTable.push_back(mipsCode(lw, regName, "$sp", "", (len + 1 - addr) * 4));  //len+1 因为有一个字节存$ra了
+			mipsCodeTable.push_back(mipsCode(lw, regName, "$fp", "", -4 * addr));
 		}
 	}
 	else if (globalSymbolTable.find(name) != globalSymbolTable.end()) {
@@ -276,12 +275,11 @@ void loadValue(string name, string regName, bool gene, int& va, bool& get) {
 }
 
 void storeValue(string name, string regName) {
-	int addr, len;
+	int addr;
 	if (allLocalSymbolTable[curFuncName].find(name) != allLocalSymbolTable[curFuncName].end()
 		&& allLocalSymbolTable[curFuncName][name].kind == 1) {
 		addr = allLocalSymbolTable[curFuncName][name].addr;
-		len = globalSymbolTable[curFuncName].length;
-		mipsCodeTable.push_back(mipsCode(sw, regName, "$sp", "", (len + 1 - addr) * 4));  //len+1 因为有一个字节存$ra了
+		mipsCodeTable.push_back(mipsCode(sw, regName, "$fp", "", -4 * addr));
 	}
 	else if (globalSymbolTable.find(name) != globalSymbolTable.end()
 		&& globalSymbolTable[name].kind == 1) {
@@ -638,11 +636,14 @@ void genMips() {
 		}
 		case CALL: {
 			len = globalSymbolTable[mc.z].length - globalSymbolTable[mc.z].parameterTable.size();  //临时变量+局部变量
-			mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -4 * len - 4));
+			mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -4 * len - 8));
 			mipsCodeTable.push_back(mipsCode(sw, "$ra", "$sp", "", 4));
+			mipsCodeTable.push_back(mipsCode(sw, "$fp", "$sp", "", 8));
+			mipsCodeTable.push_back(mipsCode(addi, "$fp", "$sp", "", 4 * globalSymbolTable[mc.z].length + 8));
 			mipsCodeTable.push_back(mipsCode(jal, mc.z, "", ""));
+			mipsCodeTable.push_back(mipsCode(lw, "$fp", "$sp", "", 8));
 			mipsCodeTable.push_back(mipsCode(lw, "$ra", "$sp", "", 4));
-			mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", 4 * globalSymbolTable[mc.z].length + 4));
+			mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", 4 * globalSymbolTable[mc.z].length + 8));
 			break;
 		}
 		case RET: {
@@ -655,8 +656,7 @@ void genMips() {
 			if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
 				&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {
 				addr = allLocalSymbolTable[curFuncName][mc.z].addr;
-				len = globalSymbolTable[curFuncName].length;
-				mipsCodeTable.push_back(mipsCode(sw, "$v0", "$sp", "", (len + 1 - addr) * 4));  //len+1 因为有一个字节存$ra了
+				mipsCodeTable.push_back(mipsCode(sw, "$v0", "$fp", "", -4 * addr));
 			}
 			break;
 		}
@@ -672,8 +672,7 @@ void genMips() {
 				}
 				mipsCodeTable.push_back(mipsCode(syscall, "", "", ""));
 				addr = allLocalSymbolTable[curFuncName][mc.z].addr;
-				len = globalSymbolTable[curFuncName].length;
-				mipsCodeTable.push_back(mipsCode(sw, "$v0", "$sp", "", (len + 1 - addr) * 4));   //len+1 因为有一个字节存$ra了
+				mipsCodeTable.push_back(mipsCode(sw, "$v0", "$fp", "", -4 * addr));
 			}
 			else if (globalSymbolTable.find(mc.z) != globalSymbolTable.end()
 				&& globalSymbolTable[mc.z].kind == 1) {
@@ -726,7 +725,8 @@ void genMips() {
 			mipsCodeTable.push_back(mipsCode(label, mc.x, "", ""));
 			if (mc.x == "main") {
 				len = globalSymbolTable[mc.x].length;
-				mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -4 * len - 4));
+				mipsCodeTable.push_back(mipsCode(moveop, "$fp", "$sp", ""));
+				mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -4 * len - 8));
 			}
 			curFuncName = mc.x;  //记录当前的函数名字
 			break;
@@ -741,15 +741,14 @@ void genMips() {
 			if (allLocalSymbolTable[curFuncName].find(mc.x) != allLocalSymbolTable[curFuncName].end()
 				&& allLocalSymbolTable[curFuncName][mc.x].kind == 4) {  //array
 				addr = allLocalSymbolTable[curFuncName][mc.x].addr;
-				len = globalSymbolTable[curFuncName].length;
 				if (!get1) {
-					mipsCodeTable.push_back(mipsCode(addi, "$t2", "$sp", "", (len + 1 - addr) * 4));  //len+1 因为有一个字节存$ra了
+					mipsCodeTable.push_back(mipsCode(addi, "$t2", "$fp", "", -4 * addr));
 					mipsCodeTable.push_back(mipsCode(sll, "$t0", "$t0", "", 2));
 					mipsCodeTable.push_back(mipsCode(sub, "$t2", "$t2", "$t0"));
 					mipsCodeTable.push_back(mipsCode(lw, "$t1", "$t2", "", 0));
 				}
 				else {
-					mipsCodeTable.push_back(mipsCode(lw, "$t1", "$sp", "", (len + 1 - addr - va) * 4));  //len+1 因为有一个字节存$ra了
+					mipsCodeTable.push_back(mipsCode(lw, "$t1", "$fp", "", -4 * addr));
 				}
 			}
 			else if (globalSymbolTable.find(mc.x) != globalSymbolTable.end()
@@ -779,15 +778,14 @@ void genMips() {
 			if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
 				&& allLocalSymbolTable[curFuncName][mc.z].kind == 4) {  //array
 				addr = allLocalSymbolTable[curFuncName][mc.z].addr;
-				len = globalSymbolTable[curFuncName].length;
 				if (!get1) {
-					mipsCodeTable.push_back(mipsCode(addi, "$t2", "$sp", "", (len + 1 - addr) * 4));  //len+1 因为有一个字节存$ra了
+					mipsCodeTable.push_back(mipsCode(addi, "$t2", "$fp", "", -4 * addr));
 					mipsCodeTable.push_back(mipsCode(sll, "$t0", "$t0", "", 2));
 					mipsCodeTable.push_back(mipsCode(sub, "$t2", "$t2", "$t0"));
 					mipsCodeTable.push_back(mipsCode(sw, "$t1", "$t2", "", 0));
 				}
 				else {
-					mipsCodeTable.push_back(mipsCode(sw, "$t1", "$sp", "", (len + 1 - addr - va) * 4));  //len+1 因为有一个字节存$ra了
+					mipsCodeTable.push_back(mipsCode(sw, "$t1", "$fp", "", -4 * addr));
 				}
 			}
 			else if (globalSymbolTable.find(mc.z) != globalSymbolTable.end()
