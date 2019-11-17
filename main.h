@@ -44,6 +44,37 @@ enum operation {
 	PUTARRAY,  //给数组赋值  a[] = t
 };
 
+enum mipsOperation {
+	add,
+	addi,
+	sub,
+	mult,
+	divop,
+	mflo,
+	mfhi,
+	sll,
+	beq,
+	bne,
+	bgt, //扩展指令 相当于一条ALU类指令+一条branch指令
+	bge, //扩展指令 相当于一条ALU类指令+一条branch指令
+	blt, //扩展指令 相当于一条ALU类指令+一条branch指令
+	ble, //扩展指令 相当于一条ALU类指令+一条branch指令
+	j,
+	jal,
+	jr,
+	lw,
+	sw,
+	syscall,
+	li,
+	la,
+	moveop,
+	dataSeg,  //.data
+	textSeg,  //.text
+	asciizSeg,  //.asciiz
+	globlSeg,  //.globl
+	label,  //产生标号
+};
+
 class symbolItem {
 public:
 	string name;
@@ -51,7 +82,7 @@ public:
 	int type; //int char void
 	int constInt;
 	char constChar;
-	int length;  //数组长度  对于函数用于记录这个函数有多少变量（参数+局部+临时)
+	int length;  //数组长度  对于函数用于记录这个函数有多少变量（参数+局部变量+临时)
 	vector<int> parameterTable;  //参数类型
 	int addr;   //地址 
 	symbolItem(string s, int add = 0, int k=0, int t=0, int ci=0, char cc=' ', int l=0) :
@@ -128,11 +159,27 @@ public:
 	midCode(operation o, string zz, string xx, string yy) : op(o), z(zz), x(xx), y(yy) {}
 };
 
-string int2string(int t);
+class mipsCode {
+public:
+	mipsOperation op; // 操作
+	string z;     // 结果
+	string x;     // 左操作数
+	string y;     // 右操作数
+	int imme;     // 立即数
+	mipsCode(mipsOperation o, string zz, string xx, string yy, int i=0) : op(o), z(zz), x(xx), y(yy), imme(i) {}
+};
+
+string int2string(int t);  //修改
+
+int string2int(string s);  //修改
 
 string genLabel();
 
 string genTmp();
 
 void outputMidCode();
+
+void genMips();
+
+void outputMipsCode();
 #endif // !MAIN_H

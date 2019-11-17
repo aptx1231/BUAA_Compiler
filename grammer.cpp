@@ -177,8 +177,7 @@ bool constDefinition(bool isglobal) {
 								//开始分析{,＜标识符＞＝＜整数＞}部分
 								if (isglobal) {
 									if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-										globalSymbolTable.insert(make_pair(name, symbolItem(name, globalAddr, 2, 1, conInt)));
-										globalAddr++;
+										globalSymbolTable.insert(make_pair(name, symbolItem(name, -1, 2, 1, conInt)));
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
@@ -186,8 +185,7 @@ bool constDefinition(bool isglobal) {
 								}
 								else {
 									if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-										localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 2, 1, conInt)));
-										localAddr++;
+										localSymbolTable.insert(make_pair(name, symbolItem(name, -1, 2, 1, conInt)));
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
@@ -234,8 +232,7 @@ bool constDefinition(bool isglobal) {
 								if (integer(conInt)) {
 									if (isglobal) {
 										if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-											globalSymbolTable.insert(make_pair(name, symbolItem(name, globalAddr, 2, 1, conInt)));
-											globalAddr++;
+											globalSymbolTable.insert(make_pair(name, symbolItem(name, -1, 2, 1, conInt)));
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
@@ -243,8 +240,7 @@ bool constDefinition(bool isglobal) {
 									}
 									else {
 										if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-											localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 2, 1, conInt)));
-											localAddr++;
+											localSymbolTable.insert(make_pair(name, symbolItem(name, -1, 2, 1, conInt)));
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
@@ -297,8 +293,7 @@ bool constDefinition(bool isglobal) {
 								doOutput();
 								if (isglobal) {
 									if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-										globalSymbolTable.insert(make_pair(name, symbolItem(name, globalAddr, 2, 2, 0, con_ch)));
-										globalAddr++;
+										globalSymbolTable.insert(make_pair(name, symbolItem(name, -1, 2, 2, 0, con_ch)));
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
@@ -306,14 +301,13 @@ bool constDefinition(bool isglobal) {
 								}
 								else {
 									if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-										localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 2, 2, 0, con_ch)));
-										localAddr++;
+										localSymbolTable.insert(make_pair(name, symbolItem(name, -1, 2, 2, 0, con_ch)));
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
 									}
 								}
-								midCodeTable.push_back(midCode(CONST, "char", name, "\'" + string(1, con_ch) + "\'"));
+								midCodeTable.push_back(midCode(CONST, "char", name, int2string(con_ch)));
 							}
 							else {
 								errorfile << line << " o\n";
@@ -356,8 +350,7 @@ bool constDefinition(bool isglobal) {
 									doOutput();
 									if (isglobal) {
 										if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
-											globalSymbolTable.insert(make_pair(name, symbolItem(name, globalAddr, 2, 2, 0, con_ch)));
-											globalAddr++;
+											globalSymbolTable.insert(make_pair(name, symbolItem(name, -1, 2, 2, 0, con_ch)));
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
@@ -365,14 +358,13 @@ bool constDefinition(bool isglobal) {
 									}
 									else {
 										if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
-											localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 2, 2, 0, con_ch)));
-											localAddr++;
+											localSymbolTable.insert(make_pair(name, symbolItem(name, -1, 2, 2, 0, con_ch)));
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
 										}
 									}
-									midCodeTable.push_back(midCode(CONST, "char", name, "\'" + string(1, con_ch) + "\'"));
+									midCodeTable.push_back(midCode(CONST, "char", name, int2string(con_ch)));
 								}
 								else {
 									errorfile << line << " o\n";
@@ -1511,7 +1503,7 @@ bool factor(int& type, string& ansTmp) {
 		type = 2;  //字符常量类型是char 
 		doOutput();
 		re = getsym();   //为下一个预读 不管是啥
-		ansTmp = "\'" + string(1, con_ch) + "\'"; //字符型 返回的名称加上''?????
+		ansTmp = int2string(con_ch);
 		outputfile << "<因子>" << endl;
 		return true;
 	}
@@ -1528,7 +1520,7 @@ bool factor(int& type, string& ansTmp) {
 }
 
 //＜语句＞    ::= ＜条件语句＞｜＜循环语句＞| '{'＜语句列＞'}'| ＜有返回值函数调用语句＞; 
-//              |＜无返回值函数调用语句＞;｜＜赋值语句＞;｜＜读语句＞;｜＜写语句＞;｜＜空＞;|＜返回语句＞;
+//              |＜无返回值函数调用语句＞;｜＜赋值语句＞;｜＜读语句＞;｜＜写语句＞;｜＜空＞;|＜返回语PUTARRAY句＞;
 bool statement() {
 	if (symbol == SEMICN) {  //;分号  一个分号直接就是一个语句
 		doOutput();
@@ -2300,7 +2292,7 @@ bool step(int& value) {
 bool callHaveReturnValueFunction() {
 	if (symbol == IDENFR) {  //标识符是函数名 需要查全局符号表
 		string name = string(token);
-		midCodeTable.push_back(midCode(CALL, name, "", ""));
+		//midCodeTable.push_back(midCode(CALL, name, "", ""));
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -2324,6 +2316,7 @@ bool callHaveReturnValueFunction() {
 			}
 			if (symbol == RPARENT) {  //是)
 				doOutput();
+				midCodeTable.push_back(midCode(CALL, name, "", ""));
 				outputfile << "<有返回值函数调用语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
@@ -2346,7 +2339,7 @@ bool callHaveReturnValueFunction() {
 bool callNoReturnValueFunction() {
 	if (symbol == IDENFR) {  //标识符
 		string name = string(token);
-		midCodeTable.push_back(midCode(CALL, name, "", ""));
+		//midCodeTable.push_back(midCode(CALL, name, "", ""));
 		doOutput();
 		int re = getsym();
 		if (re < 0) {
@@ -2370,6 +2363,7 @@ bool callNoReturnValueFunction() {
 			}
 			if (symbol == RPARENT) {  //是)
 				doOutput();
+				midCodeTable.push_back(midCode(CALL, name, "", ""));
 				outputfile << "<无返回值函数调用语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
@@ -2574,7 +2568,7 @@ bool writeStatement() {
 			if (strings()) {  //字符串常量  预读一个单词
 				stringList.push_back(string(s));
 				if (symbol == COMMA) {  //,  printf '(' ＜字符串＞,＜表达式＞ ')'
-					midCodeTable.push_back(midCode(PRINT, "\""+string(s)+"\"", "", ""));
+					midCodeTable.push_back(midCode(PRINT, string(s), "3", ""));
 					doOutput();
 					re = getsym();
 					if (re < 0) {
@@ -2585,7 +2579,7 @@ bool writeStatement() {
 					if (!expression(t, value)) {  //分析表达式
 						return false;
 					}
-					midCodeTable.push_back(midCode(PRINT, value, "", ""));
+					midCodeTable.push_back(midCode(PRINT, value, int2string(t), ""));
 					//分析表达式成功 并预读了一个单词
 					if (symbol != RPARENT) {
 						retractString(oldIndex);
@@ -2594,6 +2588,7 @@ bool writeStatement() {
 					}
 					if (symbol == RPARENT) {  //)
 						doOutput();
+						midCodeTable.push_back(midCode(PRINT, "EndLine", "4", ""));
 						outputfile << "<写语句>" << endl;
 						getsym();  //预读一个 不管是啥
 						return true;
@@ -2610,7 +2605,8 @@ bool writeStatement() {
 					}
 					if (symbol == RPARENT) {  //)  printf '('＜字符串＞ ')'
 						doOutput();
-						midCodeTable.push_back(midCode(PRINT, "\"" + string(s) + "\"", "", ""));
+						midCodeTable.push_back(midCode(PRINT, string(s), "3", ""));
+						midCodeTable.push_back(midCode(PRINT, "EndLine", "4", ""));
 						outputfile << "<写语句>" << endl;
 						getsym();  //预读一个 不管是啥
 						return true;
@@ -2626,7 +2622,7 @@ bool writeStatement() {
 				if (!expression(t, value)) {  //分析表达式
 					return false;
 				}
-				midCodeTable.push_back(midCode(PRINT, value, "", ""));
+				midCodeTable.push_back(midCode(PRINT, value, int2string(t), ""));
 				//分析表达式成功 并预读了一个单词
 				if (symbol != RPARENT) {
 					retractString(oldIndex);
@@ -2635,6 +2631,7 @@ bool writeStatement() {
 				}
 				if (symbol == RPARENT) {  //)
 					doOutput();
+					midCodeTable.push_back(midCode(PRINT, "EndLine", "4", ""));
 					outputfile << "<写语句>" << endl;
 					getsym();  //预读一个 不管是啥
 					return true;
