@@ -62,6 +62,7 @@ int main() {
 	else {
 		if (procedure()) {
 			//success
+			//cout << "True!" << endl;
 		}
 		else {
 			//error()
@@ -228,6 +229,9 @@ void outputMidCode() {
 			case PUTARRAY:
 				midCodefile << mc.z << "[" << mc.x << "]" << " = " << mc.y << "\n";
 				break;
+			case EXIT:
+				midCodefile << "EXIT\n";
+				break;
 			default:
 				break;
 		}
@@ -296,8 +300,8 @@ void genMips() {
 	}
 	mipsCodeTable.push_back(mipsCode(asciizSeg, "nextLine", "\\n", ""));
 	//全局变量从$gp向上加
-	mipsCodeTable.push_back(mipsCode(globlSeg, "", "", ""));  //.global main
 	mipsCodeTable.push_back(mipsCode(textSeg, "", "", ""));  //.text
+	mipsCodeTable.push_back(mipsCode(j, "main", "", ""));
 	bool flag = false;
 	int len = 0, addr = 0, va = 0, va2 = 0;
 	bool get1 = false, get2 = false;
@@ -748,7 +752,7 @@ void genMips() {
 					mipsCodeTable.push_back(mipsCode(lw, "$t1", "$t2", "", 0));
 				}
 				else {
-					mipsCodeTable.push_back(mipsCode(lw, "$t1", "$fp", "", -4 * addr));
+					mipsCodeTable.push_back(mipsCode(lw, "$t1", "$fp", "", -4 * (addr + va)));
 				}
 			}
 			else if (globalSymbolTable.find(mc.x) != globalSymbolTable.end()
@@ -784,8 +788,8 @@ void genMips() {
 					mipsCodeTable.push_back(mipsCode(sub, "$t2", "$t2", "$t0"));
 					mipsCodeTable.push_back(mipsCode(sw, "$t1", "$t2", "", 0));
 				}
-				else {
-					mipsCodeTable.push_back(mipsCode(sw, "$t1", "$fp", "", -4 * addr));
+				else { //拿到了数组下标 存在了va中
+					mipsCodeTable.push_back(mipsCode(sw, "$t1", "$fp", "", -4 * (addr + va)));
 				}
 			}
 			else if (globalSymbolTable.find(mc.z) != globalSymbolTable.end()
@@ -802,6 +806,10 @@ void genMips() {
 				}
 			}
 			break;
+		}
+		case EXIT: {
+			mipsCodeTable.push_back(mipsCode(li, "$v0", "", "", 10));
+			mipsCodeTable.push_back(mipsCode(syscall, "", "", ""));
 		}
 		default: {
 			break;

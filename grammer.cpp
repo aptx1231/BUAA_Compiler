@@ -29,6 +29,7 @@ int curFuncReturnType = -1;
 int realReturnType = -1;
 extern int globalAddr;
 extern int localAddr;
+bool isMain = false;
 
 //＜字符串＞   ::=  "｛十进制编码为32,33,35-126的ASCII字符｝"
 bool strings() {
@@ -1156,6 +1157,7 @@ bool mainFunction() {
 		}
 		if (symbol == MAINTK) {  //void后边是main
 			//当前是main 看下一个是不是(
+			isMain = true;
 			doOutput();
 			re = getsym();
 			if (re < 0) {
@@ -2566,9 +2568,14 @@ bool writeStatement() {
 				return false;
 			}
 			if (strings()) {  //字符串常量  预读一个单词
-				stringList.push_back(string(s));
+				string smodify = string(s);
+				int p=-2;
+				while ((p = smodify.find("\\", p+2)) != string::npos) {
+					smodify.replace(p, 1, "\\\\");
+				}
+				stringList.push_back(smodify);
 				if (symbol == COMMA) {  //,  printf '(' ＜字符串＞,＜表达式＞ ')'
-					midCodeTable.push_back(midCode(PRINT, string(s), "3", ""));
+					midCodeTable.push_back(midCode(PRINT, smodify, "3", ""));
 					doOutput();
 					re = getsym();
 					if (re < 0) {
@@ -2605,7 +2612,7 @@ bool writeStatement() {
 					}
 					if (symbol == RPARENT) {  //)  printf '('＜字符串＞ ')'
 						doOutput();
-						midCodeTable.push_back(midCode(PRINT, string(s), "3", ""));
+						midCodeTable.push_back(midCode(PRINT, smodify, "3", ""));
 						midCodeTable.push_back(midCode(PRINT, "EndLine", "4", ""));
 						outputfile << "<写语句>" << endl;
 						getsym();  //预读一个 不管是啥
@@ -2693,7 +2700,12 @@ bool returnStatement() {
 			}
 			if (symbol == RPARENT) {  //)
 				doOutput();
-				midCodeTable.push_back(midCode(RET, value, "", ""));
+				if (!isMain) {
+					midCodeTable.push_back(midCode(RET, value, "", ""));
+				}
+				else {
+					midCodeTable.push_back(midCode(EXIT, "", "", ""));
+				}
 				outputfile << "<返回语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
@@ -2708,7 +2720,12 @@ bool returnStatement() {
 			if (curFuncReturnType == 1 || curFuncReturnType == 2) {
 				errorfile << line << " h\n";  //有返回值的函数存在不匹配的return语句
 			}
-			midCodeTable.push_back(midCode(RET, "", "", ""));
+			if (!isMain) {
+				midCodeTable.push_back(midCode(RET, "", "", ""));
+			}
+			else {
+				midCodeTable.push_back(midCode(EXIT, "", "", ""));
+			}
 			outputfile << "<返回语句>" << endl;
 			return true;
 		}

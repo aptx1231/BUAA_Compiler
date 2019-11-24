@@ -42,6 +42,7 @@ enum operation {
 	PARAM, //函数参数
 	GETARRAY,  //取数组的值  t = a[]
 	PUTARRAY,  //给数组赋值  a[] = t
+	EXIT,  //退出 main最后
 };
 
 enum mipsOperation {
