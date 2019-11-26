@@ -4,6 +4,7 @@
 #include <cstring>
 #include <string>
 #include <set>
+#include <stack>
 #include <map>
 #include "lexical.h"
 #include "grammer.h"
@@ -306,6 +307,8 @@ void genMips() {
 	int len = 0, addr = 0, va = 0, va2 = 0;
 	bool get1 = false, get2 = false;
 	int pushCnt = 0;
+	int paramSize = 0;
+	stack<midCode> pushOpStack;
 	for (int i = 0; i < midCodeTable.size(); i++) {
 		midCode mc = midCodeTable[i];
 		midCode mcNext = mc;
@@ -633,14 +636,22 @@ void genMips() {
 			break;
 		}
 		case PUSH: {
-			loadValue(mc.z, "$t0", true, va, get1);
-			mipsCodeTable.push_back(mipsCode(sw, "$t0", "$sp", "", 0));
-			mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -4));
+			pushOpStack.push(mc);
 			break;
 		}
 		case CALL: {
-			len = globalSymbolTable[mc.z].length - globalSymbolTable[mc.z].parameterTable.size();  //临时变量+局部变量
-			mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -4 * len - 8));
+			paramSize = globalSymbolTable[mc.z].parameterTable.size();
+			while (paramSize) {
+				paramSize--;
+				if (pushOpStack.empty()) {
+					cout << "ERROR!!!!!!!!\n";
+				}
+				midCode tmpMc = pushOpStack.top();
+				pushOpStack.pop();
+				loadValue(tmpMc.z, "$t0", true, va, get1);
+				mipsCodeTable.push_back(mipsCode(sw, "$t0", "$sp", "", -4 * paramSize));
+			}
+			mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -4 * globalSymbolTable[mc.z].length - 8));
 			mipsCodeTable.push_back(mipsCode(sw, "$ra", "$sp", "", 4));
 			mipsCodeTable.push_back(mipsCode(sw, "$fp", "$sp", "", 8));
 			mipsCodeTable.push_back(mipsCode(addi, "$fp", "$sp", "", 4 * globalSymbolTable[mc.z].length + 8));
