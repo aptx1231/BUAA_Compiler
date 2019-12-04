@@ -49,7 +49,7 @@ bool assignStatement();
 //＜条件语句＞  ::= if '('＜条件＞')'＜语句＞［else＜语句＞］
 bool conditionStatement();
 //＜条件＞  ::=  ＜表达式＞＜关系运算符＞＜表达式＞｜＜表达式＞
-bool condition(string& result);
+bool condition();
 //＜循环语句＞   ::=  while '('＜条件＞')'＜语句＞| do＜语句＞while '('＜条件＞')'
 //              |for'('＜标识符＞＝＜表达式＞;＜条件＞;＜标识符＞＝＜标识符＞(+|-)＜步长＞')'＜语句＞
 bool repeatStatement();

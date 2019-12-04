@@ -1866,8 +1866,7 @@ bool conditionStatement() {
 			if (re < 0) {
 				return false;
 			}
-			string result;
-			if (!condition(result)) {  //分析条件
+			if (!condition()) {  //分析条件
 				return false;
 			}
 			//分析条件成功 并预读了一个单词
@@ -1883,7 +1882,7 @@ bool conditionStatement() {
 					return false;
 				}
 				laba = genLabel();  //建立标号a
-				midCodeTable.push_back(midCode(BZ, laba, result, ""));  //不满足条件(result==0)则跳转到标号a
+				midCodeTable.push_back(midCode(BZ, laba, "<>", ""));  //不满足条件(result==0)则跳转到标号a
 				if (!statement()) {  //分析语句
 					return false;
 				}
@@ -1925,10 +1924,7 @@ bool conditionStatement() {
 }
 
 //＜条件＞  ::=  ＜表达式＞＜关系运算符＞＜表达式＞｜＜表达式＞
-bool condition(string& result) {
-	result = genTmp();
-	localSymbolTable.insert(make_pair(result, symbolItem(result, localAddr, 1, 1)));  //kind=1=var,type=1=int
-	localAddr++;
+bool condition() {
 	int typeLeft, typeRight;
 	string v1, v2;
 	if (!expression(typeLeft, v1)) {  //直接调用表达式
@@ -1964,7 +1960,7 @@ bool condition(string& result) {
 		if (typeLeft != 1 || typeRight != 1) {
 			errorfile << line << " f\n";  //条件判断中出现不合法的类型 要求全是int才行
 		}
-		midCodeTable.push_back(midCode(op, result, v1, v2));
+		midCodeTable.push_back(midCode(op, "<>", v1, v2));
 		outputfile << "<条件>" << endl;
 		return true;
 	}
@@ -1973,7 +1969,7 @@ bool condition(string& result) {
 			errorfile << line << " f\n";  //条件判断中出现不合法的类型 要求是int才行
 		}
 		//只有一个表达式做条件 相当于 表达式!=0
-		midCodeTable.push_back(midCode(NEQOP, result, v1, int2string(0)));
+		midCodeTable.push_back(midCode(NEQOP, "<>", v1, int2string(0)));
 		outputfile << "<条件>" << endl;
 		return true;
 	}
@@ -1997,8 +1993,7 @@ bool repeatStatement() {
 			if (re < 0) {
 				return false;
 			}
-			string result;
-			if (!condition(result)) {  //分析条件
+			if (!condition()) {  //分析条件
 				return false;
 			}
 			//分析条件成功 并预读了一个单词
@@ -2014,7 +2009,7 @@ bool repeatStatement() {
 					return false;
 				}
 				labf = genLabel();
-				midCodeTable.push_back(midCode(BZ, labf, result, ""));  //不满足条件(result==0)的话 跳转到labf
+				midCodeTable.push_back(midCode(BZ, labf, "<>", ""));  //不满足条件(result==0)的话 跳转到labf
 				if (!statement()) {  //分析语句
 					return false;
 				}
@@ -2061,8 +2056,7 @@ bool repeatStatement() {
 				if (re < 0) {
 					return false;
 				}
-				string result;
-				if (!condition(result)) {  //分析条件
+				if (!condition()) {  //分析条件
 					return false;
 				}
 				//分析条件成功 并预读了一个单词
@@ -2073,7 +2067,7 @@ bool repeatStatement() {
 				}
 				if (symbol == RPARENT) {  //)
 					doOutput();
-					midCodeTable.push_back(midCode(BNZ, labr, result, "")); //满足条件(result==1)的话 跳到labr 继续循环
+					midCodeTable.push_back(midCode(BNZ, labr, "<>", "")); //满足条件(result==1)的话 跳到labr 继续循环
 					outputfile << "<循环语句>" << endl;
 					getsym(); //预读一个 不管是啥
 					return true;
@@ -2161,12 +2155,11 @@ bool repeatStatement() {
 		}
 		lbegin = genLabel();
 		midCodeTable.push_back(midCode(LABEL, lbegin, "", ""));  //在条件前边放lbegin
-		string result;
-		if (!condition(result)) {  //分析条件
+		if (!condition()) {  //分析条件
 			return false;
 		}
 		lend = genLabel();
-		midCodeTable.push_back(midCode(BZ, lend, result, "")); //不满足条件(result==0)跳到lend 结束for
+		midCodeTable.push_back(midCode(BZ, lend, "<>", "")); //不满足条件(result==0)跳到lend 结束for
 		//分析条件成功 并预读了一个单词
 		if (symbol != SEMICN) {
 			retractString(oldIndex);

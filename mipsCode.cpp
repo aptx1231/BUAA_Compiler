@@ -135,18 +135,49 @@ void genMips() {
 			break;
 		}
 		case MULTOP: {
-			loadValue(mc.x, "$t0", true, va, get1);
-			loadValue(mc.y, "$t1", true, va2, get2);
-			mipsCodeTable.push_back(mipsCode(mult, "$t0", "$t1", ""));
-			mipsCodeTable.push_back(mipsCode(mflo, "$t2", "", ""));
+			get1 = false;
+			loadValue(mc.x, "$t0", false, va, get1);
+			get2 = false;
+			loadValue(mc.y, "$t1", false, va2, get2);
+			if (get1 && get2) {
+				mipsCodeTable.push_back(mipsCode(li, "$t2", "", "", va * va2));
+			}
+			else if (get1 && !get2) {
+				mipsCodeTable.push_back(mipsCode(li, "$t0", "", "", va));
+				mipsCodeTable.push_back(mipsCode(mul, "$t2", "$t0", "$t1"));
+			}
+			else if (!get1 && get2) {
+				mipsCodeTable.push_back(mipsCode(li, "$t1", "", "", va2));
+				mipsCodeTable.push_back(mipsCode(mul, "$t2", "$t0", "$t1"));
+			}
+			else {
+				mipsCodeTable.push_back(mipsCode(mul, "$t2", "$t0", "$t1"));
+			}
 			storeValue(mc.z, "$t2");
 			break;
 		}
 		case DIVOP: {
-			loadValue(mc.x, "$t0", true, va, get1);
-			loadValue(mc.y, "$t1", true, va2, get2);
-			mipsCodeTable.push_back(mipsCode(divop, "$t0", "$t1", ""));
-			mipsCodeTable.push_back(mipsCode(mflo, "$t2", "", ""));
+			get1 = false;
+			loadValue(mc.x, "$t0", false, va, get1);
+			get2 = false;
+			loadValue(mc.y, "$t1", false, va2, get2);
+			if (get1 && get2) {
+				mipsCodeTable.push_back(mipsCode(li, "$t2", "", "", va / va2));
+			}
+			else if (get1 && !get2) {
+				mipsCodeTable.push_back(mipsCode(li, "$t0", "", "", va));
+				mipsCodeTable.push_back(mipsCode(divop, "$t0", "$t1", ""));
+				mipsCodeTable.push_back(mipsCode(mflo, "$t2", "", ""));
+			}
+			else if (!get1 && get2) {
+				mipsCodeTable.push_back(mipsCode(li, "$t1", "", "", va2));
+				mipsCodeTable.push_back(mipsCode(divop, "$t0", "$t1", ""));
+				mipsCodeTable.push_back(mipsCode(mflo, "$t2", "", ""));
+			}
+			else {
+				mipsCodeTable.push_back(mipsCode(divop, "$t0", "$t1", ""));
+				mipsCodeTable.push_back(mipsCode(mflo, "$t2", "", ""));
+			}
 			storeValue(mc.z, "$t2");
 			break;
 		}
@@ -623,6 +654,9 @@ void outputMipsCode() {
 			break;
 		case mult:
 			mipsCodefile << "mult " << mc.z << "," << mc.x << "\n";
+			break;
+		case mul:
+			mipsCodefile << "mul " << mc.z << "," << mc.x << "," << mc.y << "\n";
 			break;
 		case divop:
 			mipsCodefile << "div " << mc.z << "," << mc.x << "\n";

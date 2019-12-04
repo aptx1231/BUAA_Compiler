@@ -8,6 +8,7 @@ enum mipsOperation {
 	addi,
 	sub,
 	mult,
+	mul,
 	divop,
 	mflo,
 	mfhi,
