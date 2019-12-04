@@ -7,7 +7,10 @@
 #include <map>
 #include "lexical.h"
 #include "grammer.h"
-#include "main.h"
+#include "midCode.h"
+#include "mipsCode.h"
+#include "symbolItem.h"
+#include "function.h"
 using namespace std;
 
 extern char token[100000];
@@ -15,20 +18,23 @@ extern int num;   //记录整形常量
 extern char con_ch;  //记录字符型常量
 extern char s[100000];  //记录字符串常量
 extern enum typeId symbol;
+
 extern ofstream outputfile;
-extern int oldIndex;    //用于做恢复
 extern ofstream errorfile;
+
+extern int oldIndex;    //用于做恢复
 extern int line;  //行号
-extern string filecontent;  //文件的内容
-extern map<string, symbolItem> globalSymbolTable;
-extern map<string, symbolItem> localSymbolTable;
-extern map<string, map<string, symbolItem>> allLocalSymbolTable;
-extern vector<string> stringList;
-extern vector<midCode> midCodeTable;
+
+map<string, symbolItem> globalSymbolTable;
+map<string, symbolItem> localSymbolTable;
+map<string, map<string, symbolItem>> allLocalSymbolTable;  //保存所有的局部符号表 用于保留变量的地址
+vector<string> stringList;  //保存所有的字符串
+vector<midCode> midCodeTable;
+
 int curFuncReturnType = -1;
 int realReturnType = -1;
-extern int globalAddr;
-extern int localAddr;
+int globalAddr = 0;
+int localAddr = 0;
 bool isMain = false;
 
 //＜字符串＞   ::=  "｛十进制编码为32,33,35-126的ASCII字符｝"

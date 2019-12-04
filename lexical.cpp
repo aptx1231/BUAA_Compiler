@@ -1,28 +1,30 @@
-#include "lexical.h"
 #include <iostream>
 #include <fstream>
-#include <cstdio>
-#include <cstring>
 #include <string>
-#include "main.h"
+#include <cstring>
+#include "lexical.h"
 using namespace std;
 
-extern char ch;
-extern char token[100000];
-extern int tokenI;
-extern int num;   //¼ÇÂ¼ÕûĞÎ³£Á¿
-extern char con_ch;  //¼ÇÂ¼×Ö·ûĞÍ³£Á¿
-extern char s[100000];  //¼ÇÂ¼×Ö·û´®³£Á¿
-extern enum typeId symbol;
-extern int len_reservedWord;
-extern char reservedWord[20][10];
-extern string filecontent;  //ÎÄ¼şµÄÄÚÈİ
-extern ifstream inputfile;
+char ch;
+char token[100000];
+int tokenI = 0;
+int num;   //è®°å½•æ•´å½¢å¸¸é‡
+char con_ch;  //è®°å½•å­—ç¬¦å‹å¸¸é‡
+char s[100000];  //è®°å½•å­—ç¬¦ä¸²å¸¸é‡
+enum typeId symbol;
+
+int len_reservedWord = 13;
+char reservedWord[20][10] = {
+		"const", "int", "char", "void", "main", "if", "else", "do", "while", "for", "scanf", "printf", "return",
+};
+
+int indexs = 0;  //æ–‡ä»¶çš„ç´¢å¼•
+int oldIndex;    //ç”¨äºåšæ¢å¤
+int line = 1;  //è®°å½•è¡Œå·
+string filecontent;  //æ–‡ä»¶çš„å†…å®¹
+
 extern ofstream outputfile;
 extern ofstream errorfile;
-extern int indexs;  //ÎÄ¼şµÄË÷Òı
-extern int oldIndex;    //ÓÃÓÚ×ö»Ö¸´
-extern int line;  //ĞĞºÅ
 
 bool isSpace()
 {
@@ -162,17 +164,17 @@ bool isFactorFellow()
 }
 
 void clearToken()
-{  //Çå¿Õtoken
+{  //æ¸…ç©ºtoken
 	tokenI = 0;
 }
 
 void catToken()
-{  //°Ñµ±Ç°×Ö·ûchÆ´µ½tokenÉÏ
+{  //æŠŠå½“å‰å­—ç¬¦chæ‹¼åˆ°tokenä¸Š
 	token[tokenI++] = ch;
 }
 
 void get_ch()
-{  //¶ÁÒ»¸ö×Ö·û
+{  //è¯»ä¸€ä¸ªå­—ç¬¦
 	ch = filecontent[indexs++];
 	if (ch == '\n') {
 		line++;
@@ -180,7 +182,7 @@ void get_ch()
 }
 
 void retract()
-{  //°Ñ×Ö·ûĞ´»Øµ½ÊäÈëÁ÷
+{  //æŠŠå­—ç¬¦å†™å›åˆ°è¾“å…¥æµ
 	if (ch == '\n') {
 		line--;
 	}
@@ -197,7 +199,7 @@ void retractString(int old) {
 }
 
 int reserver()
-{  //²éÕÒ±£Áô×Ö ·µ»Ø-1´ú±íÊÇ±êÊ¶·û ²»ÊÇ±£Áô×Ö ·ñÔò·µ»Ø±£Áô×Ö±àÂë
+{  //æŸ¥æ‰¾ä¿ç•™å­— è¿”å›-1ä»£è¡¨æ˜¯æ ‡è¯†ç¬¦ ä¸æ˜¯ä¿ç•™å­— å¦åˆ™è¿”å›ä¿ç•™å­—ç¼–ç 
 	for (int i = 0; i < len_reservedWord; i++) {
 		if (strcmp(reservedWord[i], token) == 0) {
 			return i;
@@ -217,57 +219,57 @@ int transNum()
 
 int getsym(int out)
 {
-	oldIndex = indexs;  //¼ÇÂ¼Ã»ÓĞ¶ÁÈ¡Ö®Ç°µÄindexsÎªoldIndex
+	oldIndex = indexs;  //è®°å½•æ²¡æœ‰è¯»å–ä¹‹å‰çš„indexsä¸ºoldIndex
 	clearToken();
 	get_ch();
 	while (isBlank()) {
 		get_ch();
-	}// Ò»Ö±¶Á Ö±µ½ch²»ÊÇ¿Õ°×·û
+	}// ä¸€ç›´è¯» ç›´åˆ°chä¸æ˜¯ç©ºç™½ç¬¦
 	if (isEOF()) {
 		return -1;
 	}
 	if (isLetter()) {  //  'a'-'z' 'A'-'Z' '_'
-		while (isLetter() || isDigit()) {  //Æ´±êÊ¶·û £¼±êÊ¶·û£¾::=£¼×ÖÄ¸£¾£û£¼×ÖÄ¸£¾£ü£¼Êı×Ö£¾£ı
-			catToken();  //°ÑchÁ¬½Óµ½tokenÖĞ
-			get_ch();  //¶Ách
+		while (isLetter() || isDigit()) {  //æ‹¼æ ‡è¯†ç¬¦ ï¼œæ ‡è¯†ç¬¦ï¼::=ï¼œå­—æ¯ï¼ï½›ï¼œå­—æ¯ï¼ï½œï¼œæ•°å­—ï¼ï½
+			catToken();  //æŠŠchè¿æ¥åˆ°tokenä¸­
+			get_ch();  //è¯»ch
 		}
-		//´ËÊ±ch²»ÔÙÊÇ×ÖÄ¸»òÕßÊı×ÖÁË ËµÃ÷±êÊ¶·û½áÊøÁË
-		retract();  //»ØÍËch
+		//æ­¤æ—¶chä¸å†æ˜¯å­—æ¯æˆ–è€…æ•°å­—äº† è¯´æ˜æ ‡è¯†ç¬¦ç»“æŸäº†
+		retract();  //å›é€€ch
 		token[tokenI] = '\0';
-		int resultValue = reserver();  //²éÕÒ±£Áô×Ö±í
-		if (resultValue == -1) {  //±êÊ¶·û
+		int resultValue = reserver();  //æŸ¥æ‰¾ä¿ç•™å­—è¡¨
+		if (resultValue == -1) {  //æ ‡è¯†ç¬¦
 			symbol = IDENFR;
 		}
-		else {  //±£Áô×Ö
+		else {  //ä¿ç•™å­—
 			symbol = (typeId)resultValue;
 		}
 		return 1;
 	}
-	else if (isDigit()) {  // '0'-'9'  Êı×Ö
+	else if (isDigit()) {  // '0'-'9'  æ•°å­—
 		while (isDigit()) {
 			catToken();
 			get_ch();
 		}
-		//´ËÊ±ch²»ÔÙÊÇÊı×ÖÁË
+		//æ­¤æ—¶chä¸å†æ˜¯æ•°å­—äº†
 		retract();
 		token[tokenI] = '\0';
 		num = transNum();
-		symbol = INTCON;  //ÕûĞÍ³£Á¿
+		symbol = INTCON;  //æ•´å‹å¸¸é‡
 		return 1;
 	}
 	else if (isSquo()) {  // '
 		get_ch();
 		if (isChar()) {
-			char tmp = ch;  //ÔİÊ±¼ÇÂ¼
+			char tmp = ch;  //æš‚æ—¶è®°å½•
 			get_ch();
 			if (isSquo()) {
 				con_ch = tmp;
-				symbol = CHARCON;  //×Ö·û³£Á¿
+				symbol = CHARCON;  //å­—ç¬¦å¸¸é‡
 			}
 			else {
-				//wrong! retract(); È±ÉÙÓÒµ¥ÒıºÅ ²»·ûºÏ´Ê·¨
+				//wrong! retract(); ç¼ºå°‘å³å•å¼•å· ä¸ç¬¦åˆè¯æ³•
 				if (out) {
-					errorfile << line << " a\n";  //²»·ûºÏ´Ê·¨
+					errorfile << line << " a\n";  //ä¸ç¬¦åˆè¯æ³•
 				}
 				int old = indexs;
 				while (1) {
@@ -275,49 +277,49 @@ int getsym(int out)
 						break;
 					}
 					if (isNewline()) {
-						retractString(old-1);  //»Øµ½Õâ¸ö¶Á´íÁËµÄ ±¾¸ÃÊÇ'µÄÎ»ÖÃ
+						retractString(old-1);  //å›åˆ°è¿™ä¸ªè¯»é”™äº†çš„ æœ¬è¯¥æ˜¯'çš„ä½ç½®
 						break;
 					}
 					if (isFactorFellow()) {  //, ; + - * / > < ! =
-						indexs--;  //ĞèÒª°Ñ,;ÍË»ØÈ¥
+						indexs--;  //éœ€è¦æŠŠ,;é€€å›å»
 						break;
 					}
 					get_ch();
 				}
 				con_ch = tmp;
-				symbol = CHARCON;  //×Ö·û³£Á¿
+				symbol = CHARCON;  //å­—ç¬¦å¸¸é‡
 			}
 		}
 		else {
-			//wrong! retract();  ×Ö·û²»ÊÇa-z A-Z _+-*/
+			//wrong! retract();  å­—ç¬¦ä¸æ˜¯a-z A-Z _+-*/
 			if (out) {
-				errorfile << line << " a\n";  //²»·ûºÏ´Ê·¨
+				errorfile << line << " a\n";  //ä¸ç¬¦åˆè¯æ³•
 			}
 			char tmp = ch;
 			get_ch();
 			if (isSquo()) {
 				con_ch = tmp;
-				symbol = CHARCON;  //×Ö·û³£Á¿
+				symbol = CHARCON;  //å­—ç¬¦å¸¸é‡
 			}
 			else {
-				//wrong! retract(); È±ÉÙÓÒµ¥ÒıºÅ ²»·ûºÏ´Ê·¨
+				//wrong! retract(); ç¼ºå°‘å³å•å¼•å· ä¸ç¬¦åˆè¯æ³•
 				int old = indexs;
 				while (1) {
 					if (isSquo()) {
 						break;
 					}
 					if (isNewline()) {
-						retractString(old - 1);  //»Øµ½Õâ¸ö¶Á´íÁËµÄ ±¾¸ÃÊÇ'µÄÎ»ÖÃ
+						retractString(old - 1);  //å›åˆ°è¿™ä¸ªè¯»é”™äº†çš„ æœ¬è¯¥æ˜¯'çš„ä½ç½®
 						break;
 					}
 					if (isFactorFellow()) {  //, ; + - * / > < ! =
-						indexs--;  //ĞèÒª°Ñ,;ÍË»ØÈ¥
+						indexs--;  //éœ€è¦æŠŠ,;é€€å›å»
 						break;
 					}
 					get_ch();
 				}
 				con_ch = tmp;
-				symbol = CHARCON;  //×Ö·û³£Á¿
+				symbol = CHARCON;  //å­—ç¬¦å¸¸é‡
 			}
 		}
 		return 1;
@@ -328,17 +330,17 @@ int getsym(int out)
 			catToken();
 			get_ch();
 		}
-		//´ËÊ±ch²»ÔÙÊÇ¿ÉÒÔ×é³É×Ö·û´®µÄ×Ö·û
-		if (isDquo()) {  //Óöµ½ÁË½áÊøµÄË«ÒıºÅ
-			symbol = STRCON;  //×Ö·û´®³£Á¿
+		//æ­¤æ—¶chä¸å†æ˜¯å¯ä»¥ç»„æˆå­—ç¬¦ä¸²çš„å­—ç¬¦
+		if (isDquo()) {  //é‡åˆ°äº†ç»“æŸçš„åŒå¼•å·
+			symbol = STRCON;  //å­—ç¬¦ä¸²å¸¸é‡
 			token[tokenI] = '\0';
-			strcpy(s, token);  //´æµ½sÖĞ
+			strcpy(s, token);  //å­˜åˆ°sä¸­
 		}
-		else {  //wrong! retract(); È±ÉÙÓÒË«ÒıºÅ ²»·ûºÏ´Ê·¨
+		else {  //wrong! retract(); ç¼ºå°‘å³åŒå¼•å· ä¸ç¬¦åˆè¯æ³•
 			if (isNewline()) {
 				line--;
 				if (out) {
-					errorfile << line << " a\n";  //²»·ûºÏ´Ê·¨
+					errorfile << line << " a\n";  //ä¸ç¬¦åˆè¯æ³•
 				}
 				while (1) {
 					indexs--;
@@ -347,9 +349,9 @@ int getsym(int out)
 					}
 					tokenI--;
 				}
-				symbol = STRCON;  //×Ö·û´®³£Á¿
+				symbol = STRCON;  //å­—ç¬¦ä¸²å¸¸é‡
 				token[tokenI] = '\0';
-				strcpy(s, token);  //´æµ½sÖĞ
+				strcpy(s, token);  //å­˜åˆ°sä¸­
 			}
 		}
 		return 1;
@@ -377,7 +379,7 @@ int getsym(int out)
 		}
 		else {
 			symbol = LSS;  //<
-			retract();  //»ØÍË
+			retract();  //å›é€€
 		}
 		return 1;
 	}
@@ -388,7 +390,7 @@ int getsym(int out)
 		}
 		else {
 			symbol = GRE;  //>
-			retract();  //»ØÍË
+			retract();  //å›é€€
 		}
 		return 1;
 	}
@@ -398,10 +400,10 @@ int getsym(int out)
 			symbol = NEQ;
 		}
 		else {
-			//wrong! retract();  £¡ºó±ßÈ±ÉÙ=
+			//wrong! retract();  ï¼åè¾¹ç¼ºå°‘=
 			retract();
 			if (out) {
-				errorfile << line << " a\n";  //²»·ûºÏ´Ê·¨
+				errorfile << line << " a\n";  //ä¸ç¬¦åˆè¯æ³•
 			}
 			symbol = NEQ;
 		}
@@ -414,7 +416,7 @@ int getsym(int out)
 		}
 		else {
 			symbol = ASSIGN;
-			retract();  //»ØÍË
+			retract();  //å›é€€
 		}
 		return 1;
 	}
@@ -453,7 +455,7 @@ int getsym(int out)
 	else {
 		//wrong! retract();
 		if (out) {
-			errorfile << line << " a\n";  //²»·ûºÏ´Ê·¨
+			errorfile << line << " a\n";  //ä¸ç¬¦åˆè¯æ³•
 		}
 		return getsym(out);
 	}
