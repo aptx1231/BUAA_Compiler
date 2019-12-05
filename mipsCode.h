@@ -49,6 +49,6 @@ void genMips();
 
 void outputMipsCode();
 
-void loadValue(string name, string regName, bool gene, int& va, bool& get);
+void loadValue(string &name, string &regName, bool gene, int& va, bool& get);
 
-void storeValue(string name, string regName);
+void storeValue(string &name, string &regName);

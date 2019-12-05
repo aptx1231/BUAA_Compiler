@@ -68,5 +68,5 @@ string genLabel() {
 
 string genTmp() {
 	tmpVarId++;
-	return "T" + int2string(tmpVarId);
+	return "#T" + int2string(tmpVarId); //#开头 跟正常的变量区分开 
 }
