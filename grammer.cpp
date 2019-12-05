@@ -1837,7 +1837,17 @@ bool assignStatement() {
 			if (!expression(t, value)) {
 				return false;
 			}
-			midCodeTable.push_back(midCode(ASSIGNOP, name, value, ""));
+			if (value[0] == '#') {  //中间变量
+				if (midCodeTable.back().z == value) {
+					midCodeTable.back().z = name;
+				}
+				else {
+					midCodeTable.push_back(midCode(ASSIGNOP, name, value, ""));
+				}
+			}
+			else {
+				midCodeTable.push_back(midCode(ASSIGNOP, name, value, ""));
+			}
 			//分析表达式成功 并预读了一个单词
 			outputfile << "<赋值语句>" << endl;
 			return true;
@@ -2136,7 +2146,17 @@ bool repeatStatement() {
 		if (!expression(t, value)) {  //分析表达式
 			return false;
 		}
-		midCodeTable.push_back(midCode(ASSIGNOP, name, value, ""));
+		if (value[0] == '#') {  //中间变量
+			if (midCodeTable.back().z == value) {
+				midCodeTable.back().z = name;
+			}
+			else {
+				midCodeTable.push_back(midCode(ASSIGNOP, name, value, ""));
+			}
+		}
+		else {
+			midCodeTable.push_back(midCode(ASSIGNOP, name, value, ""));
+		}
 		//分析表达式成功 并预读了一个单词
 		if (symbol != SEMICN) {
 			retractString(oldIndex);
