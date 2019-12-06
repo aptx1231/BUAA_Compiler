@@ -234,12 +234,28 @@ void genMips() {
 				mipsCodeTable.push_back(mipsCode(li, sz, "", "", va * va2));
 			}
 			else if (get1 && !get2) {
-				mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
-				mipsCodeTable.push_back(mipsCode(mul, sz, sx, sy));
+				if (va == 1) {  //sz=1*sy=sy
+					mipsCodeTable.push_back(mipsCode(moveop, sz, sy, ""));
+				}
+				else if (va == 0) {  //sz=0*sy=0
+					mipsCodeTable.push_back(mipsCode(li, sz, "", "", 0));
+				}
+				else {
+					mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
+					mipsCodeTable.push_back(mipsCode(mul, sz, sx, sy));
+				}
 			}
 			else if (!get1 && get2) {
-				mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
-				mipsCodeTable.push_back(mipsCode(mul, sz, sx, sy));
+				if (va2 == 1) {  //sz=sx*1=sx
+					mipsCodeTable.push_back(mipsCode(moveop, sz, sx, ""));
+				}
+				else if (va2 == 0) {  //sz=sx*0=0
+					mipsCodeTable.push_back(mipsCode(li, sz, "", "", 0));
+				}
+				else {
+					mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
+					mipsCodeTable.push_back(mipsCode(mul, sz, sx, sy));
+				}
 			}
 			else {
 				mipsCodeTable.push_back(mipsCode(mul, sz, sx, sy));
@@ -276,14 +292,24 @@ void genMips() {
 				mipsCodeTable.push_back(mipsCode(li, sz, "", "", va / va2));
 			}
 			else if (get1 && !get2) {
-				mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
-				mipsCodeTable.push_back(mipsCode(divop, sx, sy, ""));
-				mipsCodeTable.push_back(mipsCode(mflo, sz, "", ""));
+				if (va == 0) {  //sz=0/sy=0
+					mipsCodeTable.push_back(mipsCode(li, sz, "", "", 0));
+				}
+				else {
+					mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
+					mipsCodeTable.push_back(mipsCode(divop, sx, sy, ""));
+					mipsCodeTable.push_back(mipsCode(mflo, sz, "", ""));
+				}
 			}
 			else if (!get1 && get2) {
-				mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
-				mipsCodeTable.push_back(mipsCode(divop, sx, sy, ""));
-				mipsCodeTable.push_back(mipsCode(mflo, sz, "", ""));
+				if (va2 == 1) {  //sz=sx/1=sx
+					mipsCodeTable.push_back(mipsCode(moveop, sz, sx, ""));
+				}
+				else {
+					mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
+					mipsCodeTable.push_back(mipsCode(divop, sx, sy, ""));
+					mipsCodeTable.push_back(mipsCode(mflo, sz, "", ""));
+				}
 			}
 			else {
 				mipsCodeTable.push_back(mipsCode(divop, sx, sy, ""));

@@ -1259,20 +1259,18 @@ bool expression(int& type, string& ansTmp) {
 	}
 	if (first) {  //第一项前边有正负号
 		if (!isPLUS) {  //减号
-			res = genTmp();
-			localSymbolTable.insert(make_pair(res, symbolItem(res, localAddr, 1, 1)));  //kind=1=var,type=1=int
-			localAddr++;
-			midCodeTable.push_back(midCode(MINUOP, res, int2string(0), op1));
-			op1 = res;
+			if (isdigit(op1[0]) || op1[0] == '-' || op1[0] == '+') {  //op1是常数
+				int v1 = string2int(op1);
+				op1 = int2string(-v1);
+			}
+			else {
+				res = genTmp();
+				localSymbolTable.insert(make_pair(res, symbolItem(res, localAddr, 1, 1)));  //kind=1=var,type=1=int
+				localAddr++;
+				midCodeTable.push_back(midCode(MINUOP, res, int2string(0), op1));
+				op1 = res;
+			}
 		}
-		/*res = genTmp();
-		if (isPLUS) {
-			midCodeTable.push_back(midCode(PLUSOP, res, int2string(0), op1));
-		}
-		else {
-			midCodeTable.push_back(midCode(MINUOP, res, int2string(0), op1));
-		}
-		op1 = res;*/
 	}
 	//项分析成功 并预读了一个单词
 	bool flag = false;
@@ -1296,10 +1294,22 @@ bool expression(int& type, string& ansTmp) {
 		if (!item(type, op2)) {
 			return false;
 		}
-		res = genTmp();
-		localSymbolTable.insert(make_pair(res, symbolItem(res, localAddr, 1, 1)));  //kind=1=var,type=1=int
-		localAddr++;
-		midCodeTable.push_back(midCode(isPLUS ? PLUSOP : MINUOP, res, op1, op2));
+		if ((isdigit(op1[0]) || op1[0] == '-' || op1[0] == '+') && (isdigit(op2[0]) || op2[0] == '-' || op2[0] == '+')) {
+			int v1 = string2int(op1);
+			int v2 = string2int(op2);
+			if (isPLUS) {
+				res = int2string(v1 + v2);
+			}
+			else {
+				res = int2string(v1 - v2);
+			}
+		}
+		else {
+			res = genTmp();
+			localSymbolTable.insert(make_pair(res, symbolItem(res, localAddr, 1, 1)));  //kind=1=var,type=1=int
+			localAddr++;
+			midCodeTable.push_back(midCode(isPLUS ? PLUSOP : MINUOP, res, op1, op2));
+		}
 		op1 = res;
 	}
 	if (first) {  //带有最前边的+-号 一定是int
@@ -1344,10 +1354,22 @@ bool item(int& type, string& ansTmp) {
 		if (!factor(type, op2)) {
 			return false;
 		}
-		res = genTmp();
-		localSymbolTable.insert(make_pair(res, symbolItem(res, localAddr, 1, 1)));  //kind=1=var,type=1=int
-		localAddr++;
-		midCodeTable.push_back(midCode(isMULT ? MULTOP : DIVOP, res, op1, op2));
+		if ((isdigit(op1[0]) || op1[0] == '-' || op1[0] == '+') && (isdigit(op2[0]) || op2[0] == '-' || op2[0] == '+')) {
+			int v1 = string2int(op1);
+			int v2 = string2int(op2);
+			if (isMULT) {
+				res = int2string(v1 * v2);
+			}
+			else {
+				res = int2string(v1 / v2);
+			}
+		}
+		else {
+			res = genTmp();
+			localSymbolTable.insert(make_pair(res, symbolItem(res, localAddr, 1, 1)));  //kind=1=var,type=1=int
+			localAddr++;
+			midCodeTable.push_back(midCode(isMULT ? MULTOP : DIVOP, res, op1, op2));
+		}
 		op1 = res;
 	}
 	if (flag) {  //项中包括了乘法除法 就一定是int了 
@@ -1462,19 +1484,44 @@ bool factor(int& type, string& ansTmp) {
 			retractString(old);   //回退到标识符的起始位置
 			getsym(0);   //把标识符重新读出来
 			string name = string(token);
+			bool isConstValue = false;
+			int value;
 			if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
 				type = localSymbolTable[name].type;
+				if (localSymbolTable[name].kind == 2) {
+					isConstValue = true;
+					if (type == 1) {
+						value = localSymbolTable[name].constInt;
+					}
+					else {
+						value = localSymbolTable[name].constChar;
+					}
+				}
 			}
 			else {
 				if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
 					type = globalSymbolTable[name].type;
+					if (globalSymbolTable[name].kind == 2) {
+						isConstValue = true;
+						if (type == 1) {
+							value = globalSymbolTable[name].constInt;
+						}
+						else {
+							value = globalSymbolTable[name].constChar;
+						}
+					}
 				}
 				else {
 					errorfile << line << " c\n";  //未定义的名字
 				}
 			}
 			doOutput();
-			ansTmp = name;  //直接返回token
+			if (isConstValue) {  //常量的话直接返回值
+				ansTmp = int2string(value);
+			}
+			else {
+				ansTmp = name;  //直接返回token
+			}
 			outputfile << "<因子>" << endl;
 			getsym();  //预读一个
 			return true;
