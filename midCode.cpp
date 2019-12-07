@@ -54,13 +54,16 @@ void outputMidCode() {
 			midCodefile << "BNZ " << mc.z << "(" << mc.x << "=1)" << "\n";
 			break;
 		case PUSH:
-			midCodefile << "PUSH " << mc.z << "\n";
+			midCodefile << "PUSH " << mc.z << "(" << mc.y << ")" << "\n";
 			break;
 		case CALL:
 			midCodefile << "CALL " << mc.z << "\n";
 			break;
 		case RET:
 			midCodefile << "RET " << mc.z << "\n";
+			break;
+		case INLINERET:
+			midCodefile << "INLINERET " << mc.z << "\n";
 			break;
 		case RETVALUE:
 			midCodefile << "RETVALUE " << mc.z << " = " << mc.x << "\n";

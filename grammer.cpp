@@ -30,8 +30,11 @@ map<string, symbolItem> localSymbolTable;
 map<string, map<string, symbolItem>> allLocalSymbolTable;  //保存所有的局部符号表 用于保留变量的地址
 vector<string> stringList;  //保存所有的字符串
 vector<midCode> midCodeTable;
+map<string, vector<midCode> > funcMidCodeTable;  //每个函数单独的中间代码
+map<string, bool> funcInlineAble;  //函数是否可以内联
 
 int curFuncReturnType = -1;
+string curFunctionName = "";
 int realReturnType = -1;
 int globalAddr = 0;
 int localAddr = 0;
@@ -840,6 +843,47 @@ bool variableDefinition(bool isglobal) {
 	}
 }
 
+void checkBeforeFunc() {
+	int i;
+	for (i = midCodeTable.size() - 1; i >= 0; i--) {
+		if (midCodeTable[i].op == FUNC) {  //向前找函数定义
+			break;
+		}
+	}
+	if (i == -1) {  //没有break 意味着没有找到前边的FUNC
+		return;
+	}
+	string funcName = midCodeTable[i].x;
+	if (funcMidCodeTable.find(funcName) != funcMidCodeTable.end()) {
+		return;
+	}
+	else {
+		vector<midCode> ve = vector<midCode>();
+		bool flag = true;
+		int varCnt = 0;
+		for (int j = i; j < midCodeTable.size(); j++) {
+			midCode mc = midCodeTable[j];
+			if (mc.op == PUSH || mc.op == CALL || mc.op == RETVALUE || mc.op == BZ
+				|| mc.op == BNZ || mc.op == LABEL || mc.op == GOTO) {
+				flag = false;
+			}
+			else if (mc.op == VAR) {
+				varCnt++;
+			}
+			else if (mc.op == ARRAY) {
+				varCnt += string2int(mc.y);
+			}
+			ve.push_back(mc);
+		}
+		if (varCnt > 2) {  //局部变量超过2个 就不内联了
+			flag = false;
+		}
+		funcMidCodeTable.insert(make_pair(funcName, ve));
+		funcInlineAble.insert(make_pair(funcName, flag));
+		return;
+	}
+}
+
 //＜有返回值函数定义＞  ::=  ＜声明头部＞'('＜参数表＞')' '{'＜复合语句＞'}’
 bool haveReturnValueFunction() {
 	string name;
@@ -847,10 +891,12 @@ bool haveReturnValueFunction() {
 	if (!declarationHead(name, type)) {  //调用声明头部
 		return false;
 	}
+	curFunctionName = name;
 	//调用声明头部成功 预读了一个符号
 	bool isRedefine = false;
 	if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
 		globalSymbolTable.insert(make_pair(name, symbolItem(name, -1, 3, type)));
+		checkBeforeFunc();
 		midCodeTable.push_back(midCode(FUNC, type == 1 ? "int" : "char", name, ""));
 	}
 	else {  //找到了 说明重定义了
@@ -958,9 +1004,11 @@ bool noReturnValueFunction() {
 		symbol = IDENFR;
 		doOutput();
 		name = string(token);
+		curFunctionName = name;
 		bool isRedefine = false;
 		if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
 			globalSymbolTable.insert(make_pair(name, symbolItem(name, -1, 3, 3)));
+			checkBeforeFunc();
 			midCodeTable.push_back(midCode(FUNC, "void", name, ""));
 		}
 		else {  //找到了 说明重定义了
@@ -1169,7 +1217,9 @@ bool mainFunction() {
 			if (re < 0) {
 				return false;
 			}
+			curFunctionName = "main";
 			globalSymbolTable.insert(make_pair("main", symbolItem("main", -1, 3, 3)));
+			checkBeforeFunc();
 			midCodeTable.push_back(midCode(FUNC, "void", "main", ""));
 			if (symbol == LPARENT) {  //main后边是(
 				doOutput();
@@ -2355,6 +2405,227 @@ bool step(int& value) {
 	}
 }
 
+void fullNameMap(map<string, string>& nameMap, vector<midCode> ve, string funcName) {
+	for (int i = 0; i < ve.size(); i++) {
+		midCode mc = ve[i];
+		switch (mc.op) {
+		case PLUSOP:
+		case MINUOP:
+		case MULTOP:
+		case DIVOP:
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.z) == nameMap.end()) {
+				if (mc.z[0] == '#') {
+					nameMap[mc.z] = genTmp();
+				}
+				else {
+					nameMap[mc.z] = genName();
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.y) == nameMap.end()) {
+				if (mc.y[0] == '#') {
+					nameMap[mc.y] = genTmp();
+				}
+				else {
+					nameMap[mc.y] = genName();
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.x) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.x) == nameMap.end()) {
+				if (mc.x[0] == '#') {
+					nameMap[mc.x] = genTmp();
+				}
+				else {
+					nameMap[mc.x] = genName();
+				}
+			}
+			break;
+		case LSSOP:
+		case LEQOP:
+		case GREOP:
+		case GEQOP:
+		case EQLOP:
+		case NEQOP:
+			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.y) == nameMap.end()) {
+				if (mc.y[0] == '#') {
+					nameMap[mc.y] = genTmp();
+				}
+				else {
+					nameMap[mc.y] = genName();
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.x) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.x) == nameMap.end()) {
+				if (mc.x[0] == '#') {
+					nameMap[mc.x] = genTmp();
+				}
+				else {
+					nameMap[mc.x] = genName();
+				}
+			}
+			break;
+		case ASSIGNOP:
+		case GETARRAY:  //mc.z << " = " << mc.x << "[" << mc.y << "]
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.z) == nameMap.end()) {
+				if (mc.z[0] == '#') {
+					nameMap[mc.z] = genTmp();
+				}
+				else {
+					nameMap[mc.z] = genName();
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.x) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.x) == nameMap.end()) {
+				if (mc.x[0] == '#') {
+					nameMap[mc.x] = genTmp();
+				}
+				else {
+					nameMap[mc.x] = genName();
+				}
+			}
+			break;
+		case GOTO:
+		case BZ:
+		case BNZ:
+		case LABEL:
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.z) == nameMap.end()) {
+				nameMap[mc.z] = genLabel();
+			}
+			break;
+		case RET:
+		case INLINERET:
+		case SCAN:
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.z) == nameMap.end()) {
+				if (mc.z[0] == '#') {
+					nameMap[mc.z] = genTmp();
+				}
+				else {
+					nameMap[mc.z] = genName();
+				}
+			}
+			break;
+		case PUSH:
+		case CALL:
+		case RETVALUE:
+			break;
+		case PRINT:
+			if (mc.x == "1" || mc.x == "2") {
+				if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end() &&  //局部变量
+					nameMap.find(mc.z) == nameMap.end()) {
+					if (mc.z[0] == '#') {
+						nameMap[mc.z] = genTmp();
+					}
+					else {
+						nameMap[mc.z] = genName();
+					}
+				}
+			}
+			break;
+		case CONST:
+		case ARRAY:
+		case VAR:
+		case PARAM:
+			if (allLocalSymbolTable[funcName].find(mc.x) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.x) == nameMap.end()) {
+				if (mc.x[0] == '#') {
+					nameMap[mc.x] = genTmp();
+				}
+				else {
+					nameMap[mc.x] = genName();
+				}
+			}
+			break;
+		case PUTARRAY:  //mc.z << "[" << mc.x << "]" << " = " << mc.y
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.z) == nameMap.end()) {
+				if (mc.z[0] == '#') {
+					nameMap[mc.z] = genTmp();
+				}
+				else {
+					nameMap[mc.z] = genName();
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.y) == nameMap.end()) {
+				if (mc.y[0] == '#') {
+					nameMap[mc.y] = genTmp();
+				}
+				else {
+					nameMap[mc.y] = genName();
+				}
+			}
+			break;
+		case FUNC:
+		case EXIT:
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void dealInlineFunc(string name) {
+	vector<midCode> ve = funcMidCodeTable[name];  //这个函数所有的中间代码
+	//函数内联需要修改这个函数里边的变量名常量名数组名
+	map<string, string> nameMap;
+	fullNameMap(nameMap, ve, name);
+	//for (map<string, string>::iterator it = nameMap.begin(); it != nameMap.end(); it++) {
+	//	cout << (*it).first << "->" << (*it).second << "\n";
+	//}
+	//传参改成赋值
+	int paramSize = globalSymbolTable[name].parameterTable.size();  //参数个数
+	for (int i = midCodeTable.size() - 1, j = paramSize; i >= 0; i--) {
+		if (midCodeTable[i].op == PUSH && midCodeTable[i].y == name) {  //不一定就是midCodeTable的最后几个是PUSH
+			midCodeTable[i].op = ASSIGNOP;
+			midCodeTable[i].x = midCodeTable[i].z;
+			midCodeTable[i].z = nameMap[ve[j].x];
+			midCodeTable[i].y = "";
+			j--;
+			if (j == 0) {
+				break;
+			}
+		}
+	}
+	//改各种名字
+	for (int i = paramSize + 1; i < ve.size(); i++) {
+		midCode mc = ve[i];
+		if (nameMap.find(mc.z) != nameMap.end()) {
+			mc.z = nameMap[mc.z];
+		}
+		if (nameMap.find(mc.x) != nameMap.end()) {
+			mc.x = nameMap[mc.x];
+		}
+		if (nameMap.find(mc.y) != nameMap.end()) {
+			mc.y = nameMap[mc.y];
+		}
+		midCodeTable.push_back(mc);
+		if (ve[i].op == RET) {
+			midCodeTable[midCodeTable.size() - 1].op = INLINERET;
+			break;
+		}
+	}
+	//符号表也得改
+	for (map<string, symbolItem>::iterator it = allLocalSymbolTable[name].begin(); it != allLocalSymbolTable[name].end(); it++) {
+		symbolItem si = (*it).second;
+		si.addr = localAddr;
+		if (si.kind == 4) {  //数组类型
+			localAddr += si.length;
+		}
+		else {
+			localAddr++;
+		}
+		if (nameMap.find(si.name) != nameMap.end()) {
+			si.name = nameMap[si.name];
+		}
+		localSymbolTable.insert(make_pair(si.name, si));
+	}
+}
+
 //＜有返回值函数调用语句＞ ::= ＜标识符＞'('＜值参数表＞')’
 //现在的写法 一旦进入了这个函数 那么这个函数名就是合法的 即存在于全局表 不存在与局部表 且 返回值是int/char
 bool callHaveReturnValueFunction() {
@@ -2384,7 +2655,12 @@ bool callHaveReturnValueFunction() {
 			}
 			if (symbol == RPARENT) {  //是)
 				doOutput();
-				midCodeTable.push_back(midCode(CALL, name, "", ""));
+				if (funcInlineAble[name]) {  //函数可以内联
+					dealInlineFunc(name);
+				}
+				else {
+					midCodeTable.push_back(midCode(CALL, name, "", ""));
+				}
 				outputfile << "<有返回值函数调用语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
@@ -2431,7 +2707,12 @@ bool callNoReturnValueFunction() {
 			}
 			if (symbol == RPARENT) {  //是)
 				doOutput();
-				midCodeTable.push_back(midCode(CALL, name, "", ""));
+				if (funcInlineAble[name]) {  //函数可以内联
+					dealInlineFunc(name);
+				}
+				else {
+					midCodeTable.push_back(midCode(CALL, name, "", ""));
+				}
 				outputfile << "<无返回值函数调用语句>" << endl;
 				getsym();  //预读一个 不管是啥
 				return true;
@@ -2471,7 +2752,7 @@ bool valueParameterTable(string funcName) {
 		return true;
 	}
 	typeList.push_back(type);
-	midCodeTable.push_back(midCode(PUSH, value, "", ""));
+	midCodeTable.push_back(midCode(PUSH, value, "", funcName));
 	//分析表达式成功 并预读了一个单词
 	//开始分析{,＜表达式＞}
 	while (true) {
@@ -2492,7 +2773,7 @@ bool valueParameterTable(string funcName) {
 		}
 		//分析表达式成功 并预读了一个单词
 		typeList.push_back(type);
-		midCodeTable.push_back(midCode(PUSH, value, "", ""));
+		midCodeTable.push_back(midCode(PUSH, value, "", funcName));
 	}
 	if (typeList.size() != globalSymbolTable[funcName].parameterTable.size()) {
 		errorfile << line << " d\n";  //参数个数不匹配

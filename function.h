@@ -18,3 +18,7 @@ int string2int(string s);  //修改
 string genLabel();
 
 string genTmp();
+
+string genName();
+
+void showFuncMidCode();

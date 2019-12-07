@@ -3,6 +3,9 @@
 #define GRAMMER_H
 
 #include <string>
+#include <vector>
+#include <map>
+#include "midCode.h"
 using namespace std;
 
 //＜字符串＞   ::=  "｛十进制编码为32,33,35-126的ASCII字符｝"
@@ -70,5 +73,9 @@ bool writeStatement();
 //＜返回语句＞   ::=  return['('＜表达式＞')']  
 bool returnStatement();
 
+void checkBeforeFunc();
 
+void fullNameMap(map<string, string>& nameMap, vector<midCode> ve, string funcName);
+
+void dealInlineFunc(string name);
 #endif // !GRAMMER_H

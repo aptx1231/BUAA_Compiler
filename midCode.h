@@ -21,6 +21,7 @@ enum operation {
 	PUSH,  //函数调用时参数传递
 	CALL,  //函数调用
 	RET,   //函数返回语句
+	INLINERET,  //函数内联之后的返回语句
 	RETVALUE, //有返回值函数返回的结果
 	SCAN,  //读
 	PRINT, //写

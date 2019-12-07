@@ -49,5 +49,6 @@ int main() {
 	showGlobal();
 	showAll();
 	showString();
+	//showFuncMidCode();
 	return 0;
 }
