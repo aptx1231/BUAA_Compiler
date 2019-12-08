@@ -5,6 +5,7 @@
 #include "midCode.h"
 #include "mipsCode.h"
 #include "function.h"
+#include "optimize.h"
 using namespace std;
 
 extern string filecontent;  //文件的内容
@@ -38,6 +39,9 @@ int main() {
 			//error()
 		}
 	}
+	showFuncMidCode();
+	splitBlock();
+	showFuncBlock();
 	outputMidCode();
 	genMips();
 	outputMipsCode();
@@ -49,6 +53,5 @@ int main() {
 	showGlobal();
 	showAll();
 	showString();
-	//showFuncMidCode();
 	return 0;
 }

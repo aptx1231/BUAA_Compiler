@@ -77,15 +77,15 @@ void outputMidCode() {
 		case LABEL:
 			midCodefile << mc.z << ": \n";
 			break;
-			/*case CONST:
-				midCodefile << "CONST " << mc.z << " " << mc.x << " = " << mc.y << endl;
-				break;
-			case ARRAY:
-				midCodefile << "ARRAY " << mc.z << " " << mc.x << "[" << mc.y << "]" << endl;
-				break;
-			case VAR:
-				midCodefile << "VAR " << mc.z << " " << mc.x << endl;
-				break;*/
+		case CONST:
+			midCodefile << "CONST " << mc.z << " " << mc.x << " = " << mc.y << endl;
+			break;
+		case ARRAY:
+			midCodefile << "ARRAY " << mc.z << " " << mc.x << "[" << mc.y << "]" << endl;
+			break;
+		case VAR:
+			midCodefile << "VAR " << mc.z << " " << mc.x << endl;
+			break;
 		case FUNC:
 			midCodefile << "FUNC " << mc.z << " " << mc.x << "()" << endl;
 			break;
