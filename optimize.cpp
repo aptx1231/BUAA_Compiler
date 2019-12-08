@@ -51,6 +51,35 @@ void splitBlock() {
 			}
 			blockVe.push_back(bl);
 		}
+		//把nextBlock改成Block的id 而不是Block的start
+		for (int i = 0; i < blockVe.size(); i++) {
+			if (blockVe[i].nextBlock1 != -1) {
+				if (blockVe[i].nextBlock1 == mcVe.size()) {
+					blockVe[i].nextBlock1 = -1;
+				}
+				else {
+					for (int j = 0; j < blockVe.size(); j++) {
+						if (blockVe[i].nextBlock1 == blockVe[j].start) {
+							blockVe[i].nextBlock1 = j;
+							break;
+						}
+					}
+				}
+			}
+			if (blockVe[i].nextBlock2 != -1) {
+				if (blockVe[i].nextBlock2 == mcVe.size()) {
+					blockVe[i].nextBlock2 = -1;
+				}
+				else {
+					for (int j = 0; j < blockVe.size(); j++) {
+						if (blockVe[i].nextBlock2 == blockVe[j].start) {
+							blockVe[i].nextBlock2 = j;
+							break;
+						}
+					}
+				}
+			}
+		}
 		funcBlockTable.insert(make_pair(funcName, blockVe));
 	}
 }
