@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <iostream>
+#include <set>
 #include "midCode.h"
 using namespace std;
 
@@ -16,7 +17,12 @@ public:
 	vector<string> in;
 	vector<string> out;
 
-	Block(int s, int e, int n1, int n2) : start(s), end(e), nextBlock1(n1), nextBlock2(n2) {}
+	Block(int s, int e, int n1, int n2) : start(s), end(e), nextBlock1(n1), nextBlock2(n2) {
+		use = vector<string>();
+		def = vector<string>();
+		in  = vector<string>();
+		out = vector<string>();
+	}
 
 	void setnextBlock1(int n1) {
 		nextBlock1 = n1;
@@ -56,6 +62,16 @@ public:
 		cout << "def: \n";
 		for (int i = 0; i < def.size(); i++) {
 			cout << def[i] << " ";
+		}
+		cout << "\n";
+		cout << "in: \n";
+		for (int i = 0; i < in.size(); i++) {
+			cout << in[i] << " ";
+		}
+		cout << "\n";
+		cout << "out: \n";
+		for (int i = 0; i < out.size(); i++) {
+			cout << out[i] << " ";
 		}
 		cout << "\n";
 		for (int i = 0; i < midCodeVector.size(); i++) {
@@ -164,3 +180,5 @@ void splitBlock();
 void showFuncBlock();
 
 void calUseDef(Block& bl, string funcName);
+
+void calInOut();

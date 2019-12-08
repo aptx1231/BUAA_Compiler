@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <algorithm>
 #include "midCode.h"
 #include "optimize.h"
 #include "symbolItem.h"
@@ -103,7 +104,6 @@ void calUseDef(Block& bl, string funcName) {
 					}
 				}
 			}
-			cout << "PRINT " << mc.z << " " << mc.x << "\n";
 			break;
 		case PUTARRAY:
 			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end()
@@ -164,10 +164,10 @@ void splitBlock() {
 			}
 		}
 		split.insert(mcVe.size()); //!!!!要不然最后一个label不成块
-		for (set<int>::iterator it = split.begin(); it != split.end(); it++) {
-			cout << (*it) << " ";
-		}
-		cout << "\n";
+		//for (set<int>::iterator it = split.begin(); it != split.end(); it++) {
+		//	cout << (*it) << " ";
+		//}
+		//cout << "\n";
 		splitVe.assign(split.begin(), split.end());
 		vector<Block> blockVe;
 		for (int i = 0; i + 1 < splitVe.size(); i++) {
@@ -214,6 +214,58 @@ void splitBlock() {
 			}
 		}
 		funcBlockTable.insert(make_pair(funcName, blockVe));
+	}
+	calInOut();
+}
+
+vector<string> unionVe(vector<string> v1, vector<string> v2) {
+	vector<string> res;
+	res.insert(res.end(), v1.begin(), v1.end());
+	res.insert(res.end(), v2.begin(), v2.end());
+	set<string> s(res.begin(), res.end());
+	res.assign(s.begin(), s.end());
+	return res;
+}
+
+vector<string> diffVe(vector<string> v1, vector<string> v2) {
+	for (int i = 0; i < v2.size(); i++) {
+		vector<string>::iterator iter = find(v1.begin(), v1.end(), v2[i]);
+		if (iter != v1.end()) {
+			v1.erase(iter);
+		}
+	}
+	return v1;
+}
+
+void calInOut() {
+	for (map<string, vector<Block> >::iterator it = funcBlockTable.begin(); it != funcBlockTable.end(); it++) {
+		string funcName = (*it).first;
+		vector<Block> blVe = (*it).second;
+		while (true) {
+			int cnt = 0;
+			for (int i = blVe.size() - 1; i >= 0; i--) {
+				vector<string> tOut, tIn, t;
+				if (blVe[i].nextBlock1 != -1) {
+					tOut = unionVe(tOut, blVe[blVe[i].nextBlock1].in);
+				}
+				if (blVe[i].nextBlock2 != -1) {
+					tOut = unionVe(tOut, blVe[blVe[i].nextBlock2].in);
+				}
+				blVe[i].out = tOut;
+				t = diffVe(tOut, blVe[i].def);
+				tIn = unionVe(t, blVe[i].use);
+				t = diffVe(tIn, blVe[i].in);
+				if (t.size() != 0) {
+					blVe[i].in = tIn;
+				}
+				else {
+					cnt++;
+				}
+			}
+			if (cnt == blVe.size()) {
+				break;
+			}
+		}
 	}
 }
 
