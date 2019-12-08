@@ -5,11 +5,143 @@
 #include <string>
 #include "midCode.h"
 #include "optimize.h"
+#include "symbolItem.h"
 using namespace std;
 
+extern map<string, map<string, symbolItem>> allLocalSymbolTable;
 extern vector<midCode> midCodeTable;  //所有的中间代码
 extern map<string, vector<midCode> > funcMidCodeTable;  //每个函数单独的中间代码
 map<string, vector<Block> > funcBlockTable;   //每个函数的基本块列表
+
+void calUseDef(Block& bl, string funcName) {
+	set<string> use, def;
+	for (int i = 0; i < bl.midCodeVector.size(); i++) {
+		midCode mc = bl.midCodeVector[i];
+		switch (mc.op) {
+		case PLUSOP:
+		case MINUOP:
+		case MULTOP:
+		case DIVOP:
+			if (allLocalSymbolTable[funcName].find(mc.x) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.x].kind == 1 && mc.x[0] != '#') {  //局部变量
+				if (use.find(mc.x) == use.end() && def.find(mc.x) == def.end()) {
+					use.insert(mc.x);
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.y].kind == 1 && mc.y[0] != '#') {  //局部变量
+				if (use.find(mc.y) == use.end() && def.find(mc.y) == def.end()) {
+					use.insert(mc.y);
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.z].kind == 1 && mc.z[0] != '#') {  //局部变量
+				if (use.find(mc.z) == use.end() && def.find(mc.z) == def.end()) {
+					def.insert(mc.z);
+				}
+			}
+			break;
+		case LSSOP:
+		case LEQOP:
+		case GREOP:
+		case GEQOP:
+		case EQLOP:
+		case NEQOP:
+			if (allLocalSymbolTable[funcName].find(mc.x) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.x].kind == 1 && mc.x[0] != '#') {  //局部变量
+				if (use.find(mc.x) == use.end() && def.find(mc.x) == def.end()) {
+					use.insert(mc.x);
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.y].kind == 1 && mc.y[0] != '#') {  //局部变量
+				if (use.find(mc.y) == use.end() && def.find(mc.y) == def.end()) {
+					use.insert(mc.y);
+				}
+			}
+			break;
+		case ASSIGNOP:
+		case GETARRAY:
+			if (allLocalSymbolTable[funcName].find(mc.x) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.x].kind == 1 && mc.x[0] != '#') {  //局部变量
+				if (use.find(mc.x) == use.end() && def.find(mc.x) == def.end()) {
+					use.insert(mc.x);
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.z].kind == 1 && mc.z[0] != '#') {  //局部变量
+				if (use.find(mc.z) == use.end() && def.find(mc.z) == def.end()) {
+					def.insert(mc.z);
+				}
+			}
+			break;
+		case PUSH:
+		case RET:
+		case INLINERET:
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.z].kind == 1 && mc.z[0] != '#') {  //局部变量
+				if (use.find(mc.z) == use.end() && def.find(mc.z) == def.end()) {
+					use.insert(mc.z);
+				}
+			}
+			break;
+		case RETVALUE:
+		case SCAN:
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.z].kind == 1 && mc.z[0] != '#') {  //局部变量
+				if (use.find(mc.z) == use.end() && def.find(mc.z) == def.end()) {
+					def.insert(mc.z);
+				}
+			}
+			break;
+		case PRINT:
+			if (mc.x == "1" || mc.x == "2") {
+				if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end()
+					&& allLocalSymbolTable[funcName][mc.z].kind == 1 && mc.z[0] != '#') {  //局部变量
+					if (use.find(mc.z) == use.end() && def.find(mc.z) == def.end()) {
+						use.insert(mc.z);
+					}
+				}
+			}
+			cout << "PRINT " << mc.z << " " << mc.x << "\n";
+			break;
+		case PUTARRAY:
+			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.y].kind == 1 && mc.y[0] != '#') {  //局部变量
+				if (use.find(mc.y) == use.end() && def.find(mc.y) == def.end()) {
+					use.insert(mc.y);
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.z].kind == 1 && mc.z[0] != '#') {  //局部变量
+				if (use.find(mc.z) == use.end() && def.find(mc.z) == def.end()) {
+					def.insert(mc.z);
+				}
+			}
+			break;
+		case CONST:
+		case ARRAY:
+		case VAR:
+		case PARAM:
+		case FUNC:
+		case EXIT:
+		case GOTO:
+		case BZ:
+		case BNZ:
+		case CALL:
+		case LABEL:
+			break;
+		default:
+			break;
+		}
+	}
+	for (set<string>::iterator it = use.begin(); it != use.end(); it++) {
+		bl.useInsert((*it));
+	}
+	for (set<string>::iterator it = def.begin(); it != def.end(); it++) {
+		bl.defInsert((*it));
+	}
+}
 
 void splitBlock() {
 	for (map<string, vector<midCode> >::iterator it = funcMidCodeTable.begin(); it != funcMidCodeTable.end(); it++) {
@@ -49,6 +181,7 @@ void splitBlock() {
 			for (int j = bl.start; j <= bl.end; j++) {
 				bl.insert(mcVe[j]);
 			}
+			calUseDef(bl, funcName);
 			blockVe.push_back(bl);
 		}
 		//把nextBlock改成Block的id 而不是Block的start

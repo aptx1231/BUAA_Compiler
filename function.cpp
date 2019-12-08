@@ -138,6 +138,9 @@ void showFuncMidCode() {
 			case RET:
 				cout << "RET " << mc.z << "\n";
 				break;
+			case INLINERET:
+				cout << "INLINERET " << mc.z << "\n";
+				break;
 			case RETVALUE:
 				cout << "RETVALUE " << mc.z << " = " << mc.x << "\n";
 				break;

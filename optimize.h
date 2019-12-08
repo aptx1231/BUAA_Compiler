@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <iostream>
 #include "midCode.h"
 using namespace std;
 
@@ -10,6 +11,10 @@ public:
 	int nextBlock1;
 	int nextBlock2;
 	vector<midCode> midCodeVector;
+	vector<string> use;
+	vector<string> def;
+	vector<string> in;
+	vector<string> out;
 
 	Block(int s, int e, int n1, int n2) : start(s), end(e), nextBlock1(n1), nextBlock2(n2) {}
 
@@ -25,8 +30,34 @@ public:
 		midCodeVector.push_back(mc);
 	}
 
+	void useInsert(string name) {
+		use.push_back(name);
+	}
+
+	void defInsert(string name) {
+		def.push_back(name);
+	}
+
+	void inInsert(string name) {
+		in.push_back(name);
+	}
+
+	void outInsert(string name) {
+		out.push_back(name);
+	}
+
 	void output() {
 		cout << start << " " << end << " " << nextBlock1 << " " << nextBlock2 << "\n";
+		cout << "use: \n";
+		for (int i = 0; i < use.size(); i++) {
+			cout << use[i] << " ";
+		}
+		cout << "\n";
+		cout << "def: \n";
+		for (int i = 0; i < def.size(); i++) {
+			cout << def[i] << " ";
+		}
+		cout << "\n";
 		for (int i = 0; i < midCodeVector.size(); i++) {
 			cout << "(" << start + i << ") ";
 			midCode mc = midCodeVector[i];
@@ -82,6 +113,9 @@ public:
 			case RET:
 				cout << "RET " << mc.z << "\n";
 				break;
+			case INLINERET:
+				cout << "INLINERET " << mc.z << "\n";
+				break;
 			case RETVALUE:
 				cout << "RETVALUE " << mc.z << " = " << mc.x << "\n";
 				break;
@@ -128,3 +162,5 @@ public:
 void splitBlock();
 
 void showFuncBlock();
+
+void calUseDef(Block& bl, string funcName);
