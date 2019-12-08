@@ -874,13 +874,103 @@ void checkBeforeFunc() {
 			flag = false;
 		}
 		cout << "varCnt1 = " << varCnt << "\n";
+		//带有全局变量的不内联 全局常量可以 因为常量已经传播成了数字了
 		for (int j = i; j < midCodeTable.size(); j++) {
 			midCode mc = midCodeTable[j];
-			if (mc.op == PUSH || mc.op == CALL || mc.op == RETVALUE || mc.op == BZ
-				|| mc.op == BNZ || mc.op == LABEL || mc.op == GOTO) {
-				flag = false;
-			}
 			ve.push_back(mc);
+			switch (mc.op) {
+			case PLUSOP:
+			case MINUOP:
+			case MULTOP:
+			case DIVOP:
+				if (allLocalSymbolTable[funcName].find(mc.z) == allLocalSymbolTable[funcName].end() &&
+					globalSymbolTable.find(mc.z) != globalSymbolTable.end()) {  //全局变量
+					flag = false;
+				}
+				if (allLocalSymbolTable[funcName].find(mc.y) == allLocalSymbolTable[funcName].end() &&
+					globalSymbolTable.find(mc.y) != globalSymbolTable.end()) {  //全局变量
+					flag = false;
+				}
+				if (allLocalSymbolTable[funcName].find(mc.x) == allLocalSymbolTable[funcName].end() &&
+					globalSymbolTable.find(mc.x) != globalSymbolTable.end()) {  //全局变量
+					flag = false;
+				}
+				break;
+			case LSSOP:
+			case LEQOP:
+			case GREOP:
+			case GEQOP:
+			case EQLOP:
+			case NEQOP:
+				if (allLocalSymbolTable[funcName].find(mc.y) == allLocalSymbolTable[funcName].end() &&
+					globalSymbolTable.find(mc.y) != globalSymbolTable.end()) {  //全局变量
+					flag = false;
+				}
+				if (allLocalSymbolTable[funcName].find(mc.x) == allLocalSymbolTable[funcName].end() &&
+					globalSymbolTable.find(mc.x) != globalSymbolTable.end()) {  //全局变量
+					flag = false;
+				}
+				break;
+			case ASSIGNOP:
+			case GETARRAY:  //mc.z << " = " << mc.x << "[" << mc.y << "]
+				if (allLocalSymbolTable[funcName].find(mc.z) == allLocalSymbolTable[funcName].end() &&
+					globalSymbolTable.find(mc.z) != globalSymbolTable.end()) {  //全局变量
+					flag = false;
+				}
+				if (allLocalSymbolTable[funcName].find(mc.x) == allLocalSymbolTable[funcName].end() &&
+					globalSymbolTable.find(mc.x) != globalSymbolTable.end()) {  //全局变量
+					flag = false;
+				}
+				break;
+			case GOTO:
+			case BZ:
+			case BNZ:
+			case LABEL:
+			case PUSH:
+			case CALL:
+			case RETVALUE:
+				flag = false;
+				break;
+			case RET:
+			case INLINERET:
+			case SCAN:
+				if (allLocalSymbolTable[funcName].find(mc.z) == allLocalSymbolTable[funcName].end() &&
+					globalSymbolTable.find(mc.z) != globalSymbolTable.end()) {  //全局变量
+					flag = false;
+				}
+				break;
+			case PRINT:
+				if (mc.x == "1" || mc.x == "2") {
+					if (allLocalSymbolTable[funcName].find(mc.z) == allLocalSymbolTable[funcName].end() &&
+						globalSymbolTable.find(mc.z) != globalSymbolTable.end()) {  //全局变量
+						flag = false;
+					}
+				}
+				break;
+			case CONST:
+			case ARRAY:
+			case VAR:
+			case PARAM:
+				if (allLocalSymbolTable[funcName].find(mc.x) == allLocalSymbolTable[funcName].end() &&
+					globalSymbolTable.find(mc.x) != globalSymbolTable.end()) {  //全局变量
+					flag = false;
+				}
+				break;
+			case PUTARRAY:  //mc.z << "[" << mc.x << "]" << " = " << mc.y
+				if (allLocalSymbolTable[funcName].find(mc.z) == allLocalSymbolTable[funcName].end() &&
+					globalSymbolTable.find(mc.z) != globalSymbolTable.end()) {  //全局变量
+					flag = false;
+				}
+				if (allLocalSymbolTable[funcName].find(mc.y) == allLocalSymbolTable[funcName].end() &&
+					globalSymbolTable.find(mc.y) != globalSymbolTable.end()) {  //全局变量
+					flag = false;
+				}
+				break;
+			case FUNC:
+			case EXIT:
+			default:
+				break;
+			}
 		}
 		funcMidCodeTable.insert(make_pair(funcName, ve));
 		funcInlineAble.insert(make_pair(funcName, flag));
