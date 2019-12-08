@@ -202,7 +202,7 @@ bool constDefinition(bool isglobal) {
 										errorfile << line << " b\n";
 									}
 								}
-								midCodeTable.push_back(midCode(CONST, "int", name, int2string(conInt)));
+								//midCodeTable.push_back(midCode(CONST, "int", name, int2string(conInt)));
 							}
 							else {  //分析整数失败 没有预读 需要补一个
 								errorfile << line << " o\n";
@@ -257,7 +257,7 @@ bool constDefinition(bool isglobal) {
 											errorfile << line << " b\n";
 										}
 									}
-									midCodeTable.push_back(midCode(CONST, "int", name, int2string(conInt)));
+									//midCodeTable.push_back(midCode(CONST, "int", name, int2string(conInt)));
 								}
 								else {  //分析整数失败 没有预读 需要补一个
 									errorfile << line << " o\n";
@@ -318,7 +318,7 @@ bool constDefinition(bool isglobal) {
 										errorfile << line << " b\n";
 									}
 								}
-								midCodeTable.push_back(midCode(CONST, "char", name, int2string(con_ch)));
+								//midCodeTable.push_back(midCode(CONST, "char", name, int2string(con_ch)));
 							}
 							else {
 								errorfile << line << " o\n";
@@ -375,7 +375,7 @@ bool constDefinition(bool isglobal) {
 											errorfile << line << " b\n";
 										}
 									}
-									midCodeTable.push_back(midCode(CONST, "char", name, int2string(con_ch)));
+									//midCodeTable.push_back(midCode(CONST, "char", name, int2string(con_ch)));
 								}
 								else {
 									errorfile << line << " o\n";
@@ -716,7 +716,7 @@ bool variableDefinition(bool isglobal) {
 								}
 							}
 							re = getsym();  //多读一个 不管是啥 因为如果没有[的时候 也已经预读了一个
-							midCodeTable.push_back(midCode(ARRAY, type==1 ? "int" : "char", name, int2string(conInt)));
+							//midCodeTable.push_back(midCode(ARRAY, type==1 ? "int" : "char", name, int2string(conInt)));
 						}
 					}
 				}  //如果不是[ 就相当于预读了
@@ -739,7 +739,7 @@ bool variableDefinition(bool isglobal) {
 							errorfile << line << " b\n";
 						}
 					}
-					midCodeTable.push_back(midCode(VAR, type == 1 ? "int" : "char", name, ""));
+					//midCodeTable.push_back(midCode(VAR, type == 1 ? "int" : "char", name, ""));
 				}
 				//不是[ 或者[]处理完 接下来分析 {,(＜标识符＞|＜标识符＞'['＜无符号整数＞']' )}
 				//稍有不同 因为上一步已经读了一个单词 进入循环不要立刻读单词
@@ -799,7 +799,7 @@ bool variableDefinition(bool isglobal) {
 											}
 										}
 										re = getsym();  //多读一个 不管是啥 因为如果没有[的时候 也已经预读了一个
-										midCodeTable.push_back(midCode(ARRAY, type == 1 ? "int" : "char", name, int2string(conInt)));
+										//midCodeTable.push_back(midCode(ARRAY, type == 1 ? "int" : "char", name, int2string(conInt)));
 									}
 								}
 							}  //如果不是[ 就相当于预读了
@@ -822,7 +822,7 @@ bool variableDefinition(bool isglobal) {
 										errorfile << line << " b\n";
 									}
 								}
-								midCodeTable.push_back(midCode(VAR, type == 1 ? "int" : "char", name, ""));
+								//midCodeTable.push_back(midCode(VAR, type == 1 ? "int" : "char", name, ""));
 							}
 						}
 						else {
@@ -861,23 +861,26 @@ void checkBeforeFunc() {
 	else {
 		vector<midCode> ve = vector<midCode>();
 		bool flag = true;
-		int varCnt = 0;
+		//参数+临时变量+局部变量 减去 参数个数
+		int varCnt = globalSymbolTable[funcName].length - globalSymbolTable[funcName].parameterTable.size();
+		cout << "varCnt0 = " << varCnt << "\n";
+		for (map<string, symbolItem>::iterator it = allLocalSymbolTable[funcName].begin();
+										it != allLocalSymbolTable[funcName].end(); it++) { //遍历找临时变量
+			if ((*it).first[0] == '#') {
+				varCnt--;
+			}
+		}
+		if (varCnt > 2) {  //局部变量超过2个 就不内联了
+			flag = false;
+		}
+		cout << "varCnt1 = " << varCnt << "\n";
 		for (int j = i; j < midCodeTable.size(); j++) {
 			midCode mc = midCodeTable[j];
 			if (mc.op == PUSH || mc.op == CALL || mc.op == RETVALUE || mc.op == BZ
 				|| mc.op == BNZ || mc.op == LABEL || mc.op == GOTO) {
 				flag = false;
 			}
-			else if (mc.op == VAR) {
-				varCnt++;
-			}
-			else if (mc.op == ARRAY) {
-				varCnt += string2int(mc.y);
-			}
 			ve.push_back(mc);
-		}
-		if (varCnt > 2) {  //局部变量超过2个 就不内联了
-			flag = false;
 		}
 		funcMidCodeTable.insert(make_pair(funcName, ve));
 		funcInlineAble.insert(make_pair(funcName, flag));
