@@ -31,6 +31,7 @@ void splitBlock() {
 				split.insert(i + 1);  //i+1<ve.size()?
 			}
 		}
+		split.insert(mcVe.size()); //!!!!要不然最后一个label不成块
 		for (set<int>::iterator it = split.begin(); it != split.end(); it++) {
 			cout << (*it) << " ";
 		}
