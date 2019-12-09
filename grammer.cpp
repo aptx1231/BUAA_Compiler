@@ -32,6 +32,7 @@ vector<string> stringList;  //保存所有的字符串
 vector<midCode> midCodeTable;
 map<string, vector<midCode> > funcMidCodeTable;  //每个函数单独的中间代码
 map<string, bool> funcInlineAble;  //函数是否可以内联
+vector<string> funcNameList;  //函数名字
 
 int curFuncReturnType = -1;
 string curFunctionName = "";
@@ -990,6 +991,7 @@ bool haveReturnValueFunction() {
 	bool isRedefine = false;
 	if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
 		globalSymbolTable.insert(make_pair(name, symbolItem(name, -1, 3, type)));
+		funcNameList.push_back(name);
 		checkBeforeFunc();
 		midCodeTable.push_back(midCode(FUNC, type == 1 ? "int" : "char", name, ""));
 	}
@@ -1102,6 +1104,7 @@ bool noReturnValueFunction() {
 		bool isRedefine = false;
 		if (globalSymbolTable.find(name) == globalSymbolTable.end()) {  //没找到
 			globalSymbolTable.insert(make_pair(name, symbolItem(name, -1, 3, 3)));
+			funcNameList.push_back(name);
 			checkBeforeFunc();
 			midCodeTable.push_back(midCode(FUNC, "void", name, ""));
 		}
@@ -1313,6 +1316,7 @@ bool mainFunction() {
 			}
 			curFunctionName = "main";
 			globalSymbolTable.insert(make_pair("main", symbolItem("main", -1, 3, 3)));
+			funcNameList.push_back("main");
 			checkBeforeFunc();
 			midCodeTable.push_back(midCode(FUNC, "void", "main", ""));
 			if (symbol == LPARENT) {  //main后边是(
