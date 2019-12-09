@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <stack>
+#include <algorithm>
 #include "mipsCode.h"
 #include "midCode.h"
 #include "symbolItem.h"
@@ -178,8 +179,27 @@ void genMips() {
 	stack<midCode> pushOpStack;
 	for (int l = 0; l < funcNameList.size(); l++) {
 		curFuncName = funcNameList[l];
+		if (debug) {
+			cout << curFuncName << ":\n";
+		}
 		vector<Block> blVe = funcBlockTable[curFuncName];
+		for (int si = 0; si <= 7; si++) {  //遍历新的函数了 可以全部清空
+			sRegBusy[si] = 0;
+			sRegContent[si] = "";
+		}
 		for (int w = 0; w < blVe.size(); w++) {
+			/*for (int si = 0; si <= 7; si++) {
+				if (sRegBusy[si]) {
+					vector<string> blockIn = blVe[w].in;
+					if (find(blockIn.begin(), blockIn.end(), sRegContent[si]) == blockIn.end()) {
+						if (debug) {
+							cout << "del " << "$s" + int2string(si) << " = " << sRegContent[si] << "\n";
+						}
+						sRegBusy[si] = 0;
+						sRegContent[si] = "";
+					}
+				}
+			}*/
 			vector<midCode> mcVe = blVe[w].midCodeVector;
 			for (int i = 0; i < mcVe.size(); i++) {
 				midCode mc = mcVe[i];
@@ -757,31 +777,44 @@ void genMips() {
 				}
 				case ASSIGNOP: {
 					//mc.z是局部的变量 或 全局的变量
-					//mc.x可能是标识符也可能是数值 $t0
-					string sx = "$t0", sz = "";
-					loadValue(mc.x, sx, true, va, get1);
+					//mc.x可能是标识符也可能是数值
+					string sz;
+					int find;
+					int sfind;
 					if (mc.z[0] == '#') {  //mc.z是中间变量 分配t寄存器
-						int find = findEmptyTReg();
+						find = findEmptyTReg();
 						if (find != -1) {  //有空闲
 							tRegBusy[find] = 1;  //打标记
 							tRegContent[find] = mc.z;  //find这个寄存器保存了mc.z的值
-							sz = "$t" + int2string(find);
-							mipsCodeTable.push_back(mipsCode(moveop, sz, sx, ""));
+							sz = "$t" + int2string(find);  //sz修改成$t(find) 直接给他赋值 而不需要move sz, $t(find)
 							if (debug) {
 								cout << sz << " = " << mc.z << "\n";
 							}
+							//直接把mc.x的值load到寄存器sz中
+							loadValue(mc.x, sz, true, va, get1);
+							//可能因为mc.x本身被分配了寄存器 没有load 只是返回了sz=mc.x的寄存器名
+							if (sz != "$t" + int2string(find)) {
+								mipsCodeTable.push_back(mipsCode(moveop, "$t" + int2string(find), sz, ""));
+							}
 						}
-						else {  //没有空闲的寄存器
+						else {  //没有空闲寄存器 就必须取到一个寄存器中 然后存到内存
+							string sx = "$t0";
+							loadValue(mc.x, sx, true, va, get1);
 							storeValue(mc.z, sx);
 						}
 					}
 					else {
 						if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
 							&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
-							int sfind = findNameHaveSReg(mc.z);
+							sfind = findNameHaveSReg(mc.z);
 							if (sfind != -1) {  //被分配了寄存器 直接用寄存器的值
 								sz = "$s" + int2string(sfind);
-								mipsCodeTable.push_back(mipsCode(moveop, sz, sx, ""));
+								//直接把mc.x的值load到寄存器sz中
+								loadValue(mc.x, sz, true, va, get1);
+								//可能因为mc.x本身被分配了寄存器 没有load 只是返回了sz=mc.x的寄存器名
+								if (sz != "$s" + int2string(sfind)) {
+									mipsCodeTable.push_back(mipsCode(moveop, "$s" + int2string(sfind), sz, ""));
+								}
 							}
 							else {  //没有被分配寄存器
 								sfind = findEmptySReg();
@@ -789,17 +822,26 @@ void genMips() {
 									sRegBusy[sfind] = 1;  //打标记
 									sRegContent[sfind] = mc.z;  //find这个寄存器保存了mc.z的值
 									sz = "$s" + int2string(sfind);  //sz修改成$s(sfind) 直接给他赋值 而不需要move sz, $s(sfind)
-									mipsCodeTable.push_back(mipsCode(moveop, sz, sx, ""));
 									if (debug) {
 										cout << sz << " = " << mc.z << "\n";
 									}
+									//直接把mc.x的值load到寄存器sz中
+									loadValue(mc.x, sz, true, va, get1);
+									//可能因为mc.x本身被分配了寄存器 没有load 只是返回了sz=mc.x的寄存器名
+									if (sz != "$s" + int2string(sfind)) {
+										mipsCodeTable.push_back(mipsCode(moveop, "$s" + int2string(sfind), sz, ""));
+									}
 								}
-								else {
+								else {  //没有空闲寄存器 就必须取到一个寄存器中 然后存到内存
+									string sx = "$t0";
+									loadValue(mc.x, sx, true, va, get1);
 									storeValue(mc.z, sx);
 								}
 							}
 						}
-						else {
+						else {  //全局变量等
+							string sx = "$t0";
+							loadValue(mc.x, sx, true, va, get1);
 							storeValue(mc.z, sx);
 						}
 					}
@@ -1017,10 +1059,6 @@ void genMips() {
 					//需要为前一个函数做jr $ra 注意第一个函数不用做
 					if (flag) {
 						mipsCodeTable.push_back(mipsCode(jr, "$ra", "", ""));
-						for (int i = 0; i <= 7; i++) {
-							sRegBusy[i] = 0;
-							sRegContent[i] = "";
-						}
 					}
 					flag = true;
 					mipsCodeTable.push_back(mipsCode(label, mc.x, "", ""));
@@ -1045,6 +1083,7 @@ void genMips() {
 						}
 					}
 					//没有空闲就不分配了
+					break;
 				}
 				case GETARRAY: {
 					string sy = "$t0", sz = "$t1";
