@@ -8,12 +8,15 @@
 #include "midCode.h"
 #include "symbolItem.h"
 #include "function.h"
+#include "optimize.h"
 using namespace std;
 
 vector<mipsCode> mipsCodeTable;
 string curFuncName = "";
 int tRegBusy[10] = {0,};  //有t3-t9共7个临时寄存器供分配 用于记录临时寄存器是否被占用
 string tRegContent[10];   //记录每一个临时寄存器分配给了哪一个中间变量 #T0,#T1...
+int sRegBusy[10] = {0,};  //有s0-s7共8个全局寄存器供分配 用于记录全局寄存器是否被占用
+string sRegContent[10];   //记录每一个全局寄存器分配给了哪一个局部变量
 int debug = 1;
 
 extern ofstream mipsCodefile;
@@ -21,6 +24,8 @@ extern vector<string> stringList;  //保存所有的字符串
 extern vector<midCode> midCodeTable;
 extern map<string, symbolItem> globalSymbolTable;
 extern map<string, map<string, symbolItem>> allLocalSymbolTable;  //保存所有的局部符号表 用于保留变量的地址
+extern map<string, vector<midCode> > funcMidCodeTable;  //每个函数单独的中间代码
+extern map<string, vector<Block> > funcBlockTable;   //每个函数的基本块列表
 
 int findEmptyTReg() {  //查找空闲的t寄存器
 	for (int i = 3; i <= 9; i++) {
@@ -40,7 +45,25 @@ int findNameHaveTReg(string& name) {  //判断当前中间变量是否被分配�
 	return -1; //没有被分配寄存器 需要lw取
 }
 
-void loadValue(string& name, string& regName, bool gene, int& va, bool& get) {
+int findEmptySReg() {  //查找空闲的s寄存器
+	for (int i = 0; i <= 7; i++) {
+		if (!sRegBusy[i]) {  //找到了空闲寄存器
+			return i;
+		}
+	}
+	return -1; //没找到
+}
+
+int findNameHaveSReg(string& name) {  //判断当前中间变量是否被分配了s寄存器
+	for (int i = 0; i <= 7; i++) {
+		if (sRegBusy[i] && sRegContent[i] == name) {  //被占用的寄存器 存储着name
+			return i;
+		}
+	}
+	return -1; //没有被分配寄存器 需要lw取
+}
+
+void loadValue(string& name, string& regName, bool gene, int& va, bool& get, bool assign=true) {  //不用于取数组的值
 	int addr;
 	if (allLocalSymbolTable[curFuncName].find(name) != allLocalSymbolTable[curFuncName].end()) {
 		if (allLocalSymbolTable[curFuncName][name].kind == 2) {  //const
@@ -67,9 +90,34 @@ void loadValue(string& name, string& regName, bool gene, int& va, bool& get) {
 					mipsCodeTable.push_back(mipsCode(lw, regName, "$fp", "", -4 * addr));
 				}
 			}
-			else {  //name是局部变量
-				addr = allLocalSymbolTable[curFuncName][name].addr;
-				mipsCodeTable.push_back(mipsCode(lw, regName, "$fp", "", -4 * addr));
+			else {  //name是局部变量 而且非数组
+				int sfind = findNameHaveSReg(name);
+				if (sfind != -1) {
+					regName = "$s" + int2string(sfind);
+				}
+				else { //没有被分配寄存器
+					if (assign) {
+						sfind = findEmptySReg();
+						if (sfind != -1) {  //有空闲
+							sRegBusy[sfind] = 1;  //打标记
+							sRegContent[sfind] = name;  //find这个寄存器保存了name的值
+							regName = "$s" + int2string(sfind);
+							addr = allLocalSymbolTable[curFuncName][name].addr;
+							mipsCodeTable.push_back(mipsCode(lw, regName, "$fp", "", -4 * addr));
+							if (debug) {
+								cout << regName << " = " << name << "\n";
+							}
+						}
+						else {
+							addr = allLocalSymbolTable[curFuncName][name].addr;
+							mipsCodeTable.push_back(mipsCode(lw, regName, "$fp", "", -4 * addr));
+						}
+					}
+					else {
+						addr = allLocalSymbolTable[curFuncName][name].addr;
+						mipsCodeTable.push_back(mipsCode(lw, regName, "$fp", "", -4 * addr));
+					}
+				}
 			}
 		}
 	}
@@ -138,6 +186,7 @@ void genMips() {
 			get2 = false;
 			loadValue(mc.y, sy, false, va2, get2);
 			int find;
+			int sfind;
 			if (mc.z[0] == '#') {  //mc.z是中间变量 分配t寄存器
 				find = findEmptyTReg();
 				if (find != -1) {  //有空闲
@@ -146,6 +195,26 @@ void genMips() {
 					sz = "$t" + int2string(find);  //sz修改成$t(find) 直接给他赋值 而不需要move sz, $t(find)
 					if (debug) {
 						cout << sz << " = " << mc.z << "\n";
+					}
+				}
+			}
+			else {
+				if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
+					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
+					sfind = findNameHaveSReg(mc.z);
+					if (sfind != -1) {  //被分配了寄存器 直接用寄存器的值
+						sz = "$s" + int2string(sfind);
+					}
+					else {  //没有被分配寄存器
+						sfind = findEmptySReg();
+						if (sfind != -1) {  //有空闲
+							sRegBusy[sfind] = 1;  //打标记
+							sRegContent[sfind] = mc.z;  //find这个寄存器保存了mc.z的值
+							sz = "$s" + int2string(sfind);  //sz修改成$s(sfind) 直接给他赋值 而不需要move sz, $s(sfind)
+							if (debug) {
+								cout << sz << " = " << mc.z << "\n";
+							}
+						}
 					}
 				}
 			}
@@ -167,7 +236,15 @@ void genMips() {
 				} //有空闲寄存器的话 已经直接保存到它里边了
 			}
 			else {
-				storeValue(mc.z, sz);
+				if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
+					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
+					if (sfind == -1) {  //没有空闲
+						storeValue(mc.z, sz);
+					} //有空闲寄存器的话 已经直接保存到它里边了
+				}
+				else {  //全局变量等
+					storeValue(mc.z, sz);
+				}
 			}
 			break;
 		}
@@ -178,6 +255,7 @@ void genMips() {
 			get2 = false;
 			loadValue(mc.y, sy, false, va2, get2);
 			int find;
+			int sfind;
 			if (mc.z[0] == '#') {  //mc.z是中间变量 分配t寄存器
 				find = findEmptyTReg();
 				if (find != -1) {  //有空闲
@@ -186,6 +264,26 @@ void genMips() {
 					sz = "$t" + int2string(find);  //sz修改成$t(find) 直接给他赋值 而不需要move sz, $t(find)
 					if (debug) {
 						cout << sz << " = " << mc.z << "\n";
+					}
+				}
+			}
+			else {
+				if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
+					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
+					sfind = findNameHaveSReg(mc.z);
+					if (sfind != -1) {  //被分配了寄存器 直接用寄存器的值
+						sz = "$s" + int2string(sfind);
+					}
+					else {  //没有被分配寄存器
+						sfind = findEmptySReg();
+						if (sfind != -1) {  //有空闲
+							sRegBusy[sfind] = 1;  //打标记
+							sRegContent[sfind] = mc.z;  //find这个寄存器保存了mc.z的值
+							sz = "$s" + int2string(sfind);  //sz修改成$s(sfind) 直接给他赋值 而不需要move sz, $s(sfind)
+							if (debug) {
+								cout << sz << " = " << mc.z << "\n";
+							}
+						}
 					}
 				}
 			}
@@ -208,7 +306,15 @@ void genMips() {
 				} //有空闲寄存器的话 已经直接保存到它里边了
 			}
 			else {
-				storeValue(mc.z, sz);
+				if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
+					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
+					if (sfind == -1) {  //没有空闲
+						storeValue(mc.z, sz);
+					} //有空闲寄存器的话 已经直接保存到它里边了
+				}
+				else {  //全局变量等
+					storeValue(mc.z, sz);
+				}
 			}
 			break;
 		}
@@ -219,6 +325,7 @@ void genMips() {
 			get2 = false;
 			loadValue(mc.y, sy, false, va2, get2);
 			int find;
+			int sfind;
 			if (mc.z[0] == '#') {  //mc.z是中间变量 分配t寄存器
 				find = findEmptyTReg();
 				if (find != -1) {  //有空闲
@@ -227,6 +334,26 @@ void genMips() {
 					sz = "$t" + int2string(find);  //sz修改成$t(find) 直接给他赋值 而不需要move sz, $t(find)
 					if (debug) {
 						cout << sz << " = " << mc.z << "\n";
+					}
+				}
+			}
+			else {
+				if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
+					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
+					sfind = findNameHaveSReg(mc.z);
+					if (sfind != -1) {  //被分配了寄存器 直接用寄存器的值
+						sz = "$s" + int2string(sfind);
+					}
+					else {  //没有被分配寄存器
+						sfind = findEmptySReg();
+						if (sfind != -1) {  //有空闲
+							sRegBusy[sfind] = 1;  //打标记
+							sRegContent[sfind] = mc.z;  //find这个寄存器保存了mc.z的值
+							sz = "$s" + int2string(sfind);  //sz修改成$s(sfind) 直接给他赋值 而不需要move sz, $s(sfind)
+							if (debug) {
+								cout << sz << " = " << mc.z << "\n";
+							}
+						}
 					}
 				}
 			}
@@ -266,7 +393,15 @@ void genMips() {
 				} //有空闲寄存器的话 已经直接保存到它里边了
 			}
 			else {
-				storeValue(mc.z, sz);
+				if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
+					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
+					if (sfind == -1) {  //没有空闲
+						storeValue(mc.z, sz);
+					} //有空闲寄存器的话 已经直接保存到它里边了
+				}
+				else {  //全局变量等
+					storeValue(mc.z, sz);
+				}
 			}
 			break;
 		}
@@ -277,6 +412,7 @@ void genMips() {
 			get2 = false;
 			loadValue(mc.y, sy, false, va2, get2);
 			int find;
+			int sfind;
 			if (mc.z[0] == '#') {  //mc.z是中间变量 分配t寄存器
 				find = findEmptyTReg();
 				if (find != -1) {  //有空闲
@@ -285,6 +421,26 @@ void genMips() {
 					sz = "$t" + int2string(find);  //sz修改成$t(find) 直接给他赋值 而不需要move sz, $t(find)
 					if (debug) {
 						cout << sz << " = " << mc.z << "\n";
+					}
+				}
+			}
+			else {
+				if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
+					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
+					sfind = findNameHaveSReg(mc.z);
+					if (sfind != -1) {  //被分配了寄存器 直接用寄存器的值
+						sz = "$s" + int2string(sfind);
+					}
+					else {  //没有被分配寄存器
+						sfind = findEmptySReg();
+						if (sfind != -1) {  //有空闲
+							sRegBusy[sfind] = 1;  //打标记
+							sRegContent[sfind] = mc.z;  //find这个寄存器保存了mc.z的值
+							sz = "$s" + int2string(sfind);  //sz修改成$s(sfind) 直接给他赋值 而不需要move sz, $s(sfind)
+							if (debug) {
+								cout << sz << " = " << mc.z << "\n";
+							}
+						}
 					}
 				}
 			}
@@ -321,7 +477,15 @@ void genMips() {
 				} //有空闲寄存器的话 已经直接保存到它里边了
 			}
 			else {
-				storeValue(mc.z, sz);
+				if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
+					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
+					if (sfind == -1) {  //没有空闲
+						storeValue(mc.z, sz);
+					} //有空闲寄存器的话 已经直接保存到它里边了
+				}
+				else {  //全局变量等
+					storeValue(mc.z, sz);
+				}
 			}
 			break;
 		}
@@ -606,7 +770,32 @@ void genMips() {
 				}
 			}
 			else {
-				storeValue(mc.z, sx);
+				if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
+					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
+					int sfind = findNameHaveSReg(mc.z);
+					if (sfind != -1) {  //被分配了寄存器 直接用寄存器的值
+						sz = "$s" + int2string(sfind);
+						mipsCodeTable.push_back(mipsCode(moveop, sz, sx, ""));
+					}
+					else {  //没有被分配寄存器
+						sfind = findEmptySReg();
+						if (sfind != -1) {  //有空闲
+							sRegBusy[sfind] = 1;  //打标记
+							sRegContent[sfind] = mc.z;  //find这个寄存器保存了mc.z的值
+							sz = "$s" + int2string(sfind);  //sz修改成$s(sfind) 直接给他赋值 而不需要move sz, $s(sfind)
+							mipsCodeTable.push_back(mipsCode(moveop, sz, sx, ""));
+							if (debug) {
+								cout << sz << " = " << mc.z << "\n";
+							}
+						}
+						else {
+							storeValue(mc.z, sx);
+						}
+					}
+				}
+				else {
+					storeValue(mc.z, sx);
+				}
 			}
 			break;
 		}
@@ -619,16 +808,10 @@ void genMips() {
 			break;
 		}
 		case CALL: {
-			int tRegNum = 0;
-			for (int i = 3; i <= 9; i++) {
-				if (tRegBusy[i]) {
-					mipsCodeTable.push_back(mipsCode(sw, "$t" + int2string(i), "$sp", "", -4 * tRegNum));
-					tRegNum++;
-				}
-			}
-			string sx = "$t0";
+			string sx;
 			paramSize = globalSymbolTable[mc.z].parameterTable.size();
 			while (paramSize) {
+				sx = "$t0";
 				paramSize--;
 				if (pushOpStack.empty()) {
 					cout << "ERROR!!!!!!!!\n";
@@ -636,28 +819,39 @@ void genMips() {
 				midCode tmpMc = pushOpStack.top();
 				pushOpStack.pop();
 				loadValue(tmpMc.z, sx, true, va, get1);
-				mipsCodeTable.push_back(mipsCode(sw, sx, "$sp", "", -4 * paramSize - 4 * tRegNum));
+				mipsCodeTable.push_back(mipsCode(sw, sx, "$sp", "", -4 * paramSize));
 			}
-			mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -4 * globalSymbolTable[mc.z].length - 4 * tRegNum - 8));
-			mipsCodeTable.push_back(mipsCode(sw, "$ra", "$sp", "", 4));
-			mipsCodeTable.push_back(mipsCode(sw, "$fp", "$sp", "", 8));
-			mipsCodeTable.push_back(mipsCode(addi, "$fp", "$sp", "", 4 * globalSymbolTable[mc.z].length + 8));
-			mipsCodeTable.push_back(mipsCode(jal, mc.z, "", ""));
-			mipsCodeTable.push_back(mipsCode(lw, "$fp", "$sp", "", 8));
-			mipsCodeTable.push_back(mipsCode(lw, "$ra", "$sp", "", 4));
-			mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", 4 * globalSymbolTable[mc.z].length + 4 * tRegNum + 8));
-			tRegNum = 0;
+			vector<string> varList;
 			for (int i = 3; i <= 9; i++) {
 				if (tRegBusy[i]) {
-					mipsCodeTable.push_back(mipsCode(lw, "$t" + int2string(i), "$sp", "", -4 * tRegNum));
-					tRegNum++;
+					varList.push_back("$t" + int2string(i));
 				}
 			}
+			for (int i = 0; i <= 7; i++) {
+				if (sRegBusy[i]) {
+					varList.push_back("$s" + int2string(i));
+				}
+			}
+			int len = 4 * globalSymbolTable[mc.z].length + 4 * varList.size() + 8;
+			mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -len));
+			mipsCodeTable.push_back(mipsCode(sw, "$ra", "$sp", "", 4));
+			mipsCodeTable.push_back(mipsCode(sw, "$fp", "$sp", "", 8));
+			for (int i = 0; i < varList.size(); i++) {
+				mipsCodeTable.push_back(mipsCode(sw, varList[i], "$sp", "", 8 + 4 * i + 4));
+			}
+			mipsCodeTable.push_back(mipsCode(addi, "$fp", "$sp", "", len));
+			mipsCodeTable.push_back(mipsCode(jal, mc.z, "", ""));
+			for (int i = 0; i < varList.size(); i++) {
+				mipsCodeTable.push_back(mipsCode(lw, varList[i], "$sp", "", 8 + 4 * i + 4));
+			}
+			mipsCodeTable.push_back(mipsCode(lw, "$fp", "$sp", "", 8));
+			mipsCodeTable.push_back(mipsCode(lw, "$ra", "$sp", "", 4));
+			mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", len));
 			break;
 		}
 		case RET: {
 			string sv = "$v0";
-			loadValue(mc.z, sv, true, va, get1); 
+			loadValue(mc.z, sv, true, va, get1, false); 
 			//这里只需要单纯的给v0赋值 如果mc.z是被分配了寄存器的中间变量
 			//sv就会被修改为mc.z的那个寄存器 但是这时v0没有被赋值，只是知道了mc.z的值保存在寄存器sv中
 			if (sv != "$v0") {
@@ -668,7 +862,7 @@ void genMips() {
 		}
 		case INLINERET: {
 			string sv = "$v0";
-			loadValue(mc.z, sv, true, va, get1);
+			loadValue(mc.z, sv, true, va, get1, false);
 			//这里只需要单纯的给v0赋值 如果mc.z是被分配了寄存器的中间变量
 			//sv就会被修改为mc.z的那个寄存器 但是这时v0没有被赋值，只是知道了mc.z的值保存在寄存器sv中
 			if (sv != "$v0") {
@@ -699,9 +893,33 @@ void genMips() {
 			}
 			else {
 				if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
-					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {
-					addr = allLocalSymbolTable[curFuncName][mc.z].addr;
-					mipsCodeTable.push_back(mipsCode(sw, "$v0", "$fp", "", -4 * addr));
+					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
+					int sfind = findNameHaveSReg(mc.z);
+					if (sfind != -1) {  //被分配了寄存器 直接用寄存器的值
+						string sz = "$s" + int2string(sfind);
+						mipsCodeTable.push_back(mipsCode(moveop, sz, "$v0", ""));
+					}
+					else {  //没有被分配寄存器
+						sfind = findEmptySReg();
+						if (sfind != -1) {  //有空闲
+							sRegBusy[sfind] = 1;  //打标记
+							sRegContent[sfind] = mc.z;  //find这个寄存器保存了mc.z的值
+							string sz = "$s" + int2string(sfind);  //sz修改成$s(sfind) 直接给他赋值 而不需要move sz, $s(sfind)
+							mipsCodeTable.push_back(mipsCode(moveop, sz, "$v0", ""));
+							if (debug) {
+								cout << sz << " = " << mc.z << "\n";
+							}
+						}
+						else {
+							addr = allLocalSymbolTable[curFuncName][mc.z].addr;
+							mipsCodeTable.push_back(mipsCode(sw, "$v0", "$fp", "", -4 * addr));
+						}
+					}
+				}
+				else if (globalSymbolTable.find(mc.z) != globalSymbolTable.end()
+					&& globalSymbolTable[mc.z].kind == 1) {
+					addr = globalSymbolTable[mc.z].addr;
+					mipsCodeTable.push_back(mipsCode(sw, "$v0", "$gp", "", addr * 4));
 				}
 			}
 			break;
@@ -717,8 +935,27 @@ void genMips() {
 					mipsCodeTable.push_back(mipsCode(li, "$v0", "", "", 12));
 				}
 				mipsCodeTable.push_back(mipsCode(syscall, "", "", ""));
-				addr = allLocalSymbolTable[curFuncName][mc.z].addr;
-				mipsCodeTable.push_back(mipsCode(sw, "$v0", "$fp", "", -4 * addr));
+				int sfind = findNameHaveSReg(mc.z);
+				if (sfind != -1) {  //被分配了寄存器 直接用寄存器的值
+					string sz = "$s" + int2string(sfind);
+					mipsCodeTable.push_back(mipsCode(moveop, sz, "$v0", ""));
+				}
+				else {  //没有被分配寄存器
+					int sfind = findEmptySReg();
+					if (sfind != -1) {  //有空闲
+						sRegBusy[sfind] = 1;  //打标记
+						sRegContent[sfind] = mc.z;  //find这个寄存器保存了mc.z的值
+						string sz = "$s" + int2string(sfind);  //sz修改成$s(sfind) 直接给他赋值 而不需要move sz, $s(sfind)
+						mipsCodeTable.push_back(mipsCode(moveop, sz, "$v0", ""));
+						if (debug) {
+							cout << sz << " = " << mc.z << "\n";
+						}
+					}
+					else {
+						addr = allLocalSymbolTable[curFuncName][mc.z].addr;
+						mipsCodeTable.push_back(mipsCode(sw, "$v0", "$fp", "", -4 * addr));
+					}
+				}
 			}
 			else if (globalSymbolTable.find(mc.z) != globalSymbolTable.end()
 				&& globalSymbolTable[mc.z].kind == 1) {
@@ -772,6 +1009,10 @@ void genMips() {
 			//需要为前一个函数做jr $ra 注意第一个函数不用做
 			if (flag) {
 				mipsCodeTable.push_back(mipsCode(jr, "$ra", "", ""));
+				for (int i = 0; i <= 7; i++) {
+					sRegBusy[i] = 0;
+					sRegContent[i] = "";
+				}
 			}
 			flag = true;
 			mipsCodeTable.push_back(mipsCode(label, mc.x, "", ""));
@@ -783,6 +1024,20 @@ void genMips() {
 			curFuncName = mc.x;  //记录当前的函数名字
 			break;
 		}
+		case PARAM: {  //对于所有的参数 先直接给他分配s寄存器 同时把值取出来
+			int sfind = findEmptySReg();
+			if (sfind != -1) {  //有空闲
+				sRegBusy[sfind] = 1;  //打标记
+				sRegContent[sfind] = mc.x;  //find这个寄存器保存了mc.x的值
+				string sx = "$s" + int2string(sfind);
+				addr = allLocalSymbolTable[curFuncName][mc.x].addr;
+				mipsCodeTable.push_back(mipsCode(lw, sx, "$fp", "", -4 * addr));
+				if (debug) {
+					cout << sx << " = " << mc.x << "\n";
+				}
+			}
+			//没有空闲就不分配了
+		}
 		case GETARRAY: {
 			string sy = "$t0", sz = "$t1";
 			//midCodefile << mc.z << " = " << mc.x << "[" << mc.y << "]\n";
@@ -792,6 +1047,7 @@ void genMips() {
 			get1 = false;
 			loadValue(mc.y, sy, false, va, get1);
 			int find;
+			int sfind;
 			if (mc.z[0] == '#') {  //mc.z是中间变量 分配t寄存器
 				find = findEmptyTReg();
 				if (find != -1) {  //有空闲
@@ -803,13 +1059,33 @@ void genMips() {
 					}
 				}
 			}
+			else {
+				if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
+					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
+					int sfind = findNameHaveSReg(mc.z);
+					if (sfind != -1) {  //被分配了寄存器 直接用寄存器的值
+						sz = "$s" + int2string(sfind);
+					}
+					else {  //没有被分配寄存器
+						sfind = findEmptySReg();
+						if (sfind != -1) {  //有空闲
+							sRegBusy[sfind] = 1;  //打标记
+							sRegContent[sfind] = mc.z;  //find这个寄存器保存了mc.z的值
+							sz = "$s" + int2string(sfind);  //sz修改成$s(sfind) 直接给他赋值 而不需要move sz, $s(sfind)
+							if (debug) {
+								cout << sz << " = " << mc.z << "\n";
+							}
+						}
+					}
+				}
+			}
 			if (allLocalSymbolTable[curFuncName].find(mc.x) != allLocalSymbolTable[curFuncName].end()
 				&& allLocalSymbolTable[curFuncName][mc.x].kind == 4) {  //array
 				addr = allLocalSymbolTable[curFuncName][mc.x].addr;
 				if (!get1) {  //数组下标保存在sy寄存器
 					mipsCodeTable.push_back(mipsCode(addi, "$t2", "$fp", "", -4 * addr));
-					mipsCodeTable.push_back(mipsCode(sll, sy, sy, "", 2));
-					mipsCodeTable.push_back(mipsCode(sub, "$t2", "$t2", sy));
+					mipsCodeTable.push_back(mipsCode(sll, "$t0", sy, "", 2)); //$t0 而不用sy
+					mipsCodeTable.push_back(mipsCode(sub, "$t2", "$t2", "$t0"));
 					mipsCodeTable.push_back(mipsCode(lw, sz, "$t2", "", 0));
 				}
 				else {
@@ -821,8 +1097,8 @@ void genMips() {
 				addr = globalSymbolTable[mc.x].addr;
 				if (!get1) {  //数组下标保存在sy寄存器
 					mipsCodeTable.push_back(mipsCode(addi, "$t2", "$gp", "", addr * 4));
-					mipsCodeTable.push_back(mipsCode(sll, sy, sy, "", 2));
-					mipsCodeTable.push_back(mipsCode(add, "$t2", "$t2", sy));
+					mipsCodeTable.push_back(mipsCode(sll, "$t0", sy, "", 2));
+					mipsCodeTable.push_back(mipsCode(add, "$t2", "$t2", "$t0"));
 					mipsCodeTable.push_back(mipsCode(lw, sz, "$t2", "", 0));
 				}
 				else {
@@ -835,7 +1111,15 @@ void genMips() {
 				} //有空闲寄存器的话 已经直接保存到它里边了
 			}
 			else {
-				storeValue(mc.z, sz);
+				if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
+					&& allLocalSymbolTable[curFuncName][mc.z].kind == 1) {  //局部变量
+					if (sfind == -1) {  //没有空闲
+						storeValue(mc.z, sz);
+					} //有空闲寄存器的话 已经直接保存到它里边了
+				}
+				else {  //全局变量等
+					storeValue(mc.z, sz);
+				}
 			}
 			break;
 		}
@@ -853,8 +1137,8 @@ void genMips() {
 				addr = allLocalSymbolTable[curFuncName][mc.z].addr;
 				if (!get1) {  //数组下标保存在sx寄存器
 					mipsCodeTable.push_back(mipsCode(addi, "$t2", "$fp", "", -4 * addr));
-					mipsCodeTable.push_back(mipsCode(sll, sx, sx, "", 2));
-					mipsCodeTable.push_back(mipsCode(sub, "$t2", "$t2", sx));
+					mipsCodeTable.push_back(mipsCode(sll, "$t0", sx, "", 2));
+					mipsCodeTable.push_back(mipsCode(sub, "$t2", "$t2", "$t0"));
 					mipsCodeTable.push_back(mipsCode(sw, sy, "$t2", "", 0));
 				}
 				else { //拿到了数组下标 存在了va中
@@ -866,8 +1150,8 @@ void genMips() {
 				addr = globalSymbolTable[mc.z].addr;
 				if (!get1) {  //数组下标保存在sx寄存器
 					mipsCodeTable.push_back(mipsCode(addi, "$t2", "$gp", "", addr * 4));
-					mipsCodeTable.push_back(mipsCode(sll, sx, sx, "", 2));
-					mipsCodeTable.push_back(mipsCode(add, "$t2", "$t2", sx));
+					mipsCodeTable.push_back(mipsCode(sll, "$t0", sx, "", 2));
+					mipsCodeTable.push_back(mipsCode(add, "$t2", "$t2", "$t0"));
 					mipsCodeTable.push_back(mipsCode(sw, sy, "$t2", "", 0));
 				}
 				else {
