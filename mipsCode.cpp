@@ -816,10 +816,12 @@ void genMips() {
 				if (pushOpStack.empty()) {
 					cout << "ERROR!!!!!!!!\n";
 				}
-				midCode tmpMc = pushOpStack.top();
-				pushOpStack.pop();
-				loadValue(tmpMc.z, sx, true, va, get1);
-				mipsCodeTable.push_back(mipsCode(sw, sx, "$sp", "", -4 * paramSize));
+				else {
+					midCode tmpMc = pushOpStack.top();
+					pushOpStack.pop();
+					loadValue(tmpMc.z, sx, true, va, get1);
+					mipsCodeTable.push_back(mipsCode(sw, sx, "$sp", "", -4 * paramSize));
+				}
 			}
 			vector<string> varList;
 			for (int i = 3; i <= 9; i++) {

@@ -172,7 +172,9 @@ void splitBlock() {
 		vector<Block> blockVe;
 		for (int i = 0; i + 1 < splitVe.size(); i++) {
 			Block bl = Block(splitVe[i], splitVe[i + 1] - 1, -1, -1);
-			if (mcVe[splitVe[i + 1] - 1].op != RET && mcVe[splitVe[i + 1] - 1].op != EXIT) { //ret没有后继1,2
+			//RET,EXIT没有后继1,2  GOTO只有后继2 BZ,BNZ两个后继都有
+			if (mcVe[splitVe[i + 1] - 1].op != RET && mcVe[splitVe[i + 1] - 1].op != EXIT
+				&& mcVe[splitVe[i + 1] - 1].op != GOTO) {
 				bl.setnextBlock1(splitVe[i + 1]);
 			}
 			if (mcVe[splitVe[i + 1] - 1].op == BZ || mcVe[splitVe[i + 1] - 1].op == BNZ || mcVe[splitVe[i + 1] - 1].op == GOTO) {
@@ -266,6 +268,8 @@ void calInOut() {
 				break;
 			}
 		}
+		//当前是对blVe的修改 需要恢复到map中
+		(*it).second = blVe;
 	}
 }
 
