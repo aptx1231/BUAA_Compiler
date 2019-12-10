@@ -187,19 +187,43 @@ void genMips() {
 			sRegBusy[si] = 0;
 			sRegContent[si] = "";
 		}
+		bool canRelese = true;
+		char lorc = ' ';
 		for (int w = 0; w < blVe.size(); w++) {
-			/*for (int si = 0; si <= 7; si++) {
-				if (sRegBusy[si]) {
-					vector<string> blockIn = blVe[w].in;
-					if (find(blockIn.begin(), blockIn.end(), sRegContent[si]) == blockIn.end()) {
-						if (debug) {
-							cout << "del " << "$s" + int2string(si) << " = " << sRegContent[si] << "\n";
+			if (blVe[w].midCodeVector[0].op == LABEL) {
+				string label = blVe[w].midCodeVector[0].z;
+				int len = label.size();
+				if (label[len - 2] == 'L' && label[len - 1] == 'B' && canRelese == true) {
+					canRelese = false;
+					lorc = 'l';
+				}
+				if (label[len - 2] == 'L' && label[len - 1] == 'E' && lorc == 'l') {
+					canRelese = true;
+					lorc = ' ';
+				}
+				if (label[len - 2] == 'C' && label[len - 1] == 'B' && canRelese == true) {
+					canRelese = false;
+					lorc = 'c';
+				}
+				if (label[len - 2] == 'C' && label[len - 1] == 'E' && lorc == 'c') {
+					canRelese = true;
+					lorc = ' ';
+				}
+			}
+			if (canRelese) {
+				for (int si = 0; si <= 7; si++) {
+					if (sRegBusy[si]) {
+						vector<string> blockIn = blVe[w].in;
+						if (find(blockIn.begin(), blockIn.end(), sRegContent[si]) == blockIn.end()) {
+							if (debug) {
+								cout << "del " << "$s" + int2string(si) << " = " << sRegContent[si] << "\n";
+							}
+							sRegBusy[si] = 0;
+							sRegContent[si] = "";
 						}
-						sRegBusy[si] = 0;
-						sRegContent[si] = "";
 					}
 				}
-			}*/
+			}
 			vector<midCode> mcVe = blVe[w].midCodeVector;
 			for (int i = 0; i < mcVe.size(); i++) {
 				midCode mc = mcVe[i];
