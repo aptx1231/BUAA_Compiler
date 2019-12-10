@@ -1619,7 +1619,15 @@ bool factor(int& type, string& ansTmp) {
 				string op1 = genTmp();
 				localSymbolTable.insert(make_pair(op1, symbolItem(op1, localAddr, 1, type)));  //kind=1=var,type=函数返回类型
 				localAddr++;
-				midCodeTable.push_back(midCode(RETVALUE, op1, "RET", ""));
+				//如果当前中间代码最后一个是INLINERET 说明此函数内联了
+				if (midCodeTable[midCodeTable.size() - 1].op == INLINERET) {
+					string value = midCodeTable[midCodeTable.size() - 1].z;
+					midCodeTable.pop_back();
+					midCodeTable.push_back(midCode(ASSIGNOP, op1, value, ""));
+				}
+				else {
+					midCodeTable.push_back(midCode(RETVALUE, op1, "RET", ""));
+				}
 				ansTmp = op1;
 				//调用有返回值的函数调用语句成功 并预读了一个单词
 				outputfile << "<因子>" << endl;
@@ -2718,9 +2726,16 @@ void dealInlineFunc(string name) {
 		if (nameMap.find(mc.y) != nameMap.end()) {
 			mc.y = nameMap[mc.y];
 		}
+		if (mc.op == RET) {
+			if (mc.z == "") { //无返回值函数
+				break;  //正常是continue 但是到了RET 后边就没了 直接break
+			}
+			else {
+				mc.op = INLINERET;
+			}
+		}
 		midCodeTable.push_back(mc);
-		if (ve[i].op == RET) {
-			midCodeTable[midCodeTable.size() - 1].op = INLINERET;
+		if (mc.op == RET) {
 			break;
 		}
 	}

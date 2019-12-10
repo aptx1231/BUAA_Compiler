@@ -1087,7 +1087,7 @@ void genMips() {
 					mipsCodeTable.push_back(mipsCode(jr, "$ra", "", ""));
 					break;
 				}
-				case INLINERET: {
+				/*case INLINERET: {
 					string sv = "$v0";
 					loadValue(mc.z, sv, true, va, get1, false);
 					//这里只需要单纯的给v0赋值 如果mc.z是被分配了寄存器的中间变量
@@ -1096,7 +1096,7 @@ void genMips() {
 						mipsCodeTable.push_back(mipsCode(moveop, "$v0", sv, ""));
 					}
 					break;
-				}
+				}*/
 				case RETVALUE: {
 					//mc.z 是产生的一个中间变量 需要把$v0的值赋给他 尝试分配寄存器
 					if (mc.z[0] == '#') {  //mc.z是中间变量 分配t寄存器
