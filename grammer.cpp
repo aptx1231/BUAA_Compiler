@@ -2088,6 +2088,8 @@ bool conditionStatement() {
 				}
 				laba = genLabel();  //建立标号a
 				midCodeTable.push_back(midCode(BZ, laba, "<>", ""));  //不满足条件(result==0)则跳转到标号a
+				string lbegin = genLabel("CB");
+				midCodeTable.push_back(midCode(LABEL, lbegin, "", ""));  //if 分支的开头
 				if (!statement()) {  //分析语句
 					return false;
 				}
@@ -2112,6 +2114,8 @@ bool conditionStatement() {
 				else {
 					midCodeTable.push_back(midCode(LABEL, laba, "", ""));  //没有else 在语句后边设置标号a
 				}
+				string lend = genLabel("CE");
+				midCodeTable.push_back(midCode(LABEL, lend, "", ""));  //条件结束
 				outputfile << "<条件语句>" << endl;
 				return true;
 			}
@@ -2233,7 +2237,7 @@ bool repeatStatement() {
 		}
 	}
 	else if (symbol == DOTK) {  // do＜语句＞while '('＜条件＞')'
-		string labr = genLabel("LB");
+		string labr = genLabel();
 		midCodeTable.push_back(midCode(LABEL, labr, "", "")); //设置labr 用于执行一次循环之后回跳
 		doOutput();
 		int re = getsym();
@@ -2273,8 +2277,8 @@ bool repeatStatement() {
 				if (symbol == RPARENT) {  //)
 					doOutput();
 					midCodeTable.push_back(midCode(BNZ, labr, "<>", "")); //满足条件(result==1)的话 跳到labr 继续循环
-					string labf = genLabel("LE");
-					midCodeTable.push_back(midCode(LABEL, labf, "", ""));  //设置labf 用于结束循环
+					//string labf = genLabel("LE");
+					//midCodeTable.push_back(midCode(LABEL, labf, "", ""));  //设置labf 用于结束循环
 					outputfile << "<循环语句>" << endl;
 					getsym(); //预读一个 不管是啥
 					return true;
