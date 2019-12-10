@@ -529,7 +529,12 @@ void genMips() {
 							}
 						}
 						else if (get1 && !get2) {  //va >= $t1
-							mipsCodeTable.push_back(mipsCode(ble, sy, int2string(va), mcNext.z));  //ble <=跳转 代价4
+							if (va != 0) {
+								mipsCodeTable.push_back(mipsCode(ble, sy, int2string(va), mcNext.z));  //ble <=跳转 代价4
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(ble, sy, "$0", mcNext.z));  //ble <=跳转 代价3
+							}
 						}
 						else if (!get1 && get2) {  //$t0 >= va2
 							mipsCodeTable.push_back(mipsCode(bge, sx, int2string(va2), mcNext.z));  //bge >=跳转 代价3
@@ -545,7 +550,12 @@ void genMips() {
 							}
 						}
 						else if (get1 && !get2) {  //va < $t1
-							mipsCodeTable.push_back(mipsCode(bgt, sy, int2string(va), mcNext.z));  //bgt >跳转 代价4
+							if (va != 0) {
+								mipsCodeTable.push_back(mipsCode(bgt, sy, int2string(va), mcNext.z));  //bgt >跳转 代价4
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(bgt, sy, "$0", mcNext.z));  //bgt >跳转 代价3
+							}
 						}
 						else if (!get1 && get2) {  //$t0 < va2
 							mipsCodeTable.push_back(mipsCode(blt, sx, int2string(va2), mcNext.z));  //blt <跳转 代价3
@@ -574,7 +584,12 @@ void genMips() {
 							mipsCodeTable.push_back(mipsCode(blt, sy, int2string(va), mcNext.z));  //blt <跳转 代价3
 						}
 						else if (!get1 && get2) {  //$t0 > va2
-							mipsCodeTable.push_back(mipsCode(bgt, sx, int2string(va2), mcNext.z));  //bgt >跳转 代价4
+							if (va2 != 0) {
+								mipsCodeTable.push_back(mipsCode(bgt, sx, int2string(va2), mcNext.z));  //bgt >跳转 代价4
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(bgt, sx, "$0", mcNext.z));  //bgt >跳转 代价3
+							}
 						}
 						else {  //$t0 > $t1
 							mipsCodeTable.push_back(mipsCode(bgt, sx, sy, mcNext.z));  //bgt >跳转 代价3
@@ -590,7 +605,12 @@ void genMips() {
 							mipsCodeTable.push_back(mipsCode(bge, sy, int2string(va), mcNext.z));  //bge >=跳转 代价3
 						}
 						else if (!get1 && get2) {  //$t0 <= va2
-							mipsCodeTable.push_back(mipsCode(ble, sx, int2string(va2), mcNext.z));  //ble <=跳转 代价4
+							if (va2 != 0) {
+								mipsCodeTable.push_back(mipsCode(ble, sx, int2string(va2), mcNext.z));  //ble <=跳转 代价4
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(ble, sx, "$0", mcNext.z));  //ble <=跳转 代价3
+							}
 						}
 						else { //$t0 <= $t1
 							mipsCodeTable.push_back(mipsCode(ble, sx, sy, mcNext.z));  //ble <=跳转 代价3
@@ -616,7 +636,12 @@ void genMips() {
 							mipsCodeTable.push_back(mipsCode(bge, sy, int2string(va), mcNext.z));  //bge >=跳转 代价3
 						}
 						else if (!get1 && get2) {  //$t0 <= va2
-							mipsCodeTable.push_back(mipsCode(ble, sx, int2string(va2), mcNext.z));  //ble <=跳转 代价4
+							if (va2 != 0) {
+								mipsCodeTable.push_back(mipsCode(ble, sx, int2string(va2), mcNext.z));  //ble <=跳转 代价4
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(ble, sx, "$0", mcNext.z));  //ble <=跳转 代价3
+							}
 						}
 						else { //$t0 <= $t1
 							mipsCodeTable.push_back(mipsCode(ble, sx, sy, mcNext.z));  //ble <=跳转 代价3
@@ -632,7 +657,12 @@ void genMips() {
 							mipsCodeTable.push_back(mipsCode(blt, sy, int2string(va), mcNext.z));  //blt <跳转 代价3
 						}
 						else if (!get1 && get2) {  //$t0 > va2
-							mipsCodeTable.push_back(mipsCode(bgt, sx, int2string(va2), mcNext.z));  //bgt >跳转 代价4
+							if (va2 != 0) {
+								mipsCodeTable.push_back(mipsCode(bgt, sx, int2string(va2), mcNext.z));  //bgt >跳转 代价4
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(bgt, sx, "$0", mcNext.z));  //bgt >跳转 代价3
+							}
 						}
 						else {  //$t0 > $t1
 							mipsCodeTable.push_back(mipsCode(bgt, sx, sy, mcNext.z));  //bgt >跳转 代价3
@@ -655,7 +685,12 @@ void genMips() {
 							}
 						}
 						else if (get1 && !get2) {  //va < $t1
-							mipsCodeTable.push_back(mipsCode(bgt, sy, int2string(va), mcNext.z));  //bgt >跳转 代价4
+							if (va != 0) {
+								mipsCodeTable.push_back(mipsCode(bgt, sy, int2string(va), mcNext.z));  //bgt >跳转 代价4
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(bgt, sy, "$0", mcNext.z));  //bgt >跳转 代价3
+							}
 						}
 						else if (!get1 && get2) {  //$t0 < va2
 							mipsCodeTable.push_back(mipsCode(blt, sx, int2string(va2), mcNext.z));  //blt <跳转 代价3
@@ -671,7 +706,12 @@ void genMips() {
 							}
 						}
 						else if (get1 && !get2) {  //va >= $t1
-							mipsCodeTable.push_back(mipsCode(ble, sy, int2string(va), mcNext.z));  //ble <=跳转 代价4
+							if (va != 0) {
+								mipsCodeTable.push_back(mipsCode(ble, sy, int2string(va), mcNext.z));  //ble <=跳转 代价4
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(ble, sy, "$0", mcNext.z));  //ble <=跳转 代价3
+							}
 						}
 						else if (!get1 && get2) {  //$t0 >= va2
 							mipsCodeTable.push_back(mipsCode(bge, sx, int2string(va2), mcNext.z));  //bge >=跳转 代价3
@@ -697,12 +737,22 @@ void genMips() {
 							}
 						}
 						else if (get1 && !get2) {
-							mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
-							mipsCodeTable.push_back(mipsCode(bne, sx, sy, mcNext.z));
+							if (va != 0) {
+								mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
+								mipsCodeTable.push_back(mipsCode(bne, sx, sy, mcNext.z));
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(bne, "$0", sy, mcNext.z));
+							}
 						}
 						else if (!get1 && get2) {
-							mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
-							mipsCodeTable.push_back(mipsCode(bne, sx, sy, mcNext.z));
+							if (va2 != 0) {
+								mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
+								mipsCodeTable.push_back(mipsCode(bne, sx, sy, mcNext.z));
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(bne, sx, "$0", mcNext.z));
+							}
 						}
 						else {
 							mipsCodeTable.push_back(mipsCode(bne, sx, sy, mcNext.z));
@@ -715,12 +765,22 @@ void genMips() {
 							}
 						}
 						else if (get1 && !get2) {
-							mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
-							mipsCodeTable.push_back(mipsCode(beq, sx, sy, mcNext.z));
+							if (va != 0) {
+								mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
+								mipsCodeTable.push_back(mipsCode(beq, sx, sy, mcNext.z));
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(beq, "$0", sy, mcNext.z));
+							}
 						}
 						else if (!get1 && get2) {
-							mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
-							mipsCodeTable.push_back(mipsCode(beq, sx, sy, mcNext.z));
+							if (va2 != 0) {
+								mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
+								mipsCodeTable.push_back(mipsCode(beq, sx, sy, mcNext.z));
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(beq, sx, "$0", mcNext.z));
+							}
 						}
 						else {
 							mipsCodeTable.push_back(mipsCode(beq, sx, sy, mcNext.z));
@@ -743,12 +803,22 @@ void genMips() {
 							}
 						}
 						else if (get1 && !get2) {
-							mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
-							mipsCodeTable.push_back(mipsCode(beq, sx, sy, mcNext.z));
+							if (va != 0) {
+								mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
+								mipsCodeTable.push_back(mipsCode(beq, sx, sy, mcNext.z));
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(beq, "$0", sy, mcNext.z));
+							}
 						}
 						else if (!get1 && get2) {
-							mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
-							mipsCodeTable.push_back(mipsCode(beq, sx, sy, mcNext.z));
+							if (va2 != 0) {
+								mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
+								mipsCodeTable.push_back(mipsCode(beq, sx, sy, mcNext.z));
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(beq, sx, "$0", mcNext.z));
+							}
 						}
 						else {
 							mipsCodeTable.push_back(mipsCode(beq, sx, sy, mcNext.z));
@@ -761,12 +831,22 @@ void genMips() {
 							}
 						}
 						else if (get1 && !get2) {
-							mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
-							mipsCodeTable.push_back(mipsCode(bne, sx, sy, mcNext.z));
+							if (va != 0) {
+								mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
+								mipsCodeTable.push_back(mipsCode(bne, sx, sy, mcNext.z));
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(bne, "$0", sy, mcNext.z));
+							}
 						}
 						else if (!get1 && get2) {
-							mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
-							mipsCodeTable.push_back(mipsCode(bne, sx, sy, mcNext.z));
+							if (va2 != 0) {
+								mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
+								mipsCodeTable.push_back(mipsCode(bne, sx, sy, mcNext.z));
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(bne, sx, "$0", mcNext.z));
+							}
 						}
 						else {
 							mipsCodeTable.push_back(mipsCode(bne, sx, sy, mcNext.z));
@@ -867,8 +947,20 @@ void genMips() {
 						else {
 							midCode tmpMc = pushOpStack.top();
 							pushOpStack.pop();
-							loadValue(tmpMc.z, sx, true, va, get1);
-							mipsCodeTable.push_back(mipsCode(sw, sx, "$sp", "", -4 * paramSize));
+							get1 = false;
+							loadValue(tmpMc.z, sx, false, va, get1);
+							if (get1) {
+								if (va == 0) {
+									mipsCodeTable.push_back(mipsCode(sw, "$0", "$sp", "", -4 * paramSize));
+								}
+								else {
+									mipsCodeTable.push_back(mipsCode(li, sx, "", "", va));
+									mipsCodeTable.push_back(mipsCode(sw, sx, "$sp", "", -4 * paramSize));
+								}
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(sw, sx, "$sp", "", -4 * paramSize));
+							}
 						}
 					}
 					vector<string> varList;
@@ -1176,7 +1268,8 @@ void genMips() {
 					//mc.x可能是标识符也可能是数值 数组下标 $t0
 					//mc.z是数组名
 					//mc.y可能是标识符也可能是数值 $t1
-					loadValue(mc.y, sy, true, va, get1);
+					get2 = false;
+					loadValue(mc.y, sy, false, va2, get2);
 					get1 = false;
 					loadValue(mc.x, sx, false, va, get1);
 					if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
@@ -1186,10 +1279,32 @@ void genMips() {
 							mipsCodeTable.push_back(mipsCode(addi, "$t2", "$fp", "", -4 * addr));
 							mipsCodeTable.push_back(mipsCode(sll, "$t0", sx, "", 2));
 							mipsCodeTable.push_back(mipsCode(sub, "$t2", "$t2", "$t0"));
-							mipsCodeTable.push_back(mipsCode(sw, sy, "$t2", "", 0));
+							if (get2) {
+								if (va2 == 0) {
+									mipsCodeTable.push_back(mipsCode(sw, "$0", "$t2", "", 0));
+								}
+								else {
+									mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
+									mipsCodeTable.push_back(mipsCode(sw, sy, "$t2", "", 0));
+								}
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(sw, sy, "$t2", "", 0));
+							}
 						}
 						else { //拿到了数组下标 存在了va中
-							mipsCodeTable.push_back(mipsCode(sw, sy, "$fp", "", -4 * (addr + va)));
+							if (get2) {
+								if (va2 == 0) {
+									mipsCodeTable.push_back(mipsCode(sw, "$0", "$fp", "", -4 * (addr + va)));
+								}
+								else {
+									mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
+									mipsCodeTable.push_back(mipsCode(sw, sy, "$fp", "", -4 * (addr + va)));
+								}
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(sw, sy, "$fp", "", -4 * (addr + va)));
+							}
 						}
 					}
 					else if (globalSymbolTable.find(mc.z) != globalSymbolTable.end()
@@ -1199,10 +1314,32 @@ void genMips() {
 							mipsCodeTable.push_back(mipsCode(addi, "$t2", "$gp", "", addr * 4));
 							mipsCodeTable.push_back(mipsCode(sll, "$t0", sx, "", 2));
 							mipsCodeTable.push_back(mipsCode(add, "$t2", "$t2", "$t0"));
-							mipsCodeTable.push_back(mipsCode(sw, sy, "$t2", "", 0));
+							if (get2) {
+								if (va2 == 0) {
+									mipsCodeTable.push_back(mipsCode(sw, "$0", "$t2", "", 0));
+								}
+								else {
+									mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
+									mipsCodeTable.push_back(mipsCode(sw, sy, "$t2", "", 0));
+								}
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(sw, sy, "$t2", "", 0));
+							}
 						}
 						else {
-							mipsCodeTable.push_back(mipsCode(sw, sy, "$gp", "", (addr + va) * 4));
+							if (get2) {
+								if (va2 == 0) {
+									mipsCodeTable.push_back(mipsCode(sw, "$0", "$gp", "", (addr + va) * 4));
+								}
+								else {
+									mipsCodeTable.push_back(mipsCode(li, sy, "", "", va2));
+									mipsCodeTable.push_back(mipsCode(sw, sy, "$gp", "", (addr + va) * 4));
+								}
+							}
+							else {
+								mipsCodeTable.push_back(mipsCode(sw, sy, "$gp", "", (addr + va) * 4));
+							}
 						}
 					}
 					break;
