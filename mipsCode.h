@@ -19,6 +19,10 @@ enum mipsOperation {
 	bge, //扩展指令 相当于一条ALU类指令+一条branch指令
 	blt, //扩展指令 相当于一条ALU类指令+一条branch指令
 	ble, //扩展指令 相当于一条ALU类指令+一条branch指令
+	blez,  //一条branch
+	bgtz,  //一条branch
+	bgez,  //一条branch
+	bltz,  //一条branch
 	j,
 	jal,
 	jr,
