@@ -2186,7 +2186,7 @@ bool repeatStatement() {
 	if (symbol == WHILETK) {  //while '('＜条件＞')'＜语句＞
 		doOutput();
 		string labr, labf;
-		labr = genLabel();
+		labr = genLabel("LB");
 		midCodeTable.push_back(midCode(LABEL, labr, "", ""));  //设置labr 用于执行一次循环之后跳回来
 		int re = getsym();
 		if (re < 0) {
@@ -2213,7 +2213,7 @@ bool repeatStatement() {
 				if (re < 0) {
 					return false;
 				}
-				labf = genLabel();
+				labf = genLabel("LE");
 				midCodeTable.push_back(midCode(BZ, labf, "<>", ""));  //不满足条件(result==0)的话 跳转到labf
 				if (!statement()) {  //分析语句
 					return false;
@@ -2233,7 +2233,7 @@ bool repeatStatement() {
 		}
 	}
 	else if (symbol == DOTK) {  // do＜语句＞while '('＜条件＞')'
-		string labr = genLabel();
+		string labr = genLabel("LB");
 		midCodeTable.push_back(midCode(LABEL, labr, "", "")); //设置labr 用于执行一次循环之后回跳
 		doOutput();
 		int re = getsym();
@@ -2273,6 +2273,8 @@ bool repeatStatement() {
 				if (symbol == RPARENT) {  //)
 					doOutput();
 					midCodeTable.push_back(midCode(BNZ, labr, "<>", "")); //满足条件(result==1)的话 跳到labr 继续循环
+					string labf = genLabel("LE");
+					midCodeTable.push_back(midCode(LABEL, labf, "", ""));  //设置labf 用于结束循环
 					outputfile << "<循环语句>" << endl;
 					getsym(); //预读一个 不管是啥
 					return true;
@@ -2368,12 +2370,12 @@ bool repeatStatement() {
 		else {
 			return false;
 		}
-		lbegin = genLabel();
+		lbegin = genLabel("LB");
 		midCodeTable.push_back(midCode(LABEL, lbegin, "", ""));  //在条件前边放lbegin
 		if (!condition()) {  //分析条件
 			return false;
 		}
-		lend = genLabel();
+		lend = genLabel("LE");
 		midCodeTable.push_back(midCode(BZ, lend, "<>", "")); //不满足条件(result==0)跳到lend 结束for
 		//分析条件成功 并预读了一个单词
 		if (symbol != SEMICN) {

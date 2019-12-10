@@ -65,9 +65,9 @@ int string2int(string s) {
 	return t;
 }
 
-string genLabel() {
+string genLabel(string app) {
 	labelId++;
-	return "Label" + int2string(labelId);
+	return "Label" + int2string(labelId) + app;
 }
 
 string genTmp() {
