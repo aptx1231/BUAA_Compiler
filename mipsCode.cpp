@@ -18,7 +18,7 @@ int tRegBusy[10] = {0,};  //有t3-t9共7个临时寄存器供分配 用于记录
 string tRegContent[10];   //记录每一个临时寄存器分配给了哪一个中间变量 #T0,#T1...
 int sRegBusy[10] = {0,};  //有s0-s7共8个全局寄存器供分配 用于记录全局寄存器是否被占用
 string sRegContent[10];   //记录每一个全局寄存器分配给了哪一个局部变量
-int debug = 1;
+extern int debug;
 
 extern ofstream mipsCodefile;
 extern vector<string> stringList;  //保存所有的字符串

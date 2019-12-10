@@ -14,6 +14,7 @@ ofstream outputfile;
 ofstream errorfile;
 ofstream midCodefile;
 ofstream mipsCodefile;
+int debug = 0;
 
 int main() {
 	inputfile.open("testfile.txt", ios::in);
@@ -39,9 +40,13 @@ int main() {
 			//error()
 		}
 	}
-	showFuncMidCode();
+	if (debug) {
+		showFuncMidCode();
+	}
 	splitBlock();
-	showFuncBlock();
+	if (debug) {
+		showFuncBlock();
+	}
 	outputMidCode();
 	genMips();
 	outputMipsCode();
@@ -50,8 +55,10 @@ int main() {
 	errorfile.close();
 	midCodefile.close();
 	mipsCodefile.close();
-	showGlobal();
-	showAll();
-	showString();
+	if (debug) {
+		showGlobal();
+		showAll();
+		showString();
+	}
 	return 0;
 }

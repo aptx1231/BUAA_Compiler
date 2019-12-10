@@ -24,6 +24,7 @@ extern ofstream errorfile;
 
 extern int oldIndex;    //用于做恢复
 extern int line;  //行号
+extern int debug;
 
 map<string, symbolItem> globalSymbolTable;
 map<string, symbolItem> localSymbolTable;
@@ -864,7 +865,9 @@ void checkBeforeFunc() {
 		bool flag = true;
 		//参数+临时变量+局部变量 减去 参数个数
 		int varCnt = globalSymbolTable[funcName].length - globalSymbolTable[funcName].parameterTable.size();
-		cout << "varCnt0 = " << varCnt << "\n";
+		if (debug) {
+			cout << "varCnt0 = " << varCnt << "\n";
+		}
 		for (map<string, symbolItem>::iterator it = allLocalSymbolTable[funcName].begin();
 										it != allLocalSymbolTable[funcName].end(); it++) { //遍历找临时变量
 			if ((*it).first[0] == '#') {
@@ -874,7 +877,9 @@ void checkBeforeFunc() {
 		if (varCnt > 2) {  //局部变量超过2个 就不内联了
 			flag = false;
 		}
-		cout << "varCnt1 = " << varCnt << "\n";
+		if (debug) {
+			cout << "varCnt1 = " << varCnt << "\n";
+		}
 		//带有全局变量的不内联 全局常量可以 因为常量已经传播成了数字了
 		for (int j = i; j < midCodeTable.size(); j++) {
 			midCode mc = midCodeTable[j];
@@ -1052,7 +1057,9 @@ bool haveReturnValueFunction() {
 				}
 				outputfile << "<有返回值函数定义>" << endl;
 				re = getsym();  //预读 不管读到什么
-				showLocal();
+				if (debug) {
+					showLocal();
+				}
 				allLocalSymbolTable.insert(make_pair(name, localSymbolTable));
 				globalSymbolTable[name].length = localAddr;
 				localSymbolTable.clear();
@@ -1164,7 +1171,9 @@ bool noReturnValueFunction() {
 					doOutput();
 					outputfile << "<无返回值函数定义>" << endl;
 					re = getsym();  //预读 不管读到什么
-					showLocal();
+					if (debug) {
+						showLocal();
+					}
 					allLocalSymbolTable.insert(make_pair(name, localSymbolTable));
 					globalSymbolTable[name].length = localAddr;
 					localSymbolTable.clear();
@@ -1354,7 +1363,9 @@ bool mainFunction() {
 							doOutput();
 							outputfile << "<主函数>" << endl;
 							re = getsym();  //预读 不管读到什么
-							showLocal();
+							if (debug) {
+								showLocal();
+							}
 							allLocalSymbolTable.insert(make_pair("main", localSymbolTable));
 							globalSymbolTable["main"].length = localAddr;
 							localSymbolTable.clear();
