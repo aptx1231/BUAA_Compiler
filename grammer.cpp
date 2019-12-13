@@ -2211,6 +2211,7 @@ bool repeatStatement() {
 		string labr, labf;
 		labr = genLabel("LB");
 		midCodeTable.push_back(midCode(LABEL, labr, "", ""));  //设置labr 用于执行一次循环之后跳回来
+		int conditionBeginIndex = midCodeTable.size();
 		int re = getsym();
 		if (re < 0) {
 			return false;
@@ -2238,10 +2239,44 @@ bool repeatStatement() {
 				}
 				labf = genLabel("LE");
 				midCodeTable.push_back(midCode(BZ, labf, "<>", ""));  //不满足条件(result==0)的话 跳转到labf
+				int conditionEndIndex = midCodeTable.size() - 1;
+				string whileBody = genLabel("LO");
+				midCodeTable.push_back(midCode(LABEL, whileBody, "", ""));
 				if (!statement()) {  //分析语句
 					return false;
 				}
-				midCodeTable.push_back(midCode(GOTO, labr, "", ""));  //执行了一次循环体 无条件回到labr
+				//midCodeTable.push_back(midCode(GOTO, labr, "", ""));  //执行了一次循环体 无条件回到labr
+				/*for (int ix = conditionBeginIndex; ix < conditionEndIndex; ix++) {
+					midCode mc = midCodeTable[ix];
+					midCodeTable.push_back(mc);
+				}*/
+				map<string, string> nMap;
+				for (int ix = conditionBeginIndex; ix < conditionEndIndex; ix++) {
+					midCode mc = midCodeTable[ix];
+					if (mc.x[0] == '#' && nMap.find(mc.x) == nMap.end()) {
+						nMap[mc.x] = genTmp();
+					}
+					if (mc.y[0] == '#' && nMap.find(mc.y) == nMap.end()) {
+						nMap[mc.y] = genTmp();
+					}
+					if (mc.z[0] == '#' && nMap.find(mc.z) == nMap.end()) {
+						nMap[mc.z] = genTmp();
+					}
+				}
+				for (int ix = conditionBeginIndex; ix < conditionEndIndex; ix++) {
+					midCode mc = midCodeTable[ix];
+					if (mc.x[0] == '#') {
+						mc.x = nMap[mc.x];
+					}
+					if (mc.y[0] == '#') {
+						mc.y = nMap[mc.y];
+					}
+					if (mc.z[0] == '#') {
+						mc.z = nMap[mc.z];
+					}
+					midCodeTable.push_back(mc);
+				}
+				midCodeTable.push_back(midCode(BNZ, whileBody, "<>", ""));  //回到whileBody
 				midCodeTable.push_back(midCode(LABEL, labf, "", ""));  //设置labf 用于结束循环
 				//分析语句成功 并预读了一个单词
 				outputfile << "<循环语句>" << endl;
@@ -2395,11 +2430,15 @@ bool repeatStatement() {
 		}
 		lbegin = genLabel("LB");
 		midCodeTable.push_back(midCode(LABEL, lbegin, "", ""));  //在条件前边放lbegin
+		int conditionBeginIndex = midCodeTable.size();
 		if (!condition()) {  //分析条件
 			return false;
 		}
 		lend = genLabel("LE");
 		midCodeTable.push_back(midCode(BZ, lend, "<>", "")); //不满足条件(result==0)跳到lend 结束for
+		int conditionEndIndex = midCodeTable.size() - 1;
+		string forBody = genLabel("LO");
+		midCodeTable.push_back(midCode(LABEL, forBody, "", ""));
 		//分析条件成功 并预读了一个单词
 		if (symbol != SEMICN) {
 			retractString(oldIndex);
@@ -2506,7 +2545,38 @@ bool repeatStatement() {
 			return false;
 		}
 		midCodeTable.push_back(midCode(isPLUS ? PLUSOP : MINUOP, nameLeft, nameRight, stepNum));  //增加步长
-		midCodeTable.push_back(midCode(GOTO, lbegin, "", ""));  //回到lbegin 进行条件判断
+		//midCodeTable.push_back(midCode(GOTO, lbegin, "", ""));  //回到lbegin 进行条件判断
+		/*for (int ix = conditionBeginIndex; ix < conditionEndIndex; ix++) {
+			midCode mc = midCodeTable[ix];
+			midCodeTable.push_back(mc);
+		}*/
+		map<string, string> nMap;
+		for (int ix = conditionBeginIndex; ix < conditionEndIndex; ix++) {
+			midCode mc = midCodeTable[ix];
+			if (mc.x[0] == '#' && nMap.find(mc.x) == nMap.end()) {
+				nMap[mc.x] = genTmp();
+			}
+			if (mc.y[0] == '#' && nMap.find(mc.y) == nMap.end()) {
+				nMap[mc.y] = genTmp();
+			}
+			if (mc.z[0] == '#' && nMap.find(mc.z) == nMap.end()) {
+				nMap[mc.z] = genTmp();
+			}
+		}
+		for (int ix = conditionBeginIndex; ix < conditionEndIndex; ix++) {
+			midCode mc = midCodeTable[ix];
+			if (mc.x[0] == '#') {
+				mc.x = nMap[mc.x];
+			}
+			if (mc.y[0] == '#') {
+				mc.y = nMap[mc.y];
+			}
+			if (mc.z[0] == '#') {
+				mc.z = nMap[mc.z];
+			}
+			midCodeTable.push_back(mc);
+		}
+		midCodeTable.push_back(midCode(BNZ, forBody, "<>", ""));  //回到forBody
 		midCodeTable.push_back(midCode(LABEL, lend, "", ""));  //lend结束循环
 		//分析语句成功 并预读了一个单词
 		outputfile << "<循环语句>" << endl;
