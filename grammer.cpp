@@ -2262,19 +2262,37 @@ bool repeatStatement() {
 					if (mc.z[0] == '#' && nMap.find(mc.z) == nMap.end()) {
 						nMap[mc.z] = genTmp();
 					}
+					if (mc.x[0] == '%' && nMap.find(mc.x) == nMap.end()) {
+						nMap[mc.x] = genName();
+					}
+					if (mc.y[0] == '%' && nMap.find(mc.y) == nMap.end()) {
+						nMap[mc.y] = genName();
+					}
+					if (mc.z[0] == '%' && nMap.find(mc.z) == nMap.end()) {
+						nMap[mc.z] = genName();
+					}
 				}
 				for (int ix = conditionBeginIndex; ix < conditionEndIndex; ix++) {
 					midCode mc = midCodeTable[ix];
-					if (mc.x[0] == '#') {
+					if (mc.x[0] == '#' || mc.x[0] == '%') {
 						mc.x = nMap[mc.x];
 					}
-					if (mc.y[0] == '#') {
+					if (mc.y[0] == '#' || mc.y[0] == '%') {
 						mc.y = nMap[mc.y];
 					}
-					if (mc.z[0] == '#') {
+					if (mc.z[0] == '#' || mc.z[0] == '%') {
 						mc.z = nMap[mc.z];
 					}
 					midCodeTable.push_back(mc);
+				}
+				for (map<string, string>::iterator it = nMap.begin(); it != nMap.end(); it++) {
+					string oriName = (*it).first;
+					string newName = (*it).second;
+					symbolItem sitem = localSymbolTable[oriName];
+					sitem.name = newName;
+					sitem.addr = localAddr;
+					localAddr++;
+					localSymbolTable.insert(make_pair(newName, sitem));
 				}
 				midCodeTable.push_back(midCode(BNZ, whileBody, "<>", ""));  //回到whileBody
 				midCodeTable.push_back(midCode(LABEL, labf, "", ""));  //设置labf 用于结束循环
@@ -2562,19 +2580,37 @@ bool repeatStatement() {
 			if (mc.z[0] == '#' && nMap.find(mc.z) == nMap.end()) {
 				nMap[mc.z] = genTmp();
 			}
+			if (mc.x[0] == '%' && nMap.find(mc.x) == nMap.end()) {
+				nMap[mc.x] = genName();
+			}
+			if (mc.y[0] == '%' && nMap.find(mc.y) == nMap.end()) {
+				nMap[mc.y] = genName();
+			}
+			if (mc.z[0] == '%' && nMap.find(mc.z) == nMap.end()) {
+				nMap[mc.z] = genName();
+			}
 		}
 		for (int ix = conditionBeginIndex; ix < conditionEndIndex; ix++) {
 			midCode mc = midCodeTable[ix];
-			if (mc.x[0] == '#') {
+			if (mc.x[0] == '#' || mc.x[0] == '%') {
 				mc.x = nMap[mc.x];
 			}
-			if (mc.y[0] == '#') {
+			if (mc.y[0] == '#' || mc.y[0] == '%') {
 				mc.y = nMap[mc.y];
 			}
-			if (mc.z[0] == '#') {
+			if (mc.z[0] == '#' || mc.z[0] == '%') {
 				mc.z = nMap[mc.z];
 			}
 			midCodeTable.push_back(mc);
+		}
+		for (map<string, string>::iterator it = nMap.begin(); it != nMap.end(); it++) {
+			string oriName = (*it).first;
+			string newName = (*it).second;
+			symbolItem sitem = localSymbolTable[oriName];
+			sitem.name = newName;
+			sitem.addr = localAddr;
+			localAddr++;
+			localSymbolTable.insert(make_pair(newName, sitem));
 		}
 		midCodeTable.push_back(midCode(BNZ, forBody, "<>", ""));  //回到forBody
 		midCodeTable.push_back(midCode(LABEL, lend, "", ""));  //lend结束循环
