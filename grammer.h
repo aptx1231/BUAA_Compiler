@@ -77,5 +77,5 @@ void checkBeforeFunc();
 
 void fullNameMap(map<string, string>& nameMap, vector<midCode> ve, string funcName);
 
-void dealInlineFunc(string name);
+void dealInlineFunc(string name, int& begin, int& end);
 #endif // !GRAMMER_H

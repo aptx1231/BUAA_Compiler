@@ -34,6 +34,7 @@ enum operation {
 	GETARRAY,  //取数组的值  t = a[]
 	PUTARRAY,  //给数组赋值  a[] = t
 	EXIT,  //退出 main最后
+	INLINEEND,   //内联的结尾
 };
 
 class midCode {  //z = x op y

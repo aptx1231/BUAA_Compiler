@@ -101,6 +101,9 @@ void outputMidCode() {
 		case EXIT:
 			midCodefile << "EXIT\n";
 			break;
+		case INLINEEND:
+			midCodefile << "INLINEEND " << mc.z << " " << mc.x << "\n";
+			break;
 		default:
 			break;
 		}

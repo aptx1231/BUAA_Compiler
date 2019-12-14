@@ -1433,6 +1433,23 @@ void genMips() {
 					mipsCodeTable.push_back(mipsCode(li, "$v0", "", "", 10));
 					mipsCodeTable.push_back(mipsCode(syscall, "", "", ""));
 				}
+				case INLINEEND: {
+					int be = string2int(mc.z);
+					int en = string2int(mc.x);
+					for (int si = 0; si <= 7; si++) {
+						if (sRegBusy[si] && sRegContent[si][0] == '%') {
+							int id = string2int(sRegContent[si].substr(8));
+							if (id >= be && id <= en) {
+								if (debug) {
+									cout << "del " << "$s" + int2string(si) << " = " << sRegContent[si] << "\n";
+								}
+								sRegBusy[si] = 0;
+								sRegContent[si] = "";
+							}
+						}
+					}
+					break;
+				}
 				default: {
 					break;
 				}

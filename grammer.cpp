@@ -25,6 +25,7 @@ extern ofstream errorfile;
 extern int oldIndex;    //用于做恢复
 extern int line;  //行号
 extern int debug;
+extern int nameId;
 
 map<string, symbolItem> globalSymbolTable;
 map<string, symbolItem> localSymbolTable;
@@ -1619,11 +1620,14 @@ bool factor(int& type, string& ansTmp) {
 				string op1 = genTmp();
 				localSymbolTable.insert(make_pair(op1, symbolItem(op1, localAddr, 1, type)));  //kind=1=var,type=函数返回类型
 				localAddr++;
-				//如果当前中间代码最后一个是INLINERET 说明此函数内联了
-				if (midCodeTable[midCodeTable.size() - 1].op == INLINERET) {
-					string value = midCodeTable[midCodeTable.size() - 1].z;
-					midCodeTable.pop_back();
-					midCodeTable.push_back(midCode(ASSIGNOP, op1, value, ""));
+				//如果当前中间代码最后一个是INLINEEND 说明此函数内联了
+				if (midCodeTable[midCodeTable.size() - 1].op == INLINEEND) {
+					if (midCodeTable[midCodeTable.size() - 2].op == INLINERET) {
+						string value = midCodeTable[midCodeTable.size() - 2].z;
+						midCodeTable[midCodeTable.size() - 2].op = ASSIGNOP;
+						midCodeTable[midCodeTable.size() - 2].z = op1;
+						midCodeTable[midCodeTable.size() - 2].x = value;
+					}
 				}
 				else {
 					midCodeTable.push_back(midCode(RETVALUE, op1, "RET", ""));
@@ -2052,8 +2056,12 @@ bool assignStatement() {
 				return false;
 			}
 			if (value[0] == '#') {  //中间变量
-				if (midCodeTable.back().z == value) {
-					midCodeTable.back().z = name;
+				int index = midCodeTable.size() - 1;
+				if (midCodeTable.back().op == INLINEEND) {
+					index--;
+				}
+				if (midCodeTable[index].z == value) {
+					midCodeTable[index].z = name;
 				}
 				else {
 					midCodeTable.push_back(midCode(ASSIGNOP, name, value, ""));
@@ -2420,8 +2428,12 @@ bool repeatStatement() {
 			return false;
 		}
 		if (value[0] == '#') {  //中间变量
-			if (midCodeTable.back().z == value) {
-				midCodeTable.back().z = name;
+			int index = midCodeTable.size() - 1;
+			if (midCodeTable.back().op == INLINEEND) {
+				index--;
+			}
+			if (midCodeTable[index].z == value) {
+				midCodeTable[index].z = name;
 			}
 			else {
 				midCodeTable.push_back(midCode(ASSIGNOP, name, value, ""));
@@ -2798,11 +2810,13 @@ void fullNameMap(map<string, string>& nameMap, vector<midCode> ve, string funcNa
 	}
 }
 
-void dealInlineFunc(string name) {
+void dealInlineFunc(string name, int& begin, int& end) {
 	vector<midCode> ve = funcMidCodeTable[name];  //这个函数所有的中间代码
 	//函数内联需要修改这个函数里边的变量名常量名数组名
 	map<string, string> nameMap;
+	begin = nameId + 1;
 	fullNameMap(nameMap, ve, name);
+	end = nameId;
 	//for (map<string, string>::iterator it = nameMap.begin(); it != nameMap.end(); it++) {
 	//	cout << (*it).first << "->" << (*it).second << "\n";
 	//}
@@ -2892,7 +2906,9 @@ bool callHaveReturnValueFunction() {
 			if (symbol == RPARENT) {  //是)
 				doOutput();
 				if (funcInlineAble[name]) {  //函数可以内联
-					dealInlineFunc(name);
+					int be, en;
+					dealInlineFunc(name, be, en);
+					midCodeTable.push_back(midCode(INLINEEND, int2string(be), int2string(en), ""));
 				}
 				else {
 					midCodeTable.push_back(midCode(CALL, name, "", ""));
@@ -2944,7 +2960,9 @@ bool callNoReturnValueFunction() {
 			if (symbol == RPARENT) {  //是)
 				doOutput();
 				if (funcInlineAble[name]) {  //函数可以内联
-					dealInlineFunc(name);
+					int be, en;
+					dealInlineFunc(name, be, en);
+					midCodeTable.push_back(midCode(INLINEEND, int2string(be), int2string(en), ""));
 				}
 				else {
 					midCodeTable.push_back(midCode(CALL, name, "", ""));
