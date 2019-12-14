@@ -2654,6 +2654,8 @@ void fullNameMap(map<string, string>& nameMap, vector<midCode> ve, string funcNa
 		case MINUOP:
 		case MULTOP:
 		case DIVOP:
+		case GETARRAY:  //mc.z << " = " << mc.x << "[" << mc.y << "]
+		case PUTARRAY:  //mc.z << "[" << mc.x << "]" << " = " << mc.y
 			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end() &&  //局部变量
 				nameMap.find(mc.z) == nameMap.end()) {
 				if (mc.z[0] == '#') {
@@ -2708,7 +2710,6 @@ void fullNameMap(map<string, string>& nameMap, vector<midCode> ve, string funcNa
 			}
 			break;
 		case ASSIGNOP:
-		case GETARRAY:  //mc.z << " = " << mc.x << "[" << mc.y << "]
 			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end() &&  //局部变量
 				nameMap.find(mc.z) == nameMap.end()) {
 				if (mc.z[0] == '#') {
@@ -2778,26 +2779,6 @@ void fullNameMap(map<string, string>& nameMap, vector<midCode> ve, string funcNa
 				}
 				else {
 					nameMap[mc.x] = genName();
-				}
-			}
-			break;
-		case PUTARRAY:  //mc.z << "[" << mc.x << "]" << " = " << mc.y
-			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end() &&  //局部变量
-				nameMap.find(mc.z) == nameMap.end()) {
-				if (mc.z[0] == '#') {
-					nameMap[mc.z] = genTmp();
-				}
-				else {
-					nameMap[mc.z] = genName();
-				}
-			}
-			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end() &&  //局部变量
-				nameMap.find(mc.y) == nameMap.end()) {
-				if (mc.y[0] == '#') {
-					nameMap[mc.y] = genTmp();
-				}
-				else {
-					nameMap[mc.y] = genName();
 				}
 			}
 			break;

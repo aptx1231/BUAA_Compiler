@@ -62,11 +62,24 @@ void calUseDef(Block& bl, string funcName) {
 			}
 			break;
 		case ASSIGNOP:
-		case GETARRAY:
 			if (allLocalSymbolTable[funcName].find(mc.x) != allLocalSymbolTable[funcName].end()
 				&& allLocalSymbolTable[funcName][mc.x].kind == 1 && mc.x[0] != '#') {  //局部变量
 				if (use.find(mc.x) == use.end() && def.find(mc.x) == def.end()) {
 					use.insert(mc.x);
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.z].kind == 1 && mc.z[0] != '#') {  //局部变量
+				if (use.find(mc.z) == use.end() && def.find(mc.z) == def.end()) {
+					def.insert(mc.z);
+				}
+			}
+			break;
+		case GETARRAY:  //mc.z << " = " << mc.x << "[" << mc.y << "]
+			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.y].kind == 1 && mc.y[0] != '#') {  //局部变量
+				if (use.find(mc.y) == use.end() && def.find(mc.y) == def.end()) {
+					use.insert(mc.y);
 				}
 			}
 			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end()
@@ -105,17 +118,17 @@ void calUseDef(Block& bl, string funcName) {
 				}
 			}
 			break;
-		case PUTARRAY:
+		case PUTARRAY:  //mc.z << "[" << mc.x << "]" << " = " << mc.y
 			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end()
 				&& allLocalSymbolTable[funcName][mc.y].kind == 1 && mc.y[0] != '#') {  //局部变量
 				if (use.find(mc.y) == use.end() && def.find(mc.y) == def.end()) {
 					use.insert(mc.y);
 				}
 			}
-			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end()
-				&& allLocalSymbolTable[funcName][mc.z].kind == 1 && mc.z[0] != '#') {  //局部变量
-				if (use.find(mc.z) == use.end() && def.find(mc.z) == def.end()) {
-					def.insert(mc.z);
+			if (allLocalSymbolTable[funcName].find(mc.x) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.x].kind == 1 && mc.x[0] != '#') {  //局部变量
+				if (use.find(mc.x) == use.end() && def.find(mc.x) == def.end()) {
+					use.insert(mc.x);
 				}
 			}
 			break;
