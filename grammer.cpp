@@ -26,6 +26,7 @@ extern int oldIndex;    //用于做恢复
 extern int line;  //行号
 extern int debug;
 extern int nameId;
+extern bool error;
 
 map<string, symbolItem> globalSymbolTable;
 map<string, symbolItem> localSymbolTable;
@@ -113,6 +114,7 @@ bool constDeclaration(bool isglobal) {
 				if (symbol != SEMICN) {
 					retractString(oldIndex);
 					errorfile << line << " k\n";  //缺少分号
+					error = true;
 					symbol = SEMICN;
 				}
 				if (symbol == SEMICN) {  //分号
@@ -142,6 +144,7 @@ bool constDeclaration(bool isglobal) {
 						if (symbol != SEMICN) {
 							retractString(oldIndex);
 							errorfile << line << " k\n";  //缺少分号
+							error = true;
 							symbol = SEMICN;
 						}
 						doOutput();
@@ -195,6 +198,7 @@ bool constDefinition(bool isglobal) {
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
+										error = true;
 									}
 								}
 								else {
@@ -203,12 +207,14 @@ bool constDefinition(bool isglobal) {
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
+										error = true;
 									}
 								}
 								//midCodeTable.push_back(midCode(CONST, "int", name, int2string(conInt)));
 							}
 							else {  //分析整数失败 没有预读 需要补一个
 								errorfile << line << " o\n";
+								error = true;
 								getsym();
 							}
 							while (true) {
@@ -250,6 +256,7 @@ bool constDefinition(bool isglobal) {
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
+											error = true;
 										}
 									}
 									else {
@@ -258,12 +265,14 @@ bool constDefinition(bool isglobal) {
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
+											error = true;
 										}
 									}
 									//midCodeTable.push_back(midCode(CONST, "int", name, int2string(conInt)));
 								}
 								else {  //分析整数失败 没有预读 需要补一个
 									errorfile << line << " o\n";
+									error = true;
 									getsym();
 								}
 							}
@@ -311,6 +320,7 @@ bool constDefinition(bool isglobal) {
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
+										error = true;
 									}
 								}
 								else {
@@ -319,12 +329,14 @@ bool constDefinition(bool isglobal) {
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
+										error = true;
 									}
 								}
 								//midCodeTable.push_back(midCode(CONST, "char", name, int2string(con_ch)));
 							}
 							else {
 								errorfile << line << " o\n";
+								error = true;
 							}
 							//开始分析{,＜标识符＞＝＜字符＞}部分
 							while (true) {
@@ -368,6 +380,7 @@ bool constDefinition(bool isglobal) {
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
+											error = true;
 										}
 									}
 									else {
@@ -376,12 +389,14 @@ bool constDefinition(bool isglobal) {
 										}
 										else {  //找到了 说明重定义了
 											errorfile << line << " b\n";
+											error = true;
 										}
 									}
 									//midCodeTable.push_back(midCode(CONST, "char", name, int2string(con_ch)));
 								}
 								else {
 									errorfile << line << " o\n";
+									error = true;
 								}
 							}
 							outputfile << "<常量定义>" << endl;
@@ -497,6 +512,7 @@ bool variableDeclaration(bool isglobal) {
 			if (symbol != SEMICN) {
 				retractString(oldIndex);
 				errorfile << line << " k\n";  //缺少分号
+				error = true;
 				symbol = SEMICN;
 			}
 			if (symbol == SEMICN) {  //读到分号  ＜变量定义＞;这部分结束了
@@ -517,6 +533,7 @@ bool variableDeclaration(bool isglobal) {
 					if (symbol != SEMICN) {
 						retractString(oldIndex);
 						errorfile << line << " k\n";  //缺少分号
+						error = true;
 						symbol = SEMICN;
 					}
 					doOutput();
@@ -566,6 +583,7 @@ bool variableDeclaration(bool isglobal) {
 								if (symbol != SEMICN) {
 									retractString(oldIndex);
 									errorfile << line << " k\n";  //缺少分号
+									error = true;
 									symbol = SEMICN;
 								}
 								if (symbol == SEMICN) {  //读到分号  ＜变量定义＞;这部分结束了
@@ -611,6 +629,7 @@ bool variableDeclaration(bool isglobal) {
 																	if (symbol != SEMICN) {
 																		retractString(oldIndex); //多读了 退回去
 																		errorfile << line << " k\n";  //缺少分号
+																		error = true;
 																		symbol = SEMICN;
 																	}
 																	if (symbol == SEMICN) {  //读到分号  ＜变量定义＞;这部分结束了
@@ -693,6 +712,7 @@ bool variableDefinition(bool isglobal) {
 						if (symbol != RBRACK) {
 							retractString(oldIndex);
 							errorfile << line << " m\n";  //缺少右中括号
+							error = true;
 							symbol = RBRACK;
 						}
 						if (symbol != RBRACK) {
@@ -707,6 +727,7 @@ bool variableDefinition(bool isglobal) {
 								}
 								else {  //找到了 说明重定义了
 									errorfile << line << " b\n";
+									error = true;
 								}
 							}
 							else {
@@ -716,6 +737,7 @@ bool variableDefinition(bool isglobal) {
 								}
 								else {  //找到了 说明重定义了
 									errorfile << line << " b\n";
+									error = true;
 								}
 							}
 							re = getsym();  //多读一个 不管是啥 因为如果没有[的时候 也已经预读了一个
@@ -731,6 +753,7 @@ bool variableDefinition(bool isglobal) {
 						}
 						else {  //找到了 说明重定义了
 							errorfile << line << " b\n";
+							error = true;
 						}
 					}
 					else {
@@ -740,6 +763,7 @@ bool variableDefinition(bool isglobal) {
 						}
 						else {  //找到了 说明重定义了
 							errorfile << line << " b\n";
+							error = true;
 						}
 					}
 					//midCodeTable.push_back(midCode(VAR, type == 1 ? "int" : "char", name, ""));
@@ -776,6 +800,7 @@ bool variableDefinition(bool isglobal) {
 									if (symbol != RBRACK) {
 										retractString(oldIndex);
 										errorfile << line << " m\n";  //缺少右中括号
+										error = true;
 										symbol = RBRACK;
 									}
 									if (symbol != RBRACK) {
@@ -790,6 +815,7 @@ bool variableDefinition(bool isglobal) {
 											}
 											else {  //找到了 说明重定义了
 												errorfile << line << " b\n";
+												error = true;
 											}
 										}
 										else {
@@ -799,6 +825,7 @@ bool variableDefinition(bool isglobal) {
 											}
 											else {  //找到了 说明重定义了
 												errorfile << line << " b\n";
+												error = true;
 											}
 										}
 										re = getsym();  //多读一个 不管是啥 因为如果没有[的时候 也已经预读了一个
@@ -814,6 +841,7 @@ bool variableDefinition(bool isglobal) {
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
+										error = true;
 									}
 								}
 								else {
@@ -823,6 +851,7 @@ bool variableDefinition(bool isglobal) {
 									}
 									else {  //找到了 说明重定义了
 										errorfile << line << " b\n";
+										error = true;
 									}
 								}
 								//midCodeTable.push_back(midCode(VAR, type == 1 ? "int" : "char", name, ""));
@@ -1003,6 +1032,7 @@ bool haveReturnValueFunction() {
 	}
 	else {  //找到了 说明重定义了
 		errorfile << line << " b\n";
+		error = true;
 		isRedefine = true;
 	}
 	curFuncReturnType = type;
@@ -1026,6 +1056,7 @@ bool haveReturnValueFunction() {
 		if (symbol != RPARENT) {
 			retractString(oldIndex);
 			errorfile << line << " l\n";  //缺少右小括号
+			error = true;
 			symbol = RPARENT;
 		}
 		if (symbol == RPARENT) {  //参数表后边是)
@@ -1055,6 +1086,7 @@ bool haveReturnValueFunction() {
 				doOutput();
 				if (realReturnType == -1) {  //没有遇到过return语句
 					errorfile << line << " h\n";  //有返回值的函数缺少return语句
+					error = true;
 				}
 				outputfile << "<有返回值函数定义>" << endl;
 				re = getsym();  //预读 不管读到什么
@@ -1118,6 +1150,7 @@ bool noReturnValueFunction() {
 		}
 		else {  //找到了 说明重定义了
 			errorfile << line << " b\n";
+			error = true;
 			isRedefine = true;
 		}
 		curFuncReturnType = 3;  //void
@@ -1143,6 +1176,7 @@ bool noReturnValueFunction() {
 			if (symbol != RPARENT) {
 				retractString(oldIndex);
 				errorfile << line << " l\n";  //缺少右小括号
+				error = true;
 				symbol = RPARENT;
 			}
 			if (symbol == RPARENT) {  //参数表后边是)
@@ -1235,6 +1269,7 @@ bool parameterTable(string funcName, bool isRedefine) {
 		}
 		else {  //找到了 说明重定义了
 			errorfile << line << " b\n";
+			error = true;
 		}
 		doOutput();
 		while (true) {
@@ -1282,6 +1317,7 @@ bool parameterTable(string funcName, bool isRedefine) {
 			}
 			else {  //找到了 说明重定义了
 				errorfile << line << " b\n";
+				error = true;
 			}
 		}
 		outputfile << "<参数表>" << endl;
@@ -1338,6 +1374,7 @@ bool mainFunction() {
 				if (symbol != RPARENT) {
 					retractString(oldIndex);
 					errorfile << line << " l\n";  //缺少右小括号
+					error = true;
 					symbol = RPARENT;
 				}
 				if (symbol == RPARENT) {  //(后边是)
@@ -1563,6 +1600,7 @@ bool factor(int& type, string& ansTmp) {
 				}
 				else {
 					errorfile << line << " c\n";  //未定义的名字
+					error = true;
 				}
 			}
 			doOutput();  //因为[不会修改token 只需要改一下symbol 就能输出刚才的标识符了
@@ -1581,11 +1619,13 @@ bool factor(int& type, string& ansTmp) {
 			}
 			if (t != 1) {
 				errorfile << line << " i\n";  //数组元素下标类型不是int
+				error = true;
 			}
 			//表达式分析成功 并预读了一个单词
 			if (symbol != RBRACK) {
 				retractString(oldIndex);
 				errorfile << line << " m\n";  //缺少右中括号
+				error = true;
 				symbol = RBRACK;
 			}
 			if (symbol == RBRACK) {  //是]
@@ -1639,6 +1679,7 @@ bool factor(int& type, string& ansTmp) {
 			}
 			else {
 				errorfile << line << " c\n";  //未定义的名字
+				error = true;
 				while (1) {
 					get_ch();
 					if (isRparent()) {  //)  作为因子出现的 不能一直读到;了 )就得停
@@ -1684,6 +1725,7 @@ bool factor(int& type, string& ansTmp) {
 				}
 				else {
 					errorfile << line << " c\n";  //未定义的名字
+					error = true;
 				}
 			}
 			doOutput();
@@ -1713,6 +1755,7 @@ bool factor(int& type, string& ansTmp) {
 		if (symbol != RPARENT) {
 			retractString(oldIndex);
 			errorfile << line << " l\n";  //缺少右小括号
+			error = true;
 			symbol = RPARENT;
 		}
 		if (symbol == RPARENT) {  //是)
@@ -1760,6 +1803,7 @@ bool statement() {
 			if (symbol != SEMICN) {
 				retractString(oldIndex);
 				errorfile << line << " k\n";  //缺少分号
+				error = true;
 				symbol = SEMICN;
 			}
 			if (symbol == SEMICN) {  //;分号
@@ -1782,6 +1826,7 @@ bool statement() {
 			if (symbol != SEMICN) {
 				retractString(oldIndex);
 				errorfile << line << " k\n";  //缺少分号
+				error = true;
 				symbol = SEMICN;
 			}
 			if (symbol == SEMICN) {  //;分号
@@ -1804,6 +1849,7 @@ bool statement() {
 			if (symbol != SEMICN) {
 				retractString(oldIndex);
 				errorfile << line << " k\n";  //缺少分号
+				error = true;
 				symbol = SEMICN;
 			}
 			if (symbol == SEMICN) {  //;分号
@@ -1876,6 +1922,7 @@ bool statement() {
 			if (symbol != SEMICN) {
 				retractString(oldIndex);
 				errorfile << line << " k\n";  //缺少分号
+				error = true;
 				symbol = SEMICN;
 			}
 			if (symbol == SEMICN) {  //;分号
@@ -1904,6 +1951,7 @@ bool statement() {
 					if (symbol != SEMICN) {
 						retractString(oldIndex);
 						errorfile << line << " k\n";  //缺少分号
+						error = true;
 						symbol = SEMICN;
 					}
 					if (symbol == SEMICN) {  //;分号
@@ -1924,6 +1972,7 @@ bool statement() {
 					if (symbol != SEMICN) {
 						retractString(oldIndex);
 						errorfile << line << " k\n";  //缺少分号
+						error = true;
 						symbol = SEMICN;
 					}
 					if (symbol == SEMICN) {  //;分号
@@ -1939,6 +1988,7 @@ bool statement() {
 			}
 			else {
 				errorfile << line << " c\n";  //未定义的名字
+				error = true;
 				while (1) {
 					get_ch();
 					if (isSemicn()) {  //;
@@ -1956,6 +2006,7 @@ bool statement() {
 	}
 	else if (symbol == ELSETK || symbol == RBRACE) {
 		errorfile << line << " k\n";
+		error = true;
 		return true;
 	}
 	else {
@@ -1978,6 +2029,7 @@ bool assignStatement() {
 				|| (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind == 4))
 				) {
 				errorfile << line << " c\n";  //未定义的名字
+				error = true;
 			}
 			doOutput();
 			re = getsym();
@@ -1992,11 +2044,13 @@ bool assignStatement() {
 			}
 			if (t != 1) {
 				errorfile << line << " i\n";  //数组元素下标类型不是int
+				error = true;
 			}
 			//分析表达式成功 并预读了一个单词
 			if (symbol != RBRACK) {
 				retractString(oldIndex);
 				errorfile << line << " m\n";  //缺少右中括号
+				error = true;
 				symbol = RBRACK;
 			}
 			if (symbol == RBRACK) {  //]
@@ -2033,16 +2087,19 @@ bool assignStatement() {
 			if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
 				if (localSymbolTable[name].kind == 2) {  //const
 					errorfile << line << " j\n";  //改变常量的值了
+					error = true;
 				}
 			}
 			else {
 				if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
 					if (globalSymbolTable[name].kind == 2) {  //const
 						errorfile << line << " j\n";  //改变常量的值了
+						error = true;
 					}
 				}
 				else {
 					errorfile << line << " c\n";  //未定义的名字
+					error = true;
 				}
 			}
 			doOutput();
@@ -2105,6 +2162,7 @@ bool conditionStatement() {
 			if (symbol != RPARENT) {
 				retractString(oldIndex);
 				errorfile << line << " l\n";  //缺少右小括号
+				error = true;
 				symbol = RPARENT;
 			}
 			if (symbol == RPARENT) {  //)
@@ -2195,6 +2253,7 @@ bool condition() {
 		//分析表达式成功 并预读了一个单词
 		if (typeLeft != 1 || typeRight != 1) {
 			errorfile << line << " f\n";  //条件判断中出现不合法的类型 要求全是int才行
+			error = true;
 		}
 		midCodeTable.push_back(midCode(op, "<>", v1, v2));
 		outputfile << "<条件>" << endl;
@@ -2203,6 +2262,7 @@ bool condition() {
 	else {
 		if (typeLeft != 1) {
 			errorfile << line << " f\n";  //条件判断中出现不合法的类型 要求是int才行
+			error = true;
 		}
 		//只有一个表达式做条件 相当于 表达式!=0
 		midCodeTable.push_back(midCode(NEQOP, "<>", v1, int2string(0)));
@@ -2237,6 +2297,7 @@ bool repeatStatement() {
 			if (symbol != RPARENT) {
 				retractString(oldIndex);
 				errorfile << line << " l\n";  //缺少右小括号
+				error = true;
 				symbol = RPARENT;
 			}
 			if (symbol == RPARENT) {  //)
@@ -2331,6 +2392,7 @@ bool repeatStatement() {
 		if (symbol != WHILETK) {
 			retractString(oldIndex);
 			errorfile << line << " n\n";  //缺少while
+			error = true;
 			symbol = WHILETK;
 		}
 		if (symbol == WHILETK) {
@@ -2352,6 +2414,7 @@ bool repeatStatement() {
 				if (symbol != RPARENT) {
 					retractString(oldIndex);
 					errorfile << line << " l\n";  //缺少右小括号
+					error = true;
 					symbol = RPARENT;
 				}
 				if (symbol == RPARENT) {  //)
@@ -2398,16 +2461,19 @@ bool repeatStatement() {
 		if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
 			if (localSymbolTable[name].kind == 2) {  //const
 				errorfile << line << " j\n";  //改变常量的值了
+				error = true;
 			}
 		}
 		else {
 			if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
 				if (globalSymbolTable[name].kind == 2) {  //const
 					errorfile << line << " j\n";  //改变常量的值了
+					error = true;
 				}
 			}
 			else {
 				errorfile << line << " c\n";  //未定义的名字
+				error = true;
 			}
 		}
 		re = getsym();
@@ -2446,6 +2512,7 @@ bool repeatStatement() {
 		if (symbol != SEMICN) {
 			retractString(oldIndex);
 			errorfile << line << " k\n";  //缺少分号
+			error = true;
 			symbol = SEMICN;
 		}
 		if (symbol == SEMICN) {  //;分号
@@ -2473,6 +2540,7 @@ bool repeatStatement() {
 		if (symbol != SEMICN) {
 			retractString(oldIndex);
 			errorfile << line << " k\n";  //缺少分号
+			error = true;
 			symbol = SEMICN;
 		}
 		if (symbol == SEMICN) {  //;分号
@@ -2493,16 +2561,19 @@ bool repeatStatement() {
 		if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
 			if (localSymbolTable[name].kind == 2) {  //const
 				errorfile << line << " j\n";  //改变常量的值了
+				error = true;
 			}
 		}
 		else {
 			if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
 				if (globalSymbolTable[name].kind == 2) {  //const
 					errorfile << line << " j\n";  //改变常量的值了
+					error = true;
 				}
 			}
 			else {
 				errorfile << line << " c\n";  //未定义的名字
+				error = true;
 			}
 		}
 		string nameLeft = name;
@@ -2526,16 +2597,19 @@ bool repeatStatement() {
 		if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
 			if (localSymbolTable[name].kind == 2) {  //const
 				errorfile << line << " j\n";  //改变常量的值了
+				error = true;
 			}
 		}
 		else {
 			if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
 				if (globalSymbolTable[name].kind == 2) {  //const
 					errorfile << line << " j\n";  //改变常量的值了
+					error = true;
 				}
 			}
 			else {
 				errorfile << line << " c\n";  //未定义的名字
+				error = true;
 			}
 		}
 		string nameRight = name;
@@ -2561,6 +2635,7 @@ bool repeatStatement() {
 		if (symbol != RPARENT) {
 			retractString(oldIndex);
 			errorfile << line << " l\n";  //缺少右小括号
+			error = true;
 			symbol = RPARENT;
 		}
 		if (symbol != RPARENT) {  //不是)
@@ -2882,6 +2957,7 @@ bool callHaveReturnValueFunction() {
 			if (symbol != RPARENT) {
 				retractString(oldIndex);
 				errorfile << line << " l\n";  //缺少右小括号
+				error = true;
 				symbol = RPARENT;
 			}
 			if (symbol == RPARENT) {  //是)
@@ -2936,6 +3012,7 @@ bool callNoReturnValueFunction() {
 			if (symbol != RPARENT) {
 				retractString(oldIndex);
 				errorfile << line << " l\n";  //缺少右小括号
+				error = true;
 				symbol = RPARENT;
 			}
 			if (symbol == RPARENT) {  //是)
@@ -2971,6 +3048,7 @@ bool valueParameterTable(string funcName) {
 	/*if (symbol == RPARENT) {
 		if (globalSymbolTable[funcName].parameterTable.size() != 0) {
 			errorfile << line << " d\n";  //参数个数不匹配
+			error = true;
 		}
 		outputfile << "<值参数表>" << endl;
 		return true;
@@ -2982,6 +3060,7 @@ bool valueParameterTable(string funcName) {
 		//if (symbol == RPARENT) {  //说明值参数表为空  不是)说明缺少右括号
 		if (globalSymbolTable[funcName].parameterTable.size() != 0) {
 			errorfile << line << " d\n";  //参数个数不匹配
+			error = true;
 		}
 		outputfile << "<值参数表>" << endl;
 		return true;
@@ -3012,11 +3091,13 @@ bool valueParameterTable(string funcName) {
 	}
 	if (typeList.size() != globalSymbolTable[funcName].parameterTable.size()) {
 		errorfile << line << " d\n";  //参数个数不匹配
+		error = true;
 	}
 	else {
 		for (int i = 0; i < typeList.size(); i++) {
 			if (typeList[i] != globalSymbolTable[funcName].parameterTable[i]) {
 				errorfile << line << " e\n";  //参数类型不匹配
+				error = true;
 				break;
 			}
 		}
@@ -3055,16 +3136,19 @@ bool readStatement() {
 				if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
 					if (localSymbolTable[name].kind == 2) {  //const
 						errorfile << line << " j\n";  //改变常量的值了
+						error = true;
 					}
 				}
 				else {
 					if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
 						if (globalSymbolTable[name].kind == 2) {  //const
 							errorfile << line << " j\n";  //改变常量的值了
+							error = true;
 						}
 					}
 					else {
 						errorfile << line << " c\n";  //未定义的名字
+						error = true;
 					}
 				}
 				midCodeTable.push_back(midCode(SCAN, name, "", ""));
@@ -3092,16 +3176,19 @@ bool readStatement() {
 					if (localSymbolTable.find(name) != localSymbolTable.end() && localSymbolTable[name].kind != 3) {
 						if (localSymbolTable[name].kind == 2) {  //const
 							errorfile << line << " j\n";  //改变常量的值了
+							error = true;
 						}
 					}
 					else {
 						if (globalSymbolTable.find(name) != globalSymbolTable.end() && globalSymbolTable[name].kind != 3) {
 							if (globalSymbolTable[name].kind == 2) {  //const
 								errorfile << line << " j\n";  //改变常量的值了
+								error = true;
 							}
 						}
 						else {
 							errorfile << line << " c\n";  //未定义的名字
+							error = true;
 						}
 					}
 					midCodeTable.push_back(midCode(SCAN, name, "", ""));
@@ -3110,6 +3197,7 @@ bool readStatement() {
 				if (symbol != RPARENT) {
 					retractString(oldIndex);
 					errorfile << line << " l\n";  //缺少右小括号
+					error = true;
 					symbol = RPARENT;
 				}
 				if (symbol == RPARENT) {  //)
@@ -3173,6 +3261,7 @@ bool writeStatement() {
 					if (symbol != RPARENT) {
 						retractString(oldIndex);
 						errorfile << line << " l\n";  //缺少右小括号
+						error = true;
 						symbol = RPARENT;
 					}
 					if (symbol == RPARENT) {  //)
@@ -3190,6 +3279,7 @@ bool writeStatement() {
 					if (symbol != RPARENT) {
 						retractString(oldIndex);
 						errorfile << line << " l\n";  //缺少右小括号
+						error = true;
 						symbol = RPARENT;
 					}
 					if (symbol == RPARENT) {  //)  printf '('＜字符串＞ ')'
@@ -3216,6 +3306,7 @@ bool writeStatement() {
 				if (symbol != RPARENT) {
 					retractString(oldIndex);
 					errorfile << line << " l\n";  //缺少右小括号
+					error = true;
 					symbol = RPARENT;
 				}
 				if (symbol == RPARENT) {  //)
@@ -3251,6 +3342,7 @@ bool returnStatement() {
 			realReturnType = type;
 			if (curFuncReturnType == 1 || curFuncReturnType == 2) {
 				errorfile << line << " h\n";  //有返回值的函数存在不匹配的return语句
+				error = true;
 			}
 			outputfile << "<返回语句>" << endl;
 			return true;
@@ -3269,15 +3361,18 @@ bool returnStatement() {
 			//分析表达式成功 并预读了一个单词
 			if (curFuncReturnType == 3) {
 				errorfile << line << " g\n";  //无返回值的函数存在不匹配的return语句
+				error = true;
 			}
 			else if (curFuncReturnType == 1 || curFuncReturnType == 2) {
 				if (curFuncReturnType != type) {
 					errorfile << line << " h\n";  //有返回值的函数存在不匹配的return语句
+					error = true;
 				}
 			}
 			if (symbol != RPARENT) {
 				retractString(oldIndex);
 				errorfile << line << " l\n";  //缺少右小括号
+				error = true;
 				symbol = RPARENT;
 			}
 			if (symbol == RPARENT) {  //)
@@ -3301,6 +3396,7 @@ bool returnStatement() {
 			realReturnType = type;
 			if (curFuncReturnType == 1 || curFuncReturnType == 2) {
 				errorfile << line << " h\n";  //有返回值的函数存在不匹配的return语句
+				error = true;
 			}
 			if (!isMain) {
 				midCodeTable.push_back(midCode(RET, "", "", ""));

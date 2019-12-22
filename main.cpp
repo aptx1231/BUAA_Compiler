@@ -14,7 +14,8 @@ ofstream outputfile;
 ofstream errorfile;
 ofstream midCodefile;
 ofstream mipsCodefile;
-int debug = 0;
+int debug = 1;
+bool error = false;
 
 int main() {
 	inputfile.open("testfile.txt", ios::in);
@@ -40,25 +41,31 @@ int main() {
 			//error()
 		}
 	}
-	if (debug) {
-		showFuncMidCode();
+	if (!error) {
+		//midCodefile.open("midCode.txt", ios::out);
+		//mipsCodefile.open("mips.txt", ios::out);
+		if (debug) {
+			showFuncMidCode();
+		}
+		splitBlock();
+		if (debug) {
+			showFuncBlock();
+		}
+		outputMidCode();
+		genMips();
+		outputMipsCode();
+		//midCodefile.close();
+		//mipsCodefile.close();
+		if (debug) {
+			showGlobal();
+			showAll();
+			showString();
+		}
 	}
-	splitBlock();
-	if (debug) {
-		showFuncBlock();
-	}
-	outputMidCode();
-	genMips();
-	outputMipsCode();
 	inputfile.close();
 	outputfile.close();
 	errorfile.close();
 	midCodefile.close();
 	mipsCodefile.close();
-	if (debug) {
-		showGlobal();
-		showAll();
-		showString();
-	}
 	return 0;
 }

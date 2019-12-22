@@ -177,6 +177,7 @@ void genMips() {
 	int pushCnt = 0;
 	int paramSize = 0;
 	stack<midCode> pushOpStack;
+	int releaseCnt = 0;
 	for (int l = 0; l < funcNameList.size(); l++) {
 		curFuncName = funcNameList[l];
 		if (debug) {
@@ -193,7 +194,7 @@ void genMips() {
 			if (blVe[w].midCodeVector[0].op == LABEL) {
 				string label = blVe[w].midCodeVector[0].z;
 				int len = label.size();
-				if (label[len - 2] == 'L' && label[len - 1] == 'B' && canRelese == true) {
+				/*if (label[len - 2] == 'L' && label[len - 1] == 'B' && canRelese == true) {
 					canRelese = false;
 					lorc = 'l';
 				}
@@ -208,9 +209,15 @@ void genMips() {
 				if (label[len - 2] == 'C' && label[len - 1] == 'E' && lorc == 'c') {
 					canRelese = true;
 					lorc = ' ';
+				}*/
+				if (label[len - 1] == 'B') {
+					releaseCnt++;
+				}
+				if (label[len - 1] == 'E') {
+					releaseCnt--;
 				}
 			}
-			if (canRelese) {
+			if (releaseCnt == 0) {
 				for (int si = 0; si <= 7; si++) {
 					if (sRegBusy[si]) {
 						vector<string> blockIn = blVe[w].in;

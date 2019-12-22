@@ -25,6 +25,7 @@ string filecontent;  //文件的内容
 
 extern ofstream outputfile;
 extern ofstream errorfile;
+extern bool error;
 
 bool isSpace()
 {
@@ -270,6 +271,7 @@ int getsym(int out)
 				//wrong! retract(); 缺少右单引号 不符合词法
 				if (out) {
 					errorfile << line << " a\n";  //不符合词法
+					error = true;
 				}
 				int old = indexs;
 				while (1) {
@@ -294,6 +296,7 @@ int getsym(int out)
 			//wrong! retract();  字符不是a-z A-Z _+-*/
 			if (out) {
 				errorfile << line << " a\n";  //不符合词法
+				error = true;
 			}
 			char tmp = ch;
 			get_ch();
@@ -341,6 +344,7 @@ int getsym(int out)
 				line--;
 				if (out) {
 					errorfile << line << " a\n";  //不符合词法
+					error = true;
 				}
 				while (1) {
 					indexs--;
@@ -404,6 +408,7 @@ int getsym(int out)
 			retract();
 			if (out) {
 				errorfile << line << " a\n";  //不符合词法
+				error = true;
 			}
 			symbol = NEQ;
 		}
@@ -456,6 +461,7 @@ int getsym(int out)
 		//wrong! retract();
 		if (out) {
 			errorfile << line << " a\n";  //不符合词法
+			error = true;
 		}
 		return getsym(out);
 	}
