@@ -256,6 +256,12 @@ int getsym(int out)
 		token[tokenI] = '\0';
 		num = transNum();
 		symbol = INTCON;  //整型常量
+		if (token[0] == '0' && tokenI > 1) {
+			if (out) {
+				errorfile << line << " a\n";  //不符合词法  有前导的0
+				error = true;
+			}
+		}
 		return 1;
 	}
 	else if (isSquo()) {  // '
