@@ -36,6 +36,7 @@ vector<midCode> midCodeTable;
 map<string, vector<midCode> > funcMidCodeTable;  //每个函数单独的中间代码
 map<string, bool> funcInlineAble;  //函数是否可以内联
 vector<string> funcNameList;  //函数名字
+map<string, vector<string> > funcParamName;  //函数的参数名
 
 int curFuncReturnType = -1;
 string curFunctionName = "";
@@ -1258,6 +1259,7 @@ bool parameterTable(string funcName, bool isRedefine) {
 			return false;
 		}
 		//当前是标识符  开始分析{,＜类型标识符＞＜标识符＞}
+		funcParamName.insert(make_pair(funcName, vector<string>()));
 		name = string(token);
 		if (localSymbolTable.find(name) == localSymbolTable.end()) {  //没找到
 			localSymbolTable.insert(make_pair(name, symbolItem(name, localAddr, 1, type)));
@@ -1265,6 +1267,7 @@ bool parameterTable(string funcName, bool isRedefine) {
 			if (!isRedefine) {
 				globalSymbolTable[funcName].insert(type);
 			}
+			funcParamName[funcName].push_back(name);
 			midCodeTable.push_back(midCode(PARAM, type == 1 ? "int" : "char", name, ""));
 		}
 		else {  //找到了 说明重定义了
@@ -1313,6 +1316,7 @@ bool parameterTable(string funcName, bool isRedefine) {
 				if (!isRedefine) {
 					globalSymbolTable[funcName].insert(type);
 				}
+				funcParamName[funcName].push_back(name);
 				midCodeTable.push_back(midCode(PARAM, type == 1 ? "int" : "char", name, ""));
 			}
 			else {  //找到了 说明重定义了
