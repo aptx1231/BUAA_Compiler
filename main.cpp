@@ -14,7 +14,7 @@ ofstream outputfile;
 ofstream errorfile;
 ofstream midCodefile;
 ofstream mipsCodefile;
-int debug = 0;
+int debug = 1;
 bool error = false;
 
 int main() {
