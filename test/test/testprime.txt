@@ -1,0 +1,27 @@
+int primes[10000];
+int hasfactor(int n, int maxfactor) {
+    int i;
+    for (i = 2;i <= maxfactor; i = i + 1) {
+        if (n == n / i * i) {
+            return (0);
+        }
+    }
+    return (1);
+}
+void main() {
+    int i;
+    int j;
+    i = 0;
+    j = 0;
+    for (j = 0;j < 200;i = i + 1) {
+        if (hasfactor(i, i - 1)) {
+            primes[j] = i;
+            printf("j",j);
+            printf("i",i);
+            j = j + 1;
+        }
+    }
+    for (j = 100; j >= 0;j = j - 1) {
+        printf(primes[j]);
+    }
+}

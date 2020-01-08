@@ -1,0 +1,631 @@
+const int const_1=1,const_2=2;
+const int const_3=3;
+const char const_a='a',const_b='b';
+const char const_c='c';
+const char const_='_';
+int count,num[10];
+char letter[5];
+char s;
+int _,__,___,__a__,_a_;
+int judge;
+
+
+int get_sum(int a)
+{
+    int b;
+    judge = judge + 1;
+    count = count + 1;
+    b=0;
+    if(a!=1){
+        b = get_sum(a-1);
+        judge = judge + 1;
+    }
+    return(b + a);
+
+}
+
+int count_to_10()
+{
+    judge = judge + 1;
+    return(get_sum(10));
+}
+
+char higher(char a)
+{
+    return('A');
+}
+
+
+char prt_message()
+{
+    judge = judge + 1;
+    printf(" !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+    return('a');
+}
+
+
+void test_global_variable()
+{
+    int a,flag;
+    judge = judge + 1;
+    a=0;
+    flag=0;
+    count=2;
+    letter[0]='a';
+    letter[1]='1';
+    letter[2]='_';
+    letter[3]='+';
+    letter[4]='A';
+    printf(count);
+    printf(letter[0]);
+
+    if(count==2){
+        judge = judge + 1;
+    }
+
+    if(count==1){
+        judge = judge + 1;
+        flag=1;
+    }
+    if(flag==0){
+        judge = judge + 1;
+    }
+
+    _=1;
+    __=2;
+    ___=3;
+    __a__=4;
+    _a_=5;
+
+    flag=0;
+    if(_==1)
+        judge = judge + 1;
+    if(_==0){
+        flag=1;
+    }
+    if(flag==0)
+        judge = judge + 1;
+
+    flag=0;
+    if(__==2)
+        judge = judge + 1;
+    if(__==0){
+        judge = judge + 1;
+        flag=1;
+    }
+    if(flag==0)
+        judge = judge + 1;
+
+    flag=0;
+    if(___==3)
+        judge = judge + 1;
+    if(___==0){
+        judge = judge + 1;
+        flag=1;
+    }
+    if(flag==0)
+        judge = judge + 1;
+
+    flag=0;
+    if(__a__==4)
+        judge = judge + 1;
+    if(__a__==0){
+        judge = judge + 1;
+        flag=1;
+    }
+    if(flag==0)
+        judge = judge + 1;
+
+    flag=0;
+    if(_a_==5)
+        judge = judge + 1;
+    if(_a_==0){
+        judge = judge + 1;
+        flag=1;
+    }
+    if(flag==0)
+        judge = judge + 1;
+
+
+    return ;
+}
+
+void test_global_const(){
+    int x;
+    char y;
+    int num[2];
+    int _;
+    _=100;
+    if(_==100)
+        judge = judge + 1;
+    num[0]=100;
+    num[1]=101;
+    if(num[0]==100)
+        judge = judge + 1;
+    if(num[1]==101)
+        judge = judge + 1;
+    judge = judge + 1;
+    if(const_1==1)
+    judge = judge + 1;
+    if(const_a=='a')
+    judge = judge + 1;
+    if(const_=='_')
+    judge = judge + 1;
+
+    y = const_a;
+    x = y + const_a;
+    if(x == 194) judge = judge +1;
+
+    switch(const_1){
+        case 1:{
+                judge = judge + 1;
+        }
+    default:;
+    }
+
+    switch(const_1){
+        case 0:{
+                judge = judge + 1;
+        }
+        default:{
+                ;
+        }
+    }
+
+    x=0;
+    while(x<const_2){
+        judge = judge + 1;
+        x = x + 1;
+    }
+
+}
+
+void test_brackets()
+{
+    judge = judge + 1;
+    {
+        {
+            {
+            }
+        }
+    }
+
+    {
+        ;
+    }
+
+    return ;
+}
+
+void test_compare_operator()
+{
+    int x,y,flag;
+    x=0;
+    y=1;
+    flag=0;
+    if(x<y){
+            judge = judge + 1;
+    }
+    if(y>x){
+        judge = judge + 1;
+    }
+    if(x==y){
+        judge = judge + 1;
+        flag=1;
+    }
+    if(flag==0){
+        judge = judge + 1;
+    }
+    if(x!=y){
+        judge = judge + 1;
+    }
+    x=0;
+    while(x<=1){
+        if(x<=y){
+            judge = judge + 1;
+        }
+        x = x + 1;
+    }
+    x = 0;
+    while(x<=1){
+        if(y>=x){
+            judge = judge + 1;
+        }
+        x = x + 1;
+    }
+
+}
+
+void test_expression()
+{
+    int a,b;
+    char c,d,e,f,g;
+    a=0;
+    b=0;
+    c='a';
+    d='b';
+    e='c';    judge = judge + 1;
+    a = +a;
+    if(a==0)    judge = judge + 1;
+    a = -a;
+    if(a==0)    judge = judge + 1;
+    a = +c;
+    if(a==97)    judge = judge + 1;
+    a = -c;
+    if(a==-97)    judge = judge + 1;
+    a = const_3;
+    if(a==3)    judge = judge + 1;
+    a = +-1;
+    if(a==-1)    judge = judge + 1;
+    a = --1;
+    if(a==1)    judge = judge + 1;
+    a = ++1;
+    if(a==1)    judge = judge + 1;
+    a = -+1;
+    if(a==-1)    judge = judge + 1;
+    a = (((1)));
+    if(a==1)    judge = judge + 1;
+    a = 3*-3;
+    if(a==-9)    judge = judge + 1;
+
+    b=5;
+    a = -(num[b]+num[b+const_1]+3)*count_to_10()/const_3+'a'+const_a-3*3/4+letter[0];
+    if(a==33)   judge = judge +1;
+    a = 1;
+    b = 1;
+    f = 'a';
+    g = 'q';
+    a = a*(b+c*(d+(e+f*g)));
+    judge = judge + a/1024;
+    return ;
+}
+
+void test_while()
+{
+    int a,b;
+
+    b=9;
+    while(b>=0){
+        if(b>=5)
+            judge = judge + 1;
+        b = b - 1;
+    }
+
+    b=0;
+    while(b<=2){
+        switch(b){
+              case 0:{
+                  judge = judge + 1;
+              }
+              case 1:{
+                  judge = judge + 1;
+              }
+              default:{
+                  judge = judge + 1;
+              }
+        }
+        b = b+1;
+    }
+
+    b = 0;
+    a = 0;
+    while(a<=2){
+        b = 0;
+        while(b<=2){
+            judge = judge + 1;
+            b = b + 1;
+        }
+        a = a + 1;
+    }
+
+
+    b=0;
+    a = 11;
+    while(b<10){
+        num[b] = b*a;
+        judge = judge + num[b];
+        b = b + 1;
+        a = a + 2;
+    }
+
+    return ;
+}
+
+void test_if()
+{
+    int a,flag;
+    char c;
+    a = 0;
+    flag=0;
+    judge = judge + 1;
+    if(const_1==1){
+
+    }
+
+    if(const_1==1)
+        ;
+
+    if (const_1==1){
+        ;
+    }
+
+    a=0;
+    while(a<=1){
+        if(const_1==1){
+            if(a==0){
+                judge = judge + 1;
+                flag=1;
+            }
+            if(flag==0){
+                judge = judge + 1;
+            }
+        }
+        flag=0;
+        a=a+1;
+    }
+
+    a=0;
+    if (const_1==1){
+        while(a<2){
+            judge = judge + 1;
+            a = a + 1;
+        }
+
+    }
+
+    a=0;
+    while(a<=1){
+        if(const_1==1){
+            switch(a){
+                 case 0:{
+                     judge = judge + 1;
+                 }
+                 default:
+                     judge = judge + 1;
+            }
+        }
+        a = a + 1;
+    }
+
+
+    flag=0;
+    c='a';
+    if(c=='a'){
+            judge = judge + 1;
+    }
+
+    if(c=='b'){
+            judge = judge + 1;
+        flag=1;
+    }
+    if(flag==0){
+        judge = judge + 1;
+    }
+
+
+    return ;
+}
+
+void test_switch()
+{
+    int a,b,flag,test;
+    char c;
+    flag=0;
+    test=0;
+    a=0;
+    b=0;
+    while(a<=6){
+        switch(a){
+              case 0:{
+                       if(const_1==1){
+                            judge = judge + 1;
+                             num[0]=const_3;
+                             num[const_3]=get_sum(const_3);
+                       }
+                       if(const_1==0){
+                           judge = judge + 1;
+                             flag=1;
+                       }
+                       if(flag==0){
+                           judge = judge + 1;
+                       }
+                       test=1;
+                     }
+               case 1:{
+                   judge = judge + 1;
+                        b=0;
+                        while(b<=2){
+                            judge = judge + 1;
+                            b = b +1;
+                        }
+                        test = 1;
+                      }
+               case 2:{
+                        ;
+               }
+               default:{
+                        judge = judge + 1;
+                        switch(a/const_3){
+                               case 1:{
+                                   judge = judge + 1;
+                                    test = 1;
+                               }
+                               default:{  ; }
+                        }
+                        if(test==0){
+                                judge = judge + 1;
+                        }
+                        test = 1;
+               }
+        }
+
+        if(test==0){
+                judge = judge + 1;
+        }
+        test=0;
+        a = a + 1;
+    }
+
+    a=0;
+    while(a<3){
+        if(a==0)
+            c = 'a';
+        if(a==1)
+            c = 'b';
+        if(a==2)
+            c = 'c';
+        switch(c){
+            case 'a':{
+                judge = judge + 1;
+            }
+            case 'b':{
+                judge = judge + 1;
+            }
+            default:{
+                judge = judge + 1;
+            }
+        }
+        a = a + 1;
+    }
+
+    a=1;
+    switch(a){
+    case 1: ;
+    }
+
+
+    return ;
+}
+
+void test_function()
+{
+    int a;
+    char c;
+
+    a = 11;
+    c = 'a';
+    judge = judge + 1;
+    printf(higher(c)+count_to_10());
+
+    prt_message();
+
+
+    return ;
+
+}
+
+void test_printf(){
+    int x;
+    x=1;
+    judge = judge + 1;
+    printf(x);
+
+    x=5;
+    printf(-(num[x]+num[x+const_1]+3)*count_to_10()/const_3+'a'+const_a-3*3/4);
+
+
+    return ;
+}
+
+void test_scanf(){
+    int x,y,z;
+    char m,n,q;
+    judge = judge + 1;
+    scanf(x,m);
+    judge = judge + x + m;
+    scanf(m);
+    letter[3] = m;
+    judge = judge + m;
+    scanf(x);
+    judge = judge + x;
+
+    return ;
+}
+
+void test_varib2()
+{
+    judge = judge + 1;
+    if(_==1){
+        judge = judge + 1;
+    }
+    return ;
+}
+
+void test_varib()
+{
+    int _;
+    judge = judge + 1;
+    _ = 100;
+    if(_==100)
+        judge = judge + 1;
+    test_varib2();
+    return ;
+}
+
+void test_para4(int a,int b,int c,int d,int e,int f,int g)
+{
+    judge = judge + a +b+c+d+e+f+g;
+}
+
+int test_para1(int a,int b){
+    judge = judge + 1;
+    return (1);
+}
+
+char test_para2(char a,char b){
+    judge = judge + 1;
+    return ('a');
+}
+
+void test_para3(char a,int b){
+    judge = judge + 1;
+    return ;
+}
+
+void test_para(){
+    judge = judge + 1;
+    test_para1(1,2);
+    test_para2('a','b');
+    test_para3('a',1);
+    test_para4(1,2,3,4,5,6,7);
+    return ;
+}
+
+void main()
+{
+
+    int x;
+    judge = 0;
+    judge = judge + 1;
+    x=0;
+    test_global_variable();
+
+    test_global_const();
+
+    test_brackets();
+
+    test_compare_operator();
+
+    test_expression();
+
+    test_while();
+
+    test_if();
+
+    test_switch();
+
+    test_function();
+
+    test_printf();
+
+    test_scanf();
+
+    test_varib();
+
+    test_para();
+
+    printf("all test:",judge);
+
+
+    return ;
+}

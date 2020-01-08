@@ -1,0 +1,91 @@
+const int global_single_int = 2;
+const int global_int_1 = 3 , global_int_2 = 4;
+const char global_single_char = '_';
+const char global_char_1 = '+' , global_char_2 = '9';
+int a;
+int b,c;
+int d[10];
+int e[20],f,g;
+char ch1;
+char ch2,ch3;
+char ch4[10];
+char ch5,ch6[19];
+void main(){
+	const int local_single_int = 100;
+	const int local_int_1 = 101 , local_int_2 = 102;
+	const char local_single_char = '-';
+	const char local_char_1 = '*' , local_char_2 = '/';
+	int a1;
+	int b1,c1;
+	int d1[10];
+	int e1[20],f1,g1;
+	char ch7;
+	char ch8,ch9;
+	char ch10[10];
+	char ch11,ch12[19];
+	a = 1;
+	b = 2;
+	c = 3;
+	d[4] = 4;
+	d[5] = 5;
+	e[6] = 6;
+	f1 = 7;
+	g1 = 8;
+	e1[9] = 9;
+	if(a == 1){
+		printf(" # 1 ");
+	}
+	if(b == c){
+		printf(" # 2 ");
+	}
+	if(c != d[4]){
+		printf(" # 3 ");
+	}
+	if(d[4] != 4){
+		printf(" # 4 ");
+	}
+	if(a > 0){
+		printf(" # 5 ");
+	}
+	if(a > f1 / 7){
+		printf(" # 6 ");
+	}
+	if(b >= d[4] - 2){
+		printf(" # 7 ");
+	}
+	if(b >= --7){
+		printf(" # 8 ");
+	}
+	if(+e1[9] - g1 < e1[9] + g1){
+		printf(" # 9 ");
+	}
+	if(g1 * e1[9] < f1){
+		printf(" # 10 ");
+	}
+	if(3 <= 5){
+		printf(" # 11 ");
+	}
+	if(5 <= 1){
+		printf(" # 12 ");
+	}
+	if(5 <= 5){
+		printf(" # 13 ");
+	}
+	if(b - b){
+		printf(" # 14 ");
+	}
+	if(b){
+		printf(" # 15 ");
+	}
+	a = 1;
+	while(a < 10){
+		printf(a);
+		a = a + 1;
+	}
+	while(a){
+		printf(a);
+		a = a - 2;
+	}
+	a1 = 3;
+	return;
+}

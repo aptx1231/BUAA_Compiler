@@ -1,0 +1,99 @@
+grammer.cpp 2654行
+		case MINUOP:
+		case MULTOP:
+		case DIVOP:
+		case GETARRAY:  //mc.z << " = " << mc.x << "[" << mc.y << "] 增加
+		case PUTARRAY:  //mc.z << "[" << mc.x << "]" << " = " << mc.y 增加
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.z) == nameMap.end()) {
+				if (mc.z[0] == '#') {
+@@ -2708,7 +2710,6 @@ void fullNameMap(map<string, string>& nameMap, vector<midCode> ve, string funcNa
+			}
+			break;
+		case ASSIGNOP:
+		case GETARRAY:  //mc.z << " = " << mc.x << "[" << mc.y << "]  删除
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.z) == nameMap.end()) {
+				if (mc.z[0] == '#') {
+@@ -2781,26 +2782,6 @@ void fullNameMap(map<string, string>& nameMap, vector<midCode> ve, string funcNa
+				}
+			}
+			break;
+		case PUTARRAY:  //mc.z << "[" << mc.x << "]" << " = " << mc.y   删除
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.z) == nameMap.end()) {
+				if (mc.z[0] == '#') {
+					nameMap[mc.z] = genTmp();
+				}
+				else {
+					nameMap[mc.z] = genName();
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end() &&  //局部变量
+				nameMap.find(mc.y) == nameMap.end()) {
+				if (mc.y[0] == '#') {
+					nameMap[mc.y] = genTmp();
+				}
+				else {
+					nameMap[mc.y] = genName();
+				}
+			}
+			break;
+		case FUNC:
+		case EXIT:
+			break;
+			
+			
+			
+optimize.cpp			
+			}
+			break;
+		case ASSIGNOP:
+		case GETARRAY:  删除
+			if (allLocalSymbolTable[funcName].find(mc.x) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.x].kind == 1 && mc.x[0] != '#') {  //局部变量
+				if (use.find(mc.x) == use.end() && def.find(mc.x) == def.end()) {
+@@ -76,6 +75,20 @@ void calUseDef(Block& bl, string funcName) {
+				}
+			}
+			break;
+		case GETARRAY:  //mc.z << " = " << mc.x << "[" << mc.y << "]  增加
+			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.y].kind == 1 && mc.y[0] != '#') {  //局部变量
+				if (use.find(mc.y) == use.end() && def.find(mc.y) == def.end()) {
+					use.insert(mc.y);
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.z].kind == 1 && mc.z[0] != '#') {  //局部变量
+				if (use.find(mc.z) == use.end() && def.find(mc.z) == def.end()) {
+					def.insert(mc.z);
+				}
+			}
+			break;
+		case PUSH:
+		case RET:
+		case INLINERET:
+@@ -105,17 +118,17 @@ void calUseDef(Block& bl, string funcName) {
+				}
+			}
+			break;
+		case PUTARRAY:
+		case PUTARRAY:  //mc.z << "[" << mc.x << "]" << " = " << mc.y
+			if (allLocalSymbolTable[funcName].find(mc.y) != allLocalSymbolTable[funcName].end()
+				&& allLocalSymbolTable[funcName][mc.y].kind == 1 && mc.y[0] != '#') {  //局部变量
+				if (use.find(mc.y) == use.end() && def.find(mc.y) == def.end()) {
+					use.insert(mc.y);
+				}
+			}
+			if (allLocalSymbolTable[funcName].find(mc.z) != allLocalSymbolTable[funcName].end()  删除
+				&& allLocalSymbolTable[funcName][mc.z].kind == 1 && mc.z[0] != '#') {  //局部变量
+				if (use.find(mc.z) == use.end() && def.find(mc.z) == def.end()) {
+					def.insert(mc.z);
+			if (allLocalSymbolTable[funcName].find(mc.x) != allLocalSymbolTable[funcName].end()  增加
+				&& allLocalSymbolTable[funcName][mc.x].kind == 1 && mc.x[0] != '#') {  //局部变量
+				if (use.find(mc.x) == use.end() && def.find(mc.x) == def.end()) {
+					use.insert(mc.x);
+				}
+			}
+			break;

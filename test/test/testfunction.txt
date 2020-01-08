@@ -1,0 +1,19 @@
+int minus1(int n) {
+    n = n - 1;
+    printf("minus", n);
+    if (n) {
+        return (divide2(n));
+    }
+    return (n);
+}
+int divide2(int n) {
+    n = n / 2;
+    printf("divide",n);
+    if (n) {
+        return (minus1(n));
+    }
+    return(n);
+}
+void main() {
+    minus1(1000);
+}

@@ -1,0 +1,129 @@
+const int MAX_NUM = 128 ;
+
+int factorial(int n){
+   if(n<=1) return (1);
+
+   return(n*factorial(n-1)) ;
+}
+
+int mod(int x, int y){
+   x=x-x/y*y;
+
+   return (x) ;
+}
+
+void swap(int x, int y){
+    int temp;
+
+    printf("x = ", x) ;
+    printf("y = ", y) ;
+    temp = x;
+    x=y;
+    y=temp;
+    printf("SWAP x = ", x) ;
+    printf("SWAP y = ", y) ;
+}
+
+int full_num(int n, int j, int a){
+  return (n*100+j*10+a) ;
+}
+
+int flower_num(int n, int j, int a){
+  return (n*n*n+j*j*j+a*a*a) ;
+}
+
+void complete_flower_num()
+{
+  int k[128];
+  int i,j,n,s,x1,y;
+  int m,k2,h,leap,x2;
+  int a,b,c ;
+
+
+  for(j=2;j< MAX_NUM ;j=j+1)
+  {
+    n = -1;
+    s = j;
+    for(i=1; i<j; i=i+1)
+    {
+      x1 = (j/i) * i ;
+      if( mod(j,i) == 0 )
+      {
+        n = n + 1;
+        s = s - i;
+        if (n >= 128)
+           printf("OVERFLOW!") ;
+        else
+           k[n] = i;
+      }
+    }
+
+    if(s==0)
+    {
+      printf("complete number: ",j);
+      for(i=0;i<=n;i=i+1)
+        printf("  ",k[i]);
+      printf(" ") ;
+    }
+  }
+
+  printf("---------------------------------------------------------------");
+  printf("'water flower'number is:");
+  y = 0 ;
+  for(i=100;i<100+MAX_NUM;i=i+1){
+      n=i/100;
+      j=mod(i/10,10);
+      a=mod(i,10);
+      if(full_num(n,j,a)==flower_num(n, j, a)){
+        k[y] = i ;
+        y = y + 1 ;
+      }
+  }
+  for(i = 0 ; i<y ; i=i+1){
+    printf("  ", k[i]) ;
+  }
+  printf(" ") ;
+
+
+
+  printf("---------------------------------------------------------------");
+  h = 0 ;
+  leap = 1 ;
+  for(m = 2 ; m <= MAX_NUM ; m=m+1)
+  {
+    k2 = m / 2;
+    for(i=2; i<=k2; i=i+1){
+      x2 = (m/i)*i ;
+      if( mod(m,i) == 0)
+      {
+        leap=0;
+      }
+     }
+    if(leap == 1)
+    {
+      printf(" ",m);
+      h = h +1;
+
+      x2 = (h/10)*10 ;
+      if( x2 == h)
+        printf(" ");
+     }
+     leap=1;
+  }
+
+  printf("The total is ",h);
+
+}
+
+
+void main()
+{
+   int n ;
+
+   n = factorial(5) ;
+   printf("5 != ", n) ;
+
+   swap(5, 10 ) ;
+
+   complete_flower_num() ;
+}

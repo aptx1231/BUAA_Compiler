@@ -1,0 +1,16 @@
+void main() {
+int i;
+i = 100;
+while(i) {
+printf("while",i);
+i = i - 1;
+}
+for (i = 0;i * i < 500;i = i + 1) {
+    printf("for",i * i);
+}
+do {
+    printf("do",i);
+    i = i / 2;
+}
+while(i>0);
+}

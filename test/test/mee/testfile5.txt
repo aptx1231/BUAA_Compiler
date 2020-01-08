@@ -1,0 +1,31 @@
+int f() {
+	return (1);
+}
+
+void main() {
+	int a,b,c,d,e,g;
+	int A[100];
+	a = +b;
+	a = -A[1];
+	a = (+b);
+	a = +10;
+	a = f();
+
+	a = +a * a;
+	a = -a * A[a];
+	a = a * (+a * a);
+	a = +a / 10;
+	a = a / f();
+
+	a = -A[e] * a;
+	a = +A[a+e] * A[a-e];
+	a = A[b] * (b*b);
+	a = -A[1] / 10;
+	a = A[a] / f();
+
+	a = -f() / a;
+	a = -f() / A[e+a];
+	a = +f() / (a/e);
+	a = f() * 10;
+	a = f() * f();
+}

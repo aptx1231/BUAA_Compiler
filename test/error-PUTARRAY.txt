@@ -1,0 +1,37 @@
+case PUTARRAY: {
+					string sx = "$t0", sy = "$t1";
+					//midCodefile << mc.z << "[" << mc.x << "]" << " = " << mc.y << "\n";
+					//mc.x可能是标识符也可能是数值 数组下标 $t0
+					//mc.z是数组名
+					//mc.y可能是标识符也可能是数值 $t1
+					loadValue(mc.y, sy, true, va, get1);
+					get1 = false;
+					loadValue(mc.x, sx, false, va, get1);
+					if (allLocalSymbolTable[curFuncName].find(mc.z) != allLocalSymbolTable[curFuncName].end()
+						&& allLocalSymbolTable[curFuncName][mc.z].kind == 4) {  //array
+						addr = allLocalSymbolTable[curFuncName][mc.z].addr;
+						if (!get1) {  //数组下标保存在sx寄存器
+							mipsCodeTable.push_back(mipsCode(addi, "$t2", "$fp", "", -4 * addr));
+							mipsCodeTable.push_back(mipsCode(sll, "$t0", sx, "", 2));
+							mipsCodeTable.push_back(mipsCode(sub, "$t2", "$t2", "$t0"));
+							mipsCodeTable.push_back(mipsCode(sw, sy, "$t2", "", 0));
+						}
+						else { //拿到了数组下标 存在了va中
+							mipsCodeTable.push_back(mipsCode(sw, sy, "$fp", "", -4 * (addr + va)));
+						}
+					}
+					else if (globalSymbolTable.find(mc.z) != globalSymbolTable.end()
+						&& globalSymbolTable[mc.z].kind == 4) {  //array
+						addr = globalSymbolTable[mc.z].addr;
+						if (!get1) {  //数组下标保存在sx寄存器
+							mipsCodeTable.push_back(mipsCode(addi, "$t2", "$gp", "", addr * 4));
+							mipsCodeTable.push_back(mipsCode(sll, "$t0", sx, "", 2));
+							mipsCodeTable.push_back(mipsCode(add, "$t2", "$t2", "$t0"));
+							mipsCodeTable.push_back(mipsCode(sw, sy, "$t2", "", 0));
+						}
+						else {
+							mipsCodeTable.push_back(mipsCode(sw, sy, "$gp", "", (addr + va) * 4));
+						}
+					}
+					break;
+				}

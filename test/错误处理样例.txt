@@ -1,0 +1,455 @@
+const char a='c, b='c';
+void %main(){
+	int a,b[10];
+	a='?;
+	a='???';
+	a = b[('?)];
+	b[('?a)] = 10;
+	a='csq';
+	a = b[('c)];
+	b[('c)] = 10;
+}
+
+in%t cha%nge1;
+词法 0开头的数字
+const int %const1 = 1, const2 = -100;
+const char const3 = '?';
+in%t cha%nge1;
+char change3;
+int gets1%(int var1,int var2){
+   change1 %= var1 + var2 ;
+   printf("ddd, 1);
+   printf("aa");
+   printf("bbb);
+   printf("ccc",1);
+   printf("ddd, 1);
+   %return (change1);
+}
+void %main(){
+   change1 = 10*gets1%(1,2);
+   printf("Hello World");
+   printf(gets1(10, 20));
+}
+
+
+
+int f(int a, int b) {
+    return (a);
+}
+
+int t() {}
+void main()
+{
+    int f;
+    f(1,2);
+	for (t=0;10;t=t+1) {;}
+    return (0);
+}
+
+
+int q;
+int f(int a, int b) {
+    return (a);
+}
+
+int t() {}
+void main()
+{
+    int f;
+	char w;
+    f(1,2);
+	for (t=0;10;t=t+1) {;}
+	q=10;
+	scanf(a,q);
+	scanf(f);
+	w = 1;
+    return (0);
+}
+
+
+int q;
+int f(int a, int b) {
+    return (a);
+}
+
+int t() {}
+
+int v() {}
+void main()
+{
+    int f;
+	char w;
+    f(1,2);
+	for (t=0;10;t=t+1) {;}
+	q=10;
+	scanf(a,q);
+	scanf(f);
+	w = a[10];
+	w = f(10,10);
+	w = 10*t();
+	w = 10*qqq();
+	w = qqq();
+	w = v()*t()*qqq()*t;
+	w = e;
+    return (0);
+}
+
+
+
+void f(int a, int b) {
+    return (a);
+}
+
+void main()
+{
+    f();
+    return (0);
+}
+
+
+int f(int a, int b) {
+    return (a);
+}
+
+int ff(int a)
+{}
+
+void fff() {}
+
+int ffff(int a, char b, int c) {}
+
+void main()
+{
+	return (0);
+    if ('a'>'b') {}
+	if(('c')) {
+	}
+	else {
+	}
+	
+	while ('d') {
+	
+	}
+	
+	do {
+	}
+	while(10)
+	
+	for (t=0;'0';t=t+1) {;}
+	
+	f(1);
+	f(1,2);
+	f();
+	f('1',2);
+	ff(10);
+	ff('1');
+	fff();
+	fff(1);
+	ffff();
+	ffff(10*f(1,2), 'a', 10);
+	ffff(10,10,10);
+	ffff(10,'q');
+	ffff('q','q','q');
+    return (0);
+}
+
+
+int f(int a, int b) {
+    return (a);
+}
+
+char g(int a,int b) {
+}
+
+void main()
+{
+const char ccc='0';
+	int a[10];
+	char c;
+	char cc[10];
+	
+	a['a']=1;
+	a[('a')]=1;
+	a['a'-'b']=1;
+	a['a'*'a']=1;
+	a[10]=1;
+	a[f(1,2)]=1;
+	a[g(1,2)]=1;
+	a[c]=1;
+	a[c[10]]=1;
+	a[ccc]=1;
+	a[10]=a[10]*10;
+	a[10]=(a[10]);
+	a[10]=cc[10]*10;
+	a[10]=c[10]*10;
+	a[10]=(cc[10]);
+	a[10]=c[10];
+	c[10]=10;
+	a[10]=cc['a'];
+    return (0);
+}
+
+
+const int q = 10;
+const int w = 10;
+void main()
+{
+	const char ccc='0';
+	const int qwq=1;
+	int a[10];
+	char c;
+	char cc[10];
+	int q;
+	q=10;
+	qwq=1;
+	ccc='1';
+	scanf(c,qwq);
+	scanf(qwq);
+	scanf(q);
+	for (c=0;c;c=c+1) {}
+	for (q=0;q;q=q+1) {}
+	for (w=0;w;w=w+1) {}
+	for (ccc=0;ccc;ccc=ccc+1) {}
+    return (0);
+}
+
+
+
+const int a1_1 = +10
+const int b2 = -10, cc = 10
+const char aA = '+' const char AAb_ = '-', cQ1 = '*', d1Q = '/'
+const int a____A = +0, _b = -0, c_ = 0
+
+int f(){}
+void g() {}
+void main()
+{
+	int a, d, f, e
+	int c[100],g[1000],h,aaa[10]
+	int b int aqw
+	a=10
+	f();
+	scanf(a)
+	printf("1")
+	a=20;
+	g();
+	for (a=0 a a=a+1) {
+	}
+	return (1)
+}
+
+
+int f( {}
+
+char ff(int a {}
+
+char fff (int a, char b{}
+
+void g( {}
+
+void gg(int a {}
+
+void ggg (int a, char b{}
+
+void main({
+	int a,b,c;
+	g(1);
+	gg();
+	ggg(1,'1');
+	ggg('1',1);
+	a = ('a';
+	a = ('1')
+	a = (1+2*3;
+	a = f()*(1;
+	if (10 {}
+	else {}
+	if (f() {}
+	if (10*f() {}
+	while (10 {}
+	do {
+	} while (f()
+	do{
+	} while (('a')
+	do {
+	} while (('a')<('b')
+	for (a=0;a;a=a+10 {}
+	for (a=0;a;a=a-1{}
+	f(;
+	ff(1;
+	ff(f();
+	fff(1,'1';
+	fff(1,ff(f();
+	scanf(a,b;
+	scanf(a;
+	printf("aaaa";
+	printf(f();
+	printf(10+10);
+	printf("aaa",f();
+	printf("aa", 10;
+	printf(10;
+	k();
+	k();
+	k(1);
+	return (1;
+	return ;
+	return (0);
+}
+
+
+int f( {}
+
+char ff(int a {}
+
+char fff (int a, char b{}
+
+void g( {}
+
+void gg(int a {}
+
+void ggg (int a, char b{}
+
+void main({
+	int a[10];
+	int b;
+	f(;
+	b = a[f(];
+	a[f(] = 10;
+	a[f(] = ff(1;
+	b = f(*10;
+	b = f(+10;
+	b = (f(*10)+10;
+	b = f(/10;
+	b = f(/10;
+	b = 10*a[f(];
+	b = (f();
+	b = 10*(f();
+	if (f( < f()) {}
+	if (f(<= f()) {}
+	for (b=f(;10;b=b+10){}
+	printf("a",f();
+	printf(10*f();
+	return (f();
+	fff(f(,'a');
+	ff(f();
+	return (0);
+}
+
+
+
+int f( {}
+
+char ff(int a {}
+
+char fff (int a, char b{}
+
+void g( {}
+
+void gg(int a {}
+
+void ggg (int a, char b{}
+
+void main({
+	int b,a[10,c;
+	int d[1;
+	char q[10,w[10];
+	char e[10,r;
+	e[1 = 10;
+	a[10 = 10;
+	a[10] = a[10 * 10;
+	a[10] = a[10 * f();
+	a[10] = 10*a[10;
+	a[10] = 10*(a[10);
+	ff(a[10);
+	return (0);
+}
+
+
+int f( {}
+
+char ff(int a {}
+
+char fff (int a, char b{}
+
+void g( {}
+
+void gg(int a {}
+
+void ggg (int a, char b{}
+
+void main({
+	do {
+	}while (1);
+	do {
+	} (1);
+	do {
+	}
+	(1);
+	do {
+	}
+	
+	(1);
+	return (0);
+}
+
+
+const char t = 'a, q='a';
+int f() {
+	return;
+}
+
+int ff() {
+	return (1);
+}
+
+int fff() {
+	return ('1');
+}
+
+int ffff() {
+	return (('1'));
+}
+
+char fffff() {
+	return (1);
+}
+
+char ffffff() {
+	return ('1');
+}
+
+int fffffff() {
+
+}
+
+void g() {
+	return;
+}
+
+void gg() {
+	return (1);
+}
+
+void ggg() {
+	return ('1');
+}
+
+void gggg() {
+	return (('1'));
+}
+
+void ggggg() {
+	return (1);
+}
+
+void gggggg() {
+	return ('1');
+}
+
+void ggggggg() {
+
+}
+
+void main(){
+	const char a=10;
+	return (1);
+}

@@ -1,0 +1,21 @@
+void main() {
+    const int kkk = 19260817;
+    const int jjj = -19260817;
+    char str[20];
+    char c;
+    int a, b;
+    scanf(a, b);
+    printf("hello world!", -a + b);
+    printf(a - b);
+    printf(a * b);
+    for (a = kkk; a > 0; a = a - 10086) {
+        if (b != 0) {
+            printf("good! ", a / b);
+        } else printf("fuck! ", + b / a);
+    }
+    for (a = 19; a + 1; a = a - 1) {
+        str[a] = 'G';
+        printf(str[a]);
+        printf(" and ", jjj);
+    }
+}

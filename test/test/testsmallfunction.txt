@@ -1,0 +1,28 @@
+int add(int a, int b) {
+    return (a + b);
+}
+int sub(int a, int b) {
+    return (a - b);
+}
+void main() {
+    int a;
+    int b;
+    a = 1;
+    b = 1;
+    b = sub(a, b);
+    printf("b", b);
+    b = sub(3,add(a, a));
+    printf("b", b);
+    a = add(a, b);
+    printf("a", a);
+    a = add(a, b);
+    printf("a", a);
+    a = add(a, b);
+    printf("a", a);
+    a = add(a, b);
+
+
+    printf("b", b);
+    b = add(a, b);
+
+}

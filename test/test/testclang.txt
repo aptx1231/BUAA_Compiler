@@ -1,0 +1,24 @@
+int g_val;
+
+int add_g_val(int i){
+    g_val = g_val+i ;
+    return (g_val) ;
+}
+
+void swap(int x, int y){
+    int temp;
+
+    printf("x = ", x) ;
+    printf("y = ", y) ;
+    temp = x;
+    x=y;
+    y=temp;
+    printf("SWAP x = ", x) ;
+    printf("SWAP y = ", y) ;
+}
+
+void main()
+{
+   g_val = 5 ;
+   swap(g_val, add_g_val(g_val) ) ;
+}

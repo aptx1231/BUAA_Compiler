@@ -1,0 +1,64 @@
+int kkk, jjj;
+char moha, hath;
+int arr[100], aaa;
+
+void hello_world() {
+    const int bbb = 2147483647;
+    printf("Hello World! ", bbb / 2);
+}
+
+void arrange(int n, int i)
+{
+    const int ONE = 1;
+    int j, tmp;
+    if (i >= n - 1)
+    {
+        for (j = 0; j < n; j = j + 1) printf(" ", arr[j]);
+        printf("\n");
+        return;
+    }
+    else {
+        arrange(n, i + 1);
+        for (j = i + ONE; j < n; j = j + 1) if (arr[i] != arr[j])
+        {
+            tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+            arrange(n, i + 1);
+        }
+        for (j = i + 1; n > j; j = j + 1) {
+            tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
+    }
+}
+
+void main() {
+    const int a = 123, cc = -11;
+    int i;
+    hello_world();
+    scanf(hath);
+    moha = hath;
+    printf(hath * a / (moha + cc));
+    scanf(kkk, jjj, aaa);
+    printf(hath);
+    scanf(aaa);
+    for (i = 0; i < 100; i = i + 1) {
+        arr[i] = i + 1;
+    }
+    while (aaa >= 0) {
+        arrange(aaa, 0);
+        if (aaa == 12) printf(aaa);
+        else printf("mmp ", aaa);
+        aaa = aaa - 1;
+    }
+    scanf(aaa);
+    do {
+        printf("fuck: ");
+        printf("your: ");
+        printf("mother: ");
+        if (aaa != 20000) printf("hehe", aaa);
+        aaa = aaa + '0';
+    } while (aaa < 10000);
+}

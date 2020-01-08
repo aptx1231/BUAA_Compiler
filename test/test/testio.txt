@@ -1,0 +1,34 @@
+const int a1 = 1, a2 = 2;
+const char c1 = 'c', c2 = 'd';
+int a3;
+char c3;
+int ca1[100];
+int getint() {
+ return (3);
+}
+char getchar() {
+ return ('e');
+}
+void main() {
+printf("ha\\l\0lo\n");
+printf(1);
+printf("hallo");
+printf(1);
+printf("hello world\n");
+printf(1706);
+printf("1 = ",a1);
+printf("'c' = ",c1);
+printf("3 = ",getint());
+printf("'e' = ", getchar());
+printf(ca1[0]);
+printf(ca1[getint()]);
+printf("input int a3, a3:");
+scanf(a3,a3);
+printf("a3 = ",a3);
+printf("input char c3, c3:");
+scanf(c3,c3);
+printf("c3 = ",c3);
+printf("ca[1] = 3");
+ca1[1] = getint();
+printf(ca1[1]);
+}

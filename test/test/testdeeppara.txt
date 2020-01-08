@@ -1,0 +1,23 @@
+int add(int a, int b) {
+    return (a + b);
+}
+int sub(int a, int b) {
+    return (a - b);
+}
+int sum(int a, int b, int c) {
+    return (a + b + c);
+}
+int get10() {
+    return (10);
+}
+void main(){
+    int a;
+    int b;
+    a = 4;
+    b = 3;
+    printf("6=",add(1+add(1,2),2));
+    printf("7=",add(a,sub(a,sub(a,b))));
+    printf("6=",add(sub(a,sub(a,b)),sub(a,sub(a,b))));
+    printf("15=",sum(add(a,a),sub(a,b),sum(1,2,3)));
+    printf("20=",add(get10(),get10()));
+}

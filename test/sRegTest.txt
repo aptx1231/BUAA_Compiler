@@ -1,0 +1,127 @@
+
+
+void ccc() {
+	int a,b,c,d,e,r,t,y,u,i,o,p;
+
+	a=-3;b=1;
+	if (a>0) {
+		b=1;c=1;d=1;e=1;r=1;t=1;y=1;u=1;i=1;o=1;p=1;
+	}
+	else {
+		a=1;
+	}
+	printf(b);
+}
+
+void eee() {
+	int a,b,c,d,e,r,t,y,u,i,o,p;
+	b=2;
+	a=-3;
+	if (a>0) {
+		a=1;c=1;d=1;e=1;r=1;t=1;y=1;u=1;i=1;o=1;p=1;
+	}
+	else {
+		b=1;
+	}
+	printf(a);
+}
+
+void ddd() {
+	int a,b,c,d,e,r,t,y,u,i,o,p;
+	b=1;
+	a=3;
+	if (a>0) {
+		b=1;c=1;d=1;e=1;r=1;t=1;y=1;u=1;i=1;o=1;p=1;
+	}
+	else {
+		a=1;
+	}
+	printf(a);
+}
+
+void qqq() {
+	int a,b,c,d,e,r,t,y,u,i,o,p;
+	b=2;
+	a=-3;
+	if (a>0) {
+		a=1;b=1;c=1;d=1;e=1;r=1;t=1;y=1;u=1;i=1;o=1;p=1;
+	}
+	printf(b);
+}
+
+void f() {
+	int a,b,c,d,e,r,t,y,u,i,o,p;
+	a=-10;b=2;
+	while(a>0) {
+		b=1;c=1;d=1;e=1;r=1;t=1;y=1;u=1;i=1;o=1;p=1;
+		a=-1;
+	}
+	a=1;
+	printf(b);
+}
+
+void ff() {
+	int a,b,c,d,e,r,t,y,u,i,o,p;
+	a=10;b=2;
+	do {
+		a=1;
+		a=a-1;b=1;c=1;d=1;e=1;r=1;t=1;y=1;u=1;i=1;o=1;p=1;
+		printf(a);
+	} while (a>0)
+	a=1;
+	printf(b);
+}
+
+void fff() {
+	int i,a1,a9,a2;
+	for (i=0;i<10;i=i+1) {
+		a9=1;
+		a1=a9;
+		if (a1>0) {
+			a2=2;
+		}
+		else {
+			a2=1;
+		}
+		a9=10;
+		printf(a2);
+	}
+}
+
+void cc(int a1,int a2,int a3,int a4,int a5,int a6,int a7,int a8,int a9) {
+	int i;
+	for (i=0;i<10;i=i+1) {
+		a1=a9;
+		if (a1>0) {
+			a2=2;
+		}
+		else {
+			a2=1;
+		}
+		a9=10;
+		printf(a2);
+	}
+}
+
+
+void c(int a1,int a2,int a3,int a4,int a5,int a6,int a7,int a8,int a9) {
+	int i;
+	for (i=0;i<10;i=i+1) {
+		a1=a9;
+		a9=10;
+		printf(a2);
+		printf(i);
+	}
+}
+
+void main() {
+c(1,2,3,4,5,6,7,8,-1);
+cc(1,2,3,4,5,6,7,8,-1);
+ccc();
+f();
+ff();
+fff();
+qqq();
+ddd();
+eee();
+}

@@ -1,0 +1,5 @@
+const char b_ = '-', c1 = '*', d1 = '/', e2 = 'a', d5 = 'A', aqe = 'Z', a1_1 = 'A', a2__ = 'Q', _='q', __='w', ___='1';
+
+void main() {
+	const int a = +10;
+}

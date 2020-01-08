@@ -1,0 +1,490 @@
+	//把全局常量保存到栈中
+	//需要修改 改为用一个vector顺序记录所有的全局常量 这样就可以按顺序每次sp-4了！！！！！！
+	int maxsub = 0;
+	for (map<string, symbolItem>::iterator it = globalSymbolTable.begin(); it != globalSymbolTable.end(); it++) {
+		symbolItem item = it->second;
+		if (item.kind == 2) {  //常量
+			int imme;
+			if (item.type == 1) {
+				imme = item.constInt;
+			}
+			else {
+				imme = item.constChar;
+			}
+			mipsCodeTable.push_back(mipsCode(li, "$t0", "", "", imme));
+			mipsCodeTable.push_back(mipsCode(sw, "$t0", "$sp", "", -4*item.addr));
+			if (4 * item.addr > maxsub) {
+				maxsub = 4 * item.addr;
+			}
+		}
+	}
+	if (maxsub) {
+		mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -maxsub));
+	}
+	
+	
+	//处理函数内部的局部常量
+			for (map<string, symbolItem>::iterator it = allLocalSymbolTable[mc.x].begin(); it != allLocalSymbolTable[mc.x].end(); it++) {
+				symbolItem item = it->second;
+				if (item.kind == 2) {  //常量
+					int imme;
+					if (item.type == 1) {
+						imme = item.constInt;
+					}
+					else {
+						imme = item.constChar;
+					}
+					mipsCodeTable.push_back(mipsCode(li, "$t0", "", "", imme));
+					mipsCodeTable.push_back(mipsCode(sw, "$t0", "$sp", "", -4 * item.addr));
+					if (4 * item.addr > maxsub) {
+						maxsub = 4 * item.addr;
+					}
+				}
+			}
+			
+			
+	f[8] = (a+b);
+	f[a-c] = a-c;
+	e = 1000;
+	e = -1000;
+	e = 10+10;
+	e = 10-10;
+	if (a == b) {
+		if (c == e) {
+            printf(gg);
+		}
+	}
+	if (a != b) {
+		gg = -100;
+	}
+	if (a >= b) {
+	    gg = 10;
+	}
+	if (a <= b) {
+	    gg = 10;
+	}
+	if (a > b) {
+		g[1] = c*b;
+	}
+	if (a < b) {
+		g[1] = f[1]/10;
+	}
+	if (a) {
+		g[a] = 1;
+	}
+	if (a-b) {
+		f[a] = b;
+	}
+	while (a == b) {
+		scanf(gg);
+		scanf(gg, e);
+		if (a-b) {
+			f[a] = b;
+		}
+		printf(a);
+	}
+	while (a == b) 
+		;
+	
+	do {
+		printf(a/10);
+	} while (a)
+	do 
+		printf(a/10);
+	 while (a)
+	do 
+		;
+	 while (a)
+	for (i = a - b; i<=(a+b); i=i+2) {
+		printf("abc", i);
+	}
+	for (i = a - b; i<=(a+b); i=i-2) {
+		printf("aaa");
+	}
+	for (i = a - b; i<=(a+b); i=i-2) 
+		printf("aaa");
+		
+		
+	const int cons1=1, const3=3;
+const char cc = 'a', dd = 'A';
+int e[10], f;
+
+void f1() {
+	const int c1=10, d=100;
+	int a;
+	int A[10],dd;
+	A[1] = a;
+	return;
+}
+
+int f2(int a) {
+	char A[10];
+	f1();
+	return (('a'));
+}
+
+int f22(int a) {
+	char A[10];
+	return (a);
+}
+
+char f222(int a) {
+	char A[10];
+	return ('a');
+}
+
+void main() {
+    const int a = +10; const int b = -10, c = 10; char d; int g[10], h[10];int e, f[100], gg, i;
+	scanf(e);
+	scanf(e, d);
+	f2(a);
+	f2(e);
+	f2(-1);
+	f2(('a'));
+	printf(-10);
+	printf("a", 'd');
+		printf("abc", i);
+		printf("aaa");
+		printf("aaa");
+		printf(10);
+		printf('a');
+		printf(a);
+		printf(c);
+		printf(d);
+		printf(d+a);
+		printf(e);
+}
+
+
+const int cons1=1, const3=3;
+const char cc = 'a', dd = 'A';
+int e[10], f;
+
+void f1() {
+	const int c1=10, d=100;
+	int a;
+	int A[10],dd;
+	A[1] = a;
+	return;
+}
+
+int f2(int a) {
+	char A[10];
+	f1();
+	return (('a'));
+}
+
+int f22(int a) {
+	char A[10];
+	a = 3;
+	return (a);
+}
+
+char f222(int a) {
+	char A[10];
+	return ('a');
+}
+
+void main() {
+    const int a = +10; const int b = -10, c = 10; 
+	char d; int g[10];int e, f[100], gg, i;
+	d = '+';
+	g[0] = 0;
+	g[1] = 1;
+	g[2] = 2;
+	g[3] = 3;
+	g[4] = 4;
+	g[5] = 5;
+	g[6] = 6;
+	g[7] = 7;
+	g[8] = 8;
+	g[9] = 9;
+	e = 101;
+	printf(d);
+	printf(g[0]);
+	printf(g[1]);
+	printf(g[2]);
+	printf(g[3]);
+	printf(g[4]);
+	printf(g[5]);
+	printf(g[6]);
+	printf(g[7]);
+	printf(g[8]);
+	printf(g[9]);
+	printf(e);
+}
+
+int test;
+void main(){
+    int a,b,c,d;
+	a=-1;
+	printf(a);
+	a=1;
+	b=2;
+	c=3;
+	d=4;
+	a = a + 1;
+	b = 1 + 1;
+	c = 1 + a;
+	d = a + c;
+	a = a + -1;
+	b = 1 + -1;
+	c = -1 + a;
+	d = a + c;
+	printf(a);
+	printf(b);
+	printf(c);
+	printf(d);
+	printf(a+b+c+d);
+	d = a - c;
+	c = a - -1;
+	b = -1 - a;
+	a = -1 - -2;
+	printf(a);
+	printf(b);
+	printf(c);
+	printf(d);
+	printf(a+b+c+d);
+}
+
+
+const int q=1;
+void f() {
+return;
+}
+void main(){
+    int a,b,c,d;
+	a = 1;
+	b = 2;
+	if (1==q) {
+		printf("=");
+	}
+	else {
+		printf("!=");
+	}
+	if (1==3) {
+		printf("=");
+	}
+	else {
+		printf("!=");
+	}
+	if (a==b) {
+		printf("=");
+	}
+	else {
+		printf("!=");
+	}
+	if (a==1) {
+		printf("=");
+	}
+	else {
+		printf("!=");
+	}
+	if (3==b) {
+		printf("=");
+	}
+	else {
+		printf("!=");
+	}
+}
+
+const int q=1;
+void f() {
+return;
+}
+void main(){
+    int a,b,c,d;
+	a = 1;
+	b = 2;
+	do {
+		printf("1???");
+	} while (q==3);
+	do {
+		printf("2???");
+	} while (1==2);
+	do {
+		printf("3???");
+	} while (1==b);
+	do {
+		printf("4???");
+	} while (a==2);
+	do {
+		printf("5???");
+	} while (a==b);
+}
+
+const int q=1;
+void f() {
+return;
+}
+void main(){
+    int a,b,c,d;
+	a = 1;
+	b = 2;
+	do {
+		printf("1???");
+	} while (q!=1);
+	do {
+		printf("2???");
+	} while (1!=1);
+	do {
+		printf("3???");
+	} while (2!=b);
+	do {
+		printf("4???");
+	} while (a!=1);
+	do {
+		printf("5???");
+	} while (a!=a);
+}
+
+const int q=1;
+void f() {
+return;
+}
+void main(){
+    int a,b,c,d;
+	a = 1;
+	b = 2;
+	if (1>=2) {
+		printf("a");
+	}
+	else {
+		printf("b");
+	}
+	if (a>=1) {
+		printf("a");
+	}
+	else {
+		printf("b");
+	}
+	if (1>=b) {
+		printf("a");
+	}
+	else {
+		printf("b");
+	}
+	if (1>=q) {
+		printf("a");
+	}
+	else {
+		printf("b");
+	}
+	if (1>=2) {
+		printf("a");
+	}
+	else {
+		printf("b");
+	}
+	if (a>=b) {
+		printf("a");
+	}
+	else {
+		printf("b");
+	}
+}
+
+
+int computeFac(int n) {
+    if (n == 1) {
+        return (1);
+    }
+    return (computeFac(n - 1) * n);
+}
+
+int fiboRecursion(int n) {
+    const int outRange = -1;
+
+    if (n < 0) {
+        printf("n should not less than 0");
+    } 
+    if (n < 2) {
+        return (n);
+    } else {
+        return (fiboRecursion(n - 1) + fiboRecursion(n - 2));
+    }
+}
+
+int f(int x) {
+	if (x < 10) {
+		printf("less than 10");
+		return (10);
+	}
+	else {
+		printf("more than 10");
+		return (0);
+	}
+	return (20);
+}
+
+void g() {
+}
+
+void main() {
+	g();
+	printf(f(-1));
+    printf(computeFac(1));
+	 printf(computeFac(2));
+	  printf(computeFac(3));
+}
+
+
+void compare(char c, int n) {
+    int i;
+    char tmp;
+    i = 0;
+
+    do {
+        scanf(tmp);
+        if ((tmp) < (c)) {
+            printf("<");
+        }  else {
+            printf(">");
+        }
+        i = i + 1;
+    } while (i < n);
+}
+
+void printAllChar() {
+    printf(" !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}");
+}
+
+int computeFac(int n) {
+    if (n == 1) {
+        return (1);
+    }
+    return (computeFac(n - 1) * n);
+}
+
+int returnInt() {
+    return (computeFac(3));
+}
+
+char returnChar() {
+    return ('a');
+}
+
+void main() {
+    char A;
+	int i;
+    A = 'z';
+    printAllChar();
+    compare(returnChar(), returnInt());
+    compare(A, returnInt());
+
+}	
+
+const int a=10,b=1,c=-1,d=10;
+
+void main() {
+	if (a+b != (c+d)*(-a-(-8))) {
+		printf(a+b);
+		printf((c+d)*(-a-(-8)));
+	}
+	else {
+		printf(a);
+		printf(-a);
+	}
+	
+}
+

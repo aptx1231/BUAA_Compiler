@@ -1,0 +1,93 @@
+const int a1_1 = +10;
+const int b2 = -10, cc = 10;
+const char aA = '+';
+const char AAb_ = '-', cQ1 = '*', d1Q = '/', e2 = 'a', d5 = 'A', aqe = 'Z', a2__ = 'Q', _='q', __='w';
+const char a = 'a', b = 'b', c= 'c', d='d', e='e',f='f',g='g',h='h',i='i',j='j',k='k',l='l',m='m',n='n',o='o',p='p',q='q',r='r',s='s',t='t',u='u',v='v',w='w',x='x',y='y',z='z';
+const char A = 'A', B = 'B', C= 'C', D='D', E='E',F='F',G='G',H='H',I='I',J='J',K='K',L='L',M='M',N='N',O='O',P='P',Q='Q',R='R',S='S',T='T',U='U',V='V',W='W',X='X',Y='Y',Z='Z';
+const int a____A = +0, _b = -0, c_ = 0;
+
+char g__[10], h__[10];char e__, f__;
+
+int f_d() {
+	return (10);
+}
+int f1(int a) {
+	return (a);
+}
+int f12(char a) {
+	return (a/10);
+}
+int f1_(int a, char b) {
+	return (a+b);
+}
+int _f1(char a, int b) {
+	return (b);
+}
+int fff(int a,int b) {
+	return (a);
+}
+
+void main() {
+	int a, d, f, e;
+	int c[100],g[1000];
+	int b;
+	if (a == b) {
+		if (f == e) {
+			fff(a,b);
+		}
+	}
+	else 
+		f = e;
+	if (a != b) {
+		a = -100;
+	}
+	else {
+
+	}
+	if (a != b) 
+		a = -100;
+	if (a >= b) {
+	    b = 10;
+	}
+	else {
+		b = 1;
+		a = 2;
+		e = 3;
+	}
+	if (a <= b) {
+	    c[1] = 10;
+	}
+	else {
+		;
+	}
+	if (a > b) {
+		g[1] = c[1]-b;
+	}
+	else ;
+
+	if (a > b) ;
+	else ;
+	if (a >= b) ;
+	if (a < b) {
+		g[1] = f;
+	}
+	else {
+		if (a > b)
+		    a = b;
+		else 
+			a = -b;
+	}
+	if (a) {
+		g[a] = 1;
+		;
+	}
+	else {
+		a = 10;
+	}
+	if (a-b) {
+		f = b;
+	}
+	else {
+		;
+	}
+}

@@ -1,0 +1,17 @@
+const int a1 = 1, a2 = 2;
+const char c1 = 'c', c2 = 'd';
+int a3;
+char c3;
+int ca1[100];
+void main() {
+    int a;
+    int b;
+    int c;
+    int d;
+    a = a1;
+    printf("1 = ",a);
+    a = a2;
+    printf("2 = ",a);
+    b = -a2;
+    printf("-2 = ",b);
+}

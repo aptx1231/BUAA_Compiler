@@ -1,0 +1,43 @@
+int f1(int n2)
+{
+	int i2,r2;
+	i2 = 0;
+	r2 = 0;
+	while (i2 != n2) {
+		r2 = r2 + i2;
+		i2 = i2 + 1;
+	}
+	return (r2);
+}
+int f2 (int n3)
+{
+    return ((2 * (-n3)));
+}
+char f3()
+{
+    return ('A');
+}
+void main() 
+{
+	int a1,a2,a3,a4;
+	int b1,b2,b3,b4;
+	int c1,c2,c3,c4;
+	int a[10];
+	char d1;
+	a1 = +1;
+	a2 = -1;
+	a3 = +a1 * a2;
+	a4 = -a3 * a2;
+	d1 = '+';
+	a[0] = (+a1 * a2) + a4;
+	b1 = -a1 + a2;
+	b2 = -a2 / a2 - a4;
+	b3 = -a1 + f1(a1 + a1);
+	b4 = -a1 * (-a2);
+	c1 = (-a1) + (-f1(a1));
+	a[ a1 + a1] = d1 + a1;
+	a[3] = f2(4);
+	a[4] = 1 * a[3] + 1;
+	printf(f3());
+	printf(f1((+a1)) + f1(2));
+} 

@@ -1,0 +1,192 @@
+const int _const_int_0 = +0, _const_int_1 = +1, _const_int_2 = -3;
+const char _const_char_0 = '*', _const_char_1 = '0';
+
+int _var_int_0, _var_int_arr_0[1];
+int _var_int_1, _var_int_arr_1[17];
+char _var_char_0, _var_char_arr_0[1];
+char _var_char_1, _var_char_arr_1[17];
+
+int count_i, count_j;
+int test, _______;
+char _char, i;
+
+char getNext(){
+    _char = _char;
+    return (_char);
+}
+
+char getFormer(){
+    _char = _char;
+    return (_char);
+}
+
+void testLoop0(){
+    _var_char_arr_1[count_i] = getNext();
+    count_i = count_i + 1;
+}
+
+void testLoop1(){
+    _var_int_arr_1[count_j] = getFormer() + 1 - 1;
+    count_j = count_j - 1;
+}
+
+void checkResult(int i){
+    if(_var_int_arr_1[i] != (_var_char_arr_1[16 - i]))
+        test = 0;
+    
+}
+
+void testArithmetic(){
+    const int standard = 100, ten = 10;
+    int temp;
+    temp = --10 -+ 10 + ten * (_const_char_1 - _const_char_0) / _const_int_2 + standard / (ten + _const_int_2 - _const_int_1);
+    if(temp)
+        printf("Arithmetic Check Succeed!");
+    if(temp==0)
+        printf("Arithmetic Check Failed!");
+    temp = (standard + _const_int_1 * 15) / ten;
+    if(temp == 11)
+        printf("Division Check Passed!");
+    if(temp!=11)
+        printf("Error in Division Unit!");
+}
+
+void testValue(){
+    _var_int_0 = -0;
+    if(_var_int_0 == _const_int_0)
+        if(_var_int_0 < _const_int_1)
+            if(_var_int_0 > _const_int_2)
+                printf("Value Assignment Succeed!");
+            if(_var_int_0 <= _const_int_2)
+                printf("Negative Assignment Failed!");
+        if(_var_int_0 >= _const_int_1)
+            printf("Positive Assignment Failed!");
+    if(_var_int_0 != _const_int_0)
+        printf("Basic Assignment Failed!");
+
+}
+
+
+void testDo(){
+    int i;
+    _char = '0';
+    count_i = 0;
+    count_j = 16;
+    testLoop0();
+    while(count_i <= 16)
+	testLoop0();
+	
+    _char = _char;
+    
+        testLoop1();
+    while(count_j >= 0)
+	testLoop1();
+    i = 0;
+    test = 1;
+    {
+        checkResult(i);
+        i = i + 1;
+    }
+    while(i <= 16)
+	{
+        checkResult(i);
+        i = i + 1;
+    }
+    if(test)
+        printf("Do Loop Passed!");
+    if(test==0)
+        printf("Error in Do Loop!");
+}
+
+void testIO(char c, int i){
+    int temp;
+    printf(c + i);
+    printf("Beginning IO Test...");
+    scanf(i);
+    scanf(c);
+    printf("Number One is:", i);
+    temp = c + 1 - 1;
+    printf("Number Two is:", temp);
+    printf("The Result is:", c + i);
+}
+
+void testCaseInsensitive(){
+    int temp;
+    temp = -0;
+    temp = _const_int_1;
+    switch(temp){
+        case 0: printf("Case Sensitive Detected!");
+        case 1: printf("Case Insensitive Passed!");
+        default: printf("Error in testing Case Insensitive!");
+    }
+}
+
+void testSwitch(int i){
+    int Temp;
+    Temp = i;
+    _var_int_1 = +1;
+    switch(Temp + _const_int_2 + _var_int_1 * _const_int_1){
+        case -5: printf("Error in Argument Passing!");
+        case 0: printf("Unknown Error Happened!");
+        case 1: {
+            printf("Switch Logic Check Succeed!");
+            printf("Switch Parse Check Succeed!");
+        }
+        default: printf("Switch Logic Error!");
+    }
+}
+
+void testIf(){
+    if(_const_char_1 - _const_char_0 != 2 * 3)
+        printf("If Statement Error!");
+    if(_const_char_1 - _const_char_0 == 2 * 3)
+        printf("Passed If Statement Testing!");
+}
+
+int testRecursive(int i){
+    if(i == 1)
+        return (1);
+    if(i!=1)
+        return (i + testRecursive(i - 1));
+}
+
+void testArray(){
+    _var_int_arr_0[0] = '*' + 1 - 1;
+    _var_char_arr_0[0] = _const_char_0;
+    if(_var_int_arr_0[0] + 1 == _var_char_arr_0[0] + 1)
+        printf("Initial Array Test Passed!");
+    if(_var_int_arr_0[0] + 1 != _var_char_arr_0[0] + 1)
+        printf("Error in Array Testing!");
+}
+
+void testEmptyFunction(){}
+
+void testFunction(){;;;;;;}
+
+void main(){
+    int temp;
+    int in1, in2;
+    char in3;
+    _char = '0';
+    _______ = 1024;
+    scanf(in1, in2, in3);
+    printf(in1 + in2 * in3 / in1 - in2);
+    testValue();
+    testArithmetic();
+    testArray();
+    testFunction();
+    testEmptyFunction();
+    testIO('0', 0);
+    testIf();
+    testDo();
+    testSwitch(-1 * _const_int_2);
+
+    scanf(temp);
+    printf("The Sequential Result for Input is:", testRecursive(temp)); 
+    if(testRecursive(10) == 55)
+        printf("Recursive Check Succeed!");
+    if(testRecursive(10) != 55)
+        printf("Error in Recursive Check!");
+    testCaseInsensitive();
+    return;
+}

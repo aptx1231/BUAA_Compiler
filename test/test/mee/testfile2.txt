@@ -1,0 +1,105 @@
+int e, f;
+
+void f1() {
+	int a;
+	int A[10];
+	return;
+}
+void f2(int a) {
+	int A[10];
+	return;
+}
+void f3(char a) {
+	int b, c[10], d[10];
+}
+void f4(int a, char b) {
+	int g[10], h[10];int e, f;
+}
+void f5(char a, int b) {
+	int e, f;
+	return;
+}
+
+void _1() {
+	char a;
+	char A[10];
+	return;
+}
+void _2(int a) {
+	char A[10];
+	return;
+}
+void _3(char a) {
+	char b, c[10], d[10];
+}
+void _4(int a, char b) {
+	char g[10], h[10];int e, f;
+}
+void _5(char a, int b) {
+	char e, f;
+	return;
+}
+
+void main() {
+    const int a = +10; const int b = -10, c = 10; char d; int g[10], h[10];int e, f[100], gg, i;
+	f[8] = (a+b);
+	f[a-c] = a-c;
+	e = 1000;
+	e = -1000;
+	e = 10+10;
+	e = 10-10;
+	if (a == b) {
+		if (c == e) {
+            printf(gg);
+		}
+	}
+	if (a != b) {
+		gg = -100;
+	}
+	if (a >= b) {
+	    gg = 10;
+	}
+	if (a <= b) {
+	    gg = 10;
+	}
+	if (a > b) {
+		g[1] = c*b;
+	}
+	if (a < b) {
+		g[1] = f[1]/10;
+	}
+	if (a) {
+		g[a] = 1;
+	}
+	if (a-b) {
+		f[a] = b;
+	}
+	while (a == b) {
+		scanf(gg);
+		scanf(gg, e);
+		if (a-b) {
+			f[a] = b;
+		}
+		printf(a);
+	}
+	while (a == b) 
+		;
+	
+	do {
+		printf(a/10);
+	} while (a)
+	do 
+		printf(a/10);
+	 while (a)
+	do 
+		;
+	 while (a)
+	for (i = a - b; i<=(a+b); i=i+2) {
+		printf("abc", i);
+	}
+	for (i = a - b; i<=(a+b); i=i-2) {
+		printf("aaa");
+	}
+	for (i = a - b; i<=(a+b); i=i-2) 
+		printf("aaa");
+}

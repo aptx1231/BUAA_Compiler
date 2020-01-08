@@ -1,0 +1,50 @@
+const int max = 10;
+int array1[100];
+char array2[100];
+void printglobal() {
+    int i;
+    printf("global array");
+    for (i = 0;i < max;i = i + 1) {
+        printf(array1[i]);
+        printf(array2[i]);
+    }
+}
+void initglobal() {
+    int i;
+    for (i = 0;i < max;i = i + 1) {
+        array1[i] = 200 - i;
+        array2[i] = 'c';
+    }
+}
+void printlocallocal() {
+    int i;
+    int array1[100];
+    char array2[100];
+    for (i = 0;i < max;i = i + 1) {
+        array1[i] = array1[i] + i * i;
+        array2[i] = 'b';
+    }
+    printf("locallocal array");
+    for (i = 0;i < max;i = i + 1) {
+        printf(array1[i]);
+        printf(array2[i]);
+    }
+}
+void main() {
+    int i;
+    int array1[100];
+    char array2[100];
+    for (i = 0;i < max;i = i + 1) {
+        array1[i] = i;
+        array2[i] = 'a';
+    }
+    initglobal()
+    printglobal();
+    printf("local array");
+    printlocallocal();
+    for (i = 0;i < max;i = i + 1) {
+        printf(array1[i]);
+        printf(array2[i]);
+    }
+    printlocallocal();
+}

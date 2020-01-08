@@ -1,0 +1,13 @@
+int Fibnaci(int n){
+ if(n==1)
+  return (1);
+  else{ if(n==2){
+   return (1);
+   }else {
+    return (Fibnaci(n-1)+Fibnaci(n-2));
+    }
+   }
+ }
+void main(){
+ int a; a = 6; printf(a*a*a*a); for(a=1;a<9;a=a+1){ printf(Fibnaci(a)); } }
+}

@@ -1,0 +1,35 @@
+const int n1 = 0,n2 = +0,n3 = -0,n4 = 12340,n5 = +5678,n6 = -90;
+const char _1 = '+',c1 = '-',c2 = '*',c3 = '/',c4 = 'a',c5 = 'A',c6 = '0',c7 = '9',c9 = '_';
+int r1,r2;
+char r3,r4,r5;
+void f1(char c8) 
+{
+	printf(n1);
+	printf(n2);
+	printf(n3);
+	printf(n4);
+	printf(n5);
+	printf(n6);
+	printf(c1);
+	printf(c2);
+	printf(c3);
+	printf(c4);
+	printf(c5);
+	printf(c6);
+	printf(c7);
+	printf(c8);
+	printf(c9);
+	printf(" !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+	printf("string",_1);
+}
+void main() 
+{
+	f1('a');
+	scanf(r1,r2,r3,r4);
+	printf(r1);
+	scanf(r5);
+	printf(r2);
+	printf(r3);
+	printf(r4);
+	printf(r5);
+} 

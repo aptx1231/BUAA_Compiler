@@ -1,0 +1,249 @@
+int x[100];
+int y[100];
+int num[100];
+int Middle_Number_1(int N){
+    int middle_n,i,j,biggest,biggest_tag,intermediate;
+    int num_copy[100];
+    middle_n = N / 2;
+    i = 0;
+    j = 0;
+    biggest = -1;
+    biggest_tag = -1;
+    intermediate = 0;
+
+
+    i = 0;
+    do{
+        intermediate = num[i];
+        num_copy[i]= intermediate;
+        i = i + 1;
+    }while(i < N);
+
+
+    i = 0;
+    do{
+        j = 0;
+        biggest = -1;
+        biggest_tag = -1;
+        for(j = 0;j < N - i;j = j + 1){
+            if(num_copy[j] > biggest){
+                biggest = num_copy[j];
+                biggest_tag = j;
+            }
+        }
+        intermediate = num_copy[N-1-i];
+        num_copy[N-1-i] = biggest;
+        num_copy[biggest_tag] = intermediate;
+
+        i = i + 1;
+    }while(i < N);
+
+    return (num_copy[middle_n]);
+}
+
+int Middle_Number_2(int N){
+    int middle_n,i,j,biggest,biggest_tag,intermediate;
+    int num_copy[100];
+    middle_n = N / 2;
+    i = 0;
+    j = 0;
+    biggest = -1;
+    biggest_tag = -1;
+    intermediate = 0;
+
+    i = 0;
+    for(i = 0;i < N;i = i + 1){
+        intermediate = num[i];
+        num_copy[i]= intermediate;
+    }
+
+    i = 0;
+    for(i = 0; i< N; i = i + 1){
+        j = 0;
+        biggest = -1;
+        biggest_tag = -1;
+        while(j < N - i){
+            if(num_copy[j] > biggest){
+                biggest = num_copy[j];
+                biggest_tag = j;
+            }
+            j = j + 1;
+        }
+
+        intermediate = num_copy[N-1-i];
+                num_copy[N-1-i] = biggest;
+                num_copy[biggest_tag] = intermediate;
+            }
+
+            return (num_copy[middle_n]);
+
+}
+int Middle_Number_3(int N){
+    int middle_n,i,j,biggest,biggest_tag,intermediate;
+    int num_copy[100];
+    middle_n = N / 2;
+    i = 0;
+    j = 0;
+    biggest = -1;
+    biggest_tag = -1;
+    intermediate = 0;
+    i = 0;
+    while(i < N){
+        intermediate = num[i];
+        num_copy[i]= intermediate;
+        i = i + 1;
+    }
+
+    i = 0;
+    while(i < N){
+        j = 0;
+        biggest = -1;
+        biggest_tag = -1;
+        for(j = 0;j < N - i;j = j + 1){
+            if(num_copy[j] > biggest){
+                biggest = num_copy[j];
+                biggest_tag = j;
+            }
+        }
+
+        intermediate = num_copy[N-1-i];
+        num_copy[N-1-i] = biggest;
+        num_copy[biggest_tag] = intermediate;
+                i = i + 1;
+            }
+
+    return (num_copy[middle_n]);
+}
+
+int Nearest_Point_1(int n,int N){
+    int i, j, distance, tag;
+    distance = 2147483647;
+    tag = -1;
+    i = 0;
+    do{
+        if((x[n] - x[i])*(x[n] - x[i]) + (y[n] - y[i])*(y[n] - y[i]) < distance){
+            if(i != n){
+                distance = (x[n] - x[i])*(x[n] - x[i]) + (y[n] - y[i])*(y[n] - y[i]);
+                tag = i;
+            }
+        }
+        i = i + 1;
+    }while(i < N);
+    if(tag == -1){
+        printf("Can not find Nearest_Point");
+    }
+    return (tag);
+}
+
+int Nearest_Point_2(int n,int N){
+    int i, j, distance, tag;
+    distance = 2147483647;
+    tag = -1;
+    i = 0;
+    for(i = 0;i < N; i = i + 1){
+        if((x[n] - x[i])*(x[n] - x[i]) + (y[n] - y[i])*(y[n] - y[i]) < distance){
+            if(i != n){
+                distance = (x[n] - x[i])*(x[n] - x[i]) + (y[n] - y[i])*(y[n] - y[i]);
+                tag = i;
+            }
+        }
+
+    }
+
+    if(tag == -1){
+        printf("Can not find Nearest_Point");
+    }
+    return (tag);
+}
+
+int Nearest_Point_3(int n,int N){
+    int i, j, distance, tag;
+    distance = 2147483647;
+    tag = -1;
+    i = 0;
+    while(i < N){
+        if((x[n] - x[i])*(x[n] - x[i]) + (y[n] - y[i])*(y[n] - y[i]) < distance){
+            if(i != n){
+                distance = (x[n] - x[i])*(x[n] - x[i]) + (y[n] - y[i])*(y[n] - y[i]);
+                tag = i;
+            }
+        }
+        i = i + 1;
+    }
+
+    if(tag == -1){
+        printf("Can not find Nearest_Point");
+    }
+    return (tag);
+}
+void main(){
+    const int const1 = -30, const2 = +30;
+    int  N, point_n, tag, i, k;
+    int correct1,correct2;
+
+
+
+        N = 100;
+
+
+    for(k = 0; k < N; k = k+1){
+
+        num[k] = k-k*k;
+    }
+
+    for(k = 0; k < N; k = k+1){
+
+        x[k] = k-k*k;
+    }
+
+    for(k = 0; k < N; k = k+1){
+        y[k] = k-k*k;
+    }
+
+    point_n = 10;
+
+    printf("Caculate of const is ",const1 * const2 + const1 - const2);
+
+    correct1 = 0;
+    printf("In function 1,Middle_Number is ",Middle_Number_1(N));
+    printf("In function 2,Middle_Number is ",Middle_Number_2(N));
+    printf("In function 3,Middle_Number is ",Middle_Number_3(N));
+    if(Middle_Number_1(N) == Middle_Number_2(N)){
+        if(Middle_Number_2(N) == Middle_Number_3(N)){
+            printf("Middle_Number Answer Correct!");
+            correct1 = 1;
+        }else{
+            printf("Middle_Number Error1!");
+        }
+    }else{
+        printf("Middle_Number Error2!");
+    }
+    correct2 = 0;
+    tag = Nearest_Point_1(point_n,N);
+    printf("In function 1,Nearest point is ",tag);
+    tag = Nearest_Point_2(point_n,N);
+    printf("In function 2,Nearest point is ",tag);
+    tag = Nearest_Point_3(point_n,N);
+    printf("In function 3,Nearest point is ",tag);
+    if(Nearest_Point_1(point_n,N) == Nearest_Point_2(point_n,N)){
+
+
+    if(Nearest_Point_2(point_n,N) == Nearest_Point_3(point_n,N)){
+        printf("Nearest_Point Answer Correct!");
+        correct2 = 1;
+        }else{
+            printf("Nearest_Point Error1!");
+        }
+    }else{
+        printf("Nearest_Point Error2!");
+    }
+    if(correct1 == 1){
+        if(correct2 == 1){
+            printf("All Cyclic Procedure Right!");
+        }else{
+            printf("Cyclic Procedure Error!");
+        }
+    }else{
+            printf("Cyclic Procedure Error!");
+    }
+   }

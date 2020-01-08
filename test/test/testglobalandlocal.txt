@@ -1,0 +1,9 @@
+const int a = 0;
+void printer() {
+    printf(a);
+}
+void main() {
+    const int a = 1;
+    printf(a);
+    printer();
+}

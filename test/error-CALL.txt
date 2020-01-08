@@ -1,0 +1,44 @@
+case CALL: {
+					string sx;
+					paramSize = globalSymbolTable[mc.z].parameterTable.size();
+					while (paramSize) {
+						sx = "$t0";
+						paramSize--;
+						if (pushOpStack.empty()) {
+							cout << "ERROR!!!!!!!!\n";
+						}
+						else {
+							midCode tmpMc = pushOpStack.top();
+							pushOpStack.pop();
+							loadValue(tmpMc.z, sx, true, va, get1);
+							mipsCodeTable.push_back(mipsCode(sw, sx, "$sp", "", -4 * paramSize));
+						}
+					}
+					vector<string> varList;
+					for (int i = 3; i <= 9; i++) {
+						if (tRegBusy[i]) {
+							varList.push_back("$t" + int2string(i));
+						}
+					}
+					for (int i = 0; i <= 7; i++) {
+						if (sRegBusy[i]) {
+							varList.push_back("$s" + int2string(i));
+						}
+					}
+					int len = 4 * globalSymbolTable[mc.z].length + 4 * varList.size() + 8;
+					mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", -len));
+					mipsCodeTable.push_back(mipsCode(sw, "$ra", "$sp", "", 4));
+					mipsCodeTable.push_back(mipsCode(sw, "$fp", "$sp", "", 8));
+					for (int i = 0; i < varList.size(); i++) {
+						mipsCodeTable.push_back(mipsCode(sw, varList[i], "$sp", "", 8 + 4 * i + 4));
+					}
+					mipsCodeTable.push_back(mipsCode(addi, "$fp", "$sp", "", len));
+					mipsCodeTable.push_back(mipsCode(jal, mc.z, "", ""));
+					for (int i = 0; i < varList.size(); i++) {
+						mipsCodeTable.push_back(mipsCode(lw, varList[i], "$sp", "", 8 + 4 * i + 4));
+					}
+					mipsCodeTable.push_back(mipsCode(lw, "$fp", "$sp", "", 8));
+					mipsCodeTable.push_back(mipsCode(lw, "$ra", "$sp", "", 4));
+					mipsCodeTable.push_back(mipsCode(addi, "$sp", "$sp", "", len));
+					break;
+				}

@@ -1,0 +1,58 @@
+const int z = -1234567890;
+int d1; 
+void f1()
+{
+	const int c1 = 1;
+	int i1,r1;
+	r1 = 0;
+	for (i1 = 0;i1 < 10;i1 = i1 + 1) {
+		r1 = r1 + c1;
+	} 
+	printf(r1);
+}
+int f2(int n2)
+{
+	int i2,r2;
+	i2 = 0;
+	r2 = 0;
+	while (i2 != n2) {
+		r2 = r2 + i2;
+		i2 = i2 + 1;
+	}
+	while (i2 <= 2 * n2) i2 = i2 + 1;
+	return (r2);
+}
+int f3(int n3,int n4) {
+	int i3;
+	char c3;
+	int r3;
+	char c4;
+	r3 = 0;
+	c3 = 'f';
+	i3 = n3;
+	c4 = '3';
+	do {
+		r3 = r3 + i3;
+		i3 = i3 + 1;
+	} while (i3 <= n4)
+	do i3 = i3 - 1;
+	while (i3 > 0)
+	return (r3 + 1);
+}
+void f4() {
+	int i4,r;
+	i4 = 10;
+	r = 0;
+	for (i4 = 10;i4 > 0;i4 = i4 - 1) {
+		r = r - i4;
+	}
+	printf(r);
+} 
+void main () {
+	int b2,b3;
+	f1();
+	b2 = f2(5);
+	printf(b2);
+	b3 = b2 + f3(1,4);
+	printf(b3);
+}

@@ -1,0 +1,84 @@
+const char b_ = '-', c1 = '*', d1 = '/', e2 = 'a', d5 = 'A', aqe = 'Z', a1_1 = 'A', a2__ = 'Q', _='q', __='w', ___='1';
+
+int f1() {
+	char d;int g[10], h[10];int e, f, c;
+	g[1] = 10;
+	e = 1;
+	f = g[1];
+	if (e <= f) {
+	    c = 10;
+	}
+	return (10);
+}
+int f_(int A) {
+	const int a = +10; int b, c; char d;int g[10], h[10];int e, f, i;
+	for (i = a - b; i<=(a+b); i=i-2) {
+		printf("aaa");
+	}
+	return (A);
+}
+int ff(char c) {
+	int a;
+	f_(a);
+	do {
+		printf(a/10);
+	} while (a)
+	return (c/'1');
+}
+int F11(int A, char b) {
+	const int a = +10;
+	return (A+b);
+}
+int _ff(char a, int b) {
+	scanf(a);
+	F11(b, a);
+	return (a/b);
+}
+
+char _11() {
+	const int _a = +10;
+	return ('+');
+}
+char f__1(int a) {
+	const char aA_ = '+';
+	return ('a');
+}
+char f1__(char a) {
+	const int _B = -102, c_ = +110;
+	return (a);
+}
+char F2211(int a, char b) {
+	const int AD = +10; int BB, c_c; char dc1; int ee;
+	return ('1');
+}
+char f12(char a, int b) {
+	const char b_ = '-', c1 = '*', d1 = '/', e2 = 'a', d5 = 'A', aqe = 'Z', a1_1 = 'A', a2__ = 'Q', _='q', __='w';
+	return (a);
+}
+
+void g11() {
+	return;
+}
+void G11(int a) {
+	return;
+}
+void f123(char a) {
+    G11(10);
+}
+void f_1_2(int a, char b) {
+
+}
+void g_2_1(char a, int b) {
+	return;
+}
+
+void g_2_2(int a, int b) {
+	return;
+}
+
+void main() {
+	const int a = +10;
+	g11();
+	f123('q');
+	g_2_2(a, a);
+}

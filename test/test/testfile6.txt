@@ -1,0 +1,84 @@
+const int a = 123;
+const int fuck = 2147483647, your = -65536, mother = +19260817;
+const char c = 'h', d = '+';
+const char cc = '*';
+
+int kkk, jjj;
+char moha, hath;
+int arr[100], aaa, hhh[5];
+
+int calc(int x, int y, int z) {
+    return ((x + y) * (y - z));
+}
+
+char next_char(char c) {
+    return (c);
+}
+
+void hello_world() {
+    printf("Hello World!");
+}
+
+int fact(int n) {
+    if (n <= 1) return (1);
+    else return (n * fact(n - 1));
+}
+
+char get_hath() {
+    scanf(moha);
+    return (moha);
+}
+
+void arrange(int n, int i)
+{
+    const int ONE = 1;
+    int j, tmp;
+    if (i >= n - 1)
+    {
+        for (j = 0; j < n; j = j + 1) printf(" ", arr[j]);
+        printf("\n");
+        return;
+    }
+    else {
+        arrange(n, i + 1);
+        for (j = i + ONE; j < n; j = j + 1) if (arr[i] != arr[j])
+        {
+            tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+            arrange(n, i + 1);
+        }
+        for (j = i + 1; n > j; j = j + 1) {
+            tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
+    }
+}
+
+void main() {
+    int i;
+    hello_world();
+    hath = get_hath();
+    printf(hath * a / (hath + next_char(cc)));
+    scanf(kkk, jjj, aaa);
+    printf( calc(kkk, jjj - get_hath(), 3) );
+    scanf(aaa);
+    for (i = 0; i < 100; i = i + 1) {
+        arr[i] = i + 1;
+    }
+    while (aaa >= 0) {
+        arrange(aaa, 0);
+        if (aaa == 12) printf(fact(aaa));
+        else printf("mmp ", d);
+        aaa = aaa - 1;
+    }
+    scanf(aaa);
+    do {
+        printf("fuck: ", fuck);
+        printf("your: ", your);
+        printf("mother: ", mother);
+        if (aaa != 20000) printf("hehe", aaa);
+        aaa = aaa + '0';
+    } while (aaa < 10000);
+}

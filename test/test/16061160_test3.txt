@@ -1,0 +1,72 @@
+const int global_single_int = 2;
+const int global_int_1 = 3 , global_int_2 = 4;
+const char global_single_char = '_';
+const char global_char_1 = '+' , global_char_2 = '9';
+int a;
+int b,c;
+int d[10];
+int e[20],f,g;
+char ch1;
+char ch2,ch3;
+char ch4[10];
+char ch5,ch6[19];
+
+int func1(){
+	return (global_int_1);
+}
+
+void main(){
+	const int local_single_int = 100;
+	const int local_int_1 = 101 , local_int_2 = 102;
+	const char local_single_char = '-';
+	const char local_char_1 = '*' , local_char_2 = '/';
+	int a1;
+	int b1,c1;
+	int d1[10];
+	int e1[20],f1,g1;
+	char ch7;
+	char ch8,ch9;
+	char ch10[10];
+	char ch11,ch12[19];
+	a = 10;
+	b = -11;
+	c = a;
+	d[0] = -b;
+	d[1] = d[0];
+	d[2] = (a + b);
+	d[3] = 2 * (3 + 4) - (2 + 3) / (6 - (3 * 4 - 11));
+	d[4] = 2;
+	a1 = 3;
+	b1 = 4;
+	c1 = 6;
+	f1 = d[4] *(a1 + b1) - (d[4] + a1) / (c1 - (a1 * b1 - (-b)));
+	g1 = d[4] *(a1 + b1 - 1) * 2 - (d[4] + a1 + 5) / (c1 - (a1 * b1 - (-b)));
+	g = d[b1] *(a1 + b1 - 1) * 2 - (d[4] + a1 + 5) / (c1 - (a1 * b1 - (-b)));
+	f = d[d[a1 + 1] + 2] *(a1 + b1 - 1) * 2 - (d[4] + a1 + 5) / (c1 - (a1 * b1 - (-b)));
+	e[0] = func1();
+	e[1] = func1() + a;
+	e[2] = func1() * d[4];
+	e[3] = d[d[a1 + 1] + 2] *(func1() + b1 - 1) * 2 - (d[4] + a1 + 5) / (c1 - (func1() * b1 - (-b)));
+	e1[0] = 'a' + 1;
+	ch12[1] = 'A';
+	e1[1] = ch12[1] * d[4];
+
+	printf("  a = " , a);
+	printf("  b = " , b);
+	printf("  c = " , c);
+	printf("  d[0] = " , d[0]);
+	printf("  d[1] = " , d[1]);
+	printf("  d[2] = " , d[2]);
+	printf("  d[3] = " , d[3]);
+	printf("  f1 = " , f1);
+	printf("  g1 = " , g1);
+	printf("  f = " , f);
+	printf("  g = " , g);
+	printf("  e[0] = " , e[0]);
+	printf("  e[1] = " , e[1]);
+	printf("  e[2] = " , e[2]);
+	printf("  e[3] = " , e[3]);
+	printf("  e1[0] = " , e1[0]);
+	printf("  e1[1] = " , e1[1]);
+	return;
+}

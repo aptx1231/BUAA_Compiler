@@ -1,0 +1,22 @@
+const char t0 = 'T';
+const char f0 = 'F'; 
+void main() 
+{
+	const int t = 1,f = 0;
+	int a1,a2;
+	a1 = 5;
+	a2 = 10;
+	if (t) printf("True");
+	else printf("False");
+	if (f) printf(t0);
+	else printf(f0);
+	if (a1 >= 4) printf("True");
+	if (a2 != 11) printf("True");
+	if (a1 == a2) {
+		printf("True");
+		printf("block");
+	} else {
+		printf("False");
+		printf("block");
+	} 
+} 

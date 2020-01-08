@@ -1,0 +1,61 @@
+int arr[100], tmp[100];
+
+void merge(int s1, int l1, int s2, int l2) {
+    int i, j, k;
+    i = 0;
+    j = 0;
+    k = s1;
+    while (i < l1) {
+        if (j < l2) {
+            if (arr[s1 + i] > arr[s2 + j]) {
+                tmp[k] = arr[s2 + j];
+                j = j + 1;
+            } else {
+                tmp[k] = arr[s1 + i];
+                i = i + 1;
+            }
+            k = k + 1;
+        } else {
+            while (i < l1) {
+                tmp[k] = arr[s1 + i];
+                k = k + 1;
+                i = i + 1;
+            }
+        }
+    }
+    while (j < l2) {
+        tmp[k] = arr[s2 + j];
+        k = k + 1;
+        j = j + 1;
+    }
+    for (i = s1; i < k; i = i + 1) arr[i] = tmp[i];
+}
+
+void inner_merge_sort(int start, int length) {
+    int tmp, mid;
+    if (length <= 1) return;
+    if (length == 2) {
+        if (arr[start] > arr[start + 1]) {
+            tmp = arr[start];
+            arr[start] = arr[start + 1];
+            arr[start + 1] = tmp;
+        }
+        return;
+    }
+    mid = length / 2;
+    inner_merge_sort(start, mid);
+    inner_merge_sort(start + mid, length - mid);
+    merge(start, mid, start + mid, length - mid);
+}
+
+void main() {
+    int n, i, a;
+    printf("17373248");
+    scanf(n);
+    for (i = 0; i < n; i = i + 1) {
+        scanf(a);
+        arr[i] = a;
+    }
+    inner_merge_sort(0, n);
+    for (i = 0; i < n; i = i + 1) printf(arr[i]);
+}

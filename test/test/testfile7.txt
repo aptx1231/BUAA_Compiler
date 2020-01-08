@@ -1,0 +1,46 @@
+const int a = 123;
+const int fuck = 2147483647, your = -65536, mother = +19260817;
+const char c = 'h', d = '+';
+const char cc = '*';
+
+int calc(int x, int y, int z) {
+    return ((x + y) * (y - z));
+}
+
+char next_char(char c) {
+    return (c);
+}
+
+int fact(int n) {
+    if (n <= 1) return (1);
+    else return (n * fact(n - 1));
+}
+
+char get_hath() {
+    char moha;
+    scanf(moha);
+    return (moha);
+}
+
+void main() {
+    char hath;
+    int aaa, kkk, jjj;
+    hath = get_hath();
+    printf(hath * a / (hath + next_char(cc)));
+    scanf(kkk, jjj, aaa);
+    printf( calc(kkk, jjj - get_hath(), 3) );
+    scanf(aaa);
+    while (aaa >= 0) {
+        if (aaa == 12) printf(fact(aaa));
+        else printf("mmp ", aaa);
+        aaa = aaa - 1;
+    }
+    scanf(aaa);
+    do {
+        printf("fuck: ", fuck);
+        printf("your: ", your);
+        printf("mother: ", mother);
+        if (aaa != 20000) printf("hehe", aaa);
+        aaa = aaa + '0';
+    } while (aaa < 10000);
+}

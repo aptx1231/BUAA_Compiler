@@ -1,0 +1,125 @@
+const int global_single_int = 2;
+const int global_int_1 = 3 , global_int_2 = 4;
+const char global_single_char = '_';
+const char global_char_1 = '+' , global_char_2 = '9';
+int a;
+int b,c;
+int d[10];
+int e[20],f,g;
+char ch1;
+char ch2,ch3;
+char ch4[10];
+char ch5,ch6[19];
+
+int fac(int n){
+	if(n == 1) return (1);
+	return (n * fac(n - 1));
+}
+
+char getch3(char ch , char ch1 , char ch2){
+	const int func7_const1 = 3,func7_const2 = 2;
+	const char func7_const3 = '3',func7_const4 = 'o';
+	int a1;
+	int e1[10];
+	char c;
+	c = ch2;
+	return(c);
+}
+
+char getch2(char ch){
+	const int func6_const1 = 3,func6_const2 = 2;
+	const char func6_const3 = '3',func6_const4 = 'o';
+	int a1;
+	int e1[10];
+	char c;
+	return(ch);
+}
+
+char getch1(){
+	const int func5_const1 = 3,func5_const2 = 2;
+	const char func5_const3 = 't',func5_const4 = '_';
+	int a1;
+	int e1[10];
+	char c;
+	return(global_char_1);
+}
+
+int add_mult3(int x , int y){
+	const int func3_const1 = 3,func3_const2 = 2;
+	int a1;
+	int e1[10];
+	e1[2] = (x + y) * func3_const1;
+	return (e1[2]);
+}
+
+int add_mult2(int x , int y){
+	const int func2_const1 = 1,func2_const2 = 2;
+	int a1;
+	int e1[10];
+	a1 = (x + y) * func2_const2;
+	return (a1);
+}
+
+int add_mult1(int x , int y , int z){
+	const int func4_const1 = 1,func4_const2 = 2;
+	int a1;
+	int e1[10];
+	a1 = add_mult2(x , y) + z;
+	return (a1);
+}
+
+void print_num(int x){
+	const int func1_const1 = 1,func1_const2 = 2;
+	int a1;
+	int e1[10];
+	a = a + 1;
+	printf(" | print_num called: " , a);
+	printf(" x = " , x);
+}
+
+void main(){
+	const int local_single_int = 100;
+	const int local_int_1 = 101 , local_int_2 = 102;
+	const char local_single_char = '-';
+	const char local_char_1 = '*' , local_char_2 = '/';
+	int a1;
+	int b1,c1;
+	int d1[12];
+	int e1[20],f1,g1;
+	char ch7;
+	char ch8,ch9;
+	char ch10[10];
+	char ch11,ch12[19];
+	a = 0;
+	b = 5;
+	f1 = 2;
+	f = 3;
+	d[f1] = 6;
+	b1 = 7;
+	d1[f] = 8;
+	d1[10] = 9;
+	d[(b - f) * f1] = 10;
+	print_num(4);
+	print_num(b);
+	print_num(d[f1]);
+	print_num(b1);
+	print_num(d1[f]);
+	print_num(d1[b1 + f]);
+	print_num(d[(b - f) * f1]);
+	a1 = 1;
+	while(a1 < 5){
+		print_num(a1);
+		a1 = a1 + 1;
+	}
+	print_num(add_mult2(a , f1));
+	g1 = add_mult2(1 , 3);
+	print_num(g1);
+	print_num(add_mult3(b , f1));
+	print_num(add_mult1(1 , 2 , 3));
+	printf(getch1());
+	printf(getch2('q'));
+	printf(getch3('s','z','y'));
+	printf(fac(1));
+	printf(fac(5));
+	return;
+}
